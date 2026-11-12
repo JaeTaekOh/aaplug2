@@ -12,7 +12,8 @@
     "fonts",
     "README.md",
     "PRIVACY.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=20"

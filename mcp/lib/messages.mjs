@@ -1,9 +1,9 @@
 /* MCP 전용 안내 문구 (웹 앱 i18n 에 없는 것만). en (기본) / ko / th / zh / hi */
 export const M = {
   ko: {
-    learnedRejection: '자동 목록에 없던 반려 사유라서 이 컴퓨터에 새 교훈으로 저장했어요 (원문은 이 프로젝트에만 남아요). 아래 계획대로 고친 뒤 사용자가 직접 답장하고 다시 제출하세요. 다음 앱부터는 제출 전에 이 점을 알려 드려요.',
+    learnedRejection: '자동 목록에 없던 반려 사유라서 이 컴퓨터에 새 교훈으로 저장했어요 (원문은 이 프로젝트에만 남고, 익명 코드만 aaplug.com에 공유돼요). 아래 계획대로 고친 뒤 사용자가 직접 답장하고 다시 제출하세요. 다음 앱부터는 제출 전에 이 점을 알려 드려요.',
     builtinRecorded: '알려진 반려 사유예요. 기본 수정 계획을 쓰고, 이 컴퓨터의 교훈 기록에 횟수만 더했어요.',
-    learnedNote: '이 컴퓨터의 이전 심사에서 배운 교훈 {n}개가 이 앱에 해당해요 (learned_lessons).',
+    learnedNote: '심사 교훈 {n}개가 이 앱에 해당해요 (learned_lessons). source "local" = 이 컴퓨터의 내 심사에서, "shared" = 다른 AA Plug 2 사용자 심사에서(익명 집계).',
     lessonsPassed: '이전 반려에서 배운 확인 사항이 이번 승인에 포함됐다고 기록했어요.',
     lessonForgotten: '교훈을 지웠어요: {id}', lessonNotFound: '교훈을 찾지 못했어요: {id}. aaplug2_status 의 lessons 목록을 확인하세요.',
     infoNeeded: 'App Store Connect에서는 "정보 필요(Information Needed)"도 "거부됨"으로 보여요. 대부분 새 빌드 반려가 아니라 답장(때로는 심사용 키나 설명)을 달라는 요청이에요. 답장은 사용자가 직접 보내요. AA Plug 2는 Apple에 자동으로 답하지 않아요.',
@@ -32,9 +32,9 @@ export const M = {
     stepDecide: '결정', stepGenerate: '자료 만들기', stepSubmit: '제출 안내·승인', stepReview: '심사', stepDone: '출시 완료'
   },
   en: {
-    learnedRejection: 'This rejection reason was not in the built-in list, so it was saved as a new lesson on this computer (the original message stays only in this project). Follow the plan below; the user sends the reply and resubmits. Future apps will get this as a pre-submit check.',
+    learnedRejection: 'This rejection reason was not in the built-in list, so it was saved as a new lesson on this computer (the original message stays only in this project; only anonymized codes are shared with aaplug.com). Follow the plan below; the user sends the reply and resubmits. Future apps will get this as a pre-submit check.',
     builtinRecorded: 'Known rejection reason: using the built-in fix plan, and counting it in this computer\'s lessons.',
-    learnedNote: '{n} lessons learned from earlier reviews on this computer apply to this app (learned_lessons).',
+    learnedNote: '{n} review lessons apply to this app (learned_lessons). source "local" = from your reviews on this computer, "shared" = from other AA Plug 2 users\' reviews (anonymized counts).',
     lessonsPassed: 'Recorded that the checks learned from the earlier rejection were part of this approval.',
     lessonForgotten: 'Lesson removed: {id}', lessonNotFound: 'Lesson not found: {id}. See the lessons list in aaplug2_status.',
     infoNeeded: 'In App Store Connect an "Information Needed" request also shows as Rejected. It usually asks for a reply (sometimes a sample key or a clarification), not a new binary. The user sends the reply; AA Plug 2 never replies to Apple automatically.',
@@ -63,9 +63,9 @@ export const M = {
     stepDecide: 'Decide', stepGenerate: 'Make materials', stepSubmit: 'Submission guide & approval', stepReview: 'Review', stepDone: 'Launched'
   },
   th: {
-    learnedRejection: 'เหตุผลนี้ไม่อยู่ในรายการในตัว จึงบันทึกเป็นบทเรียนใหม่บนคอมพิวเตอร์เครื่องนี้ (ข้อความต้นฉบับอยู่เฉพาะในโปรเจกต์นี้) ทำตามแผนด้านล่าง ผู้ใช้ส่งคำตอบและส่งใหม่เอง แอปถัดไปจะได้รับการตรวจนี้ก่อนส่ง',
+    learnedRejection: 'เหตุผลนี้ไม่อยู่ในรายการในตัว จึงบันทึกเป็นบทเรียนใหม่บนคอมพิวเตอร์เครื่องนี้ (ข้อความต้นฉบับอยู่เฉพาะในโปรเจกต์นี้ แชร์เฉพาะรหัสแบบไม่ระบุตัวตนกับ aaplug.com) ทำตามแผนด้านล่าง ผู้ใช้ส่งคำตอบและส่งใหม่เอง แอปถัดไปจะได้รับการตรวจนี้ก่อนส่ง',
     builtinRecorded: 'เหตุผลที่รู้จักแล้ว: ใช้แผนแก้ไขในตัว และนับเพิ่มในบทเรียนของคอมพิวเตอร์เครื่องนี้',
-    learnedNote: 'บทเรียน {n} ข้อจากการรีวิวครั้งก่อนบนคอมพิวเตอร์เครื่องนี้เกี่ยวข้องกับแอปนี้ (learned_lessons)',
+    learnedNote: 'บทเรียนจากการรีวิว {n} ข้อเกี่ยวข้องกับแอปนี้ (learned_lessons) source "local" = จากการรีวิวของคุณบนคอมพิวเตอร์นี้ "shared" = จากการรีวิวของผู้ใช้ AA Plug 2 คนอื่น (นับแบบไม่ระบุตัวตน)',
     lessonsPassed: 'บันทึกแล้วว่าการตรวจที่เรียนรู้จากการปฏิเสธครั้งก่อนเป็นส่วนหนึ่งของการอนุมัตินี้',
     lessonForgotten: 'ลบบทเรียนแล้ว: {id}', lessonNotFound: 'ไม่พบบทเรียน: {id} ดูรายการ lessons ใน aaplug2_status',
     infoNeeded: 'ใน App Store Connect คำขอ "Information Needed" จะแสดงเป็น "ถูกปฏิเสธ" ด้วย ส่วนใหญ่เป็นการขอให้ตอบกลับ (บางครั้งขอคีย์ตัวอย่างหรือคำอธิบาย) ไม่ใช่การปฏิเสธบิลด์ ผู้ใช้เป็นคนส่งคำตอบเอง AA Plug 2 ไม่ตอบ Apple อัตโนมัติ',
@@ -94,9 +94,9 @@ export const M = {
     stepDecide: 'ตัดสินใจ', stepGenerate: 'สร้างไฟล์', stepSubmit: 'คู่มือการส่งและอนุมัติ', stepReview: 'ตรวจสอบ', stepDone: 'เปิดตัวแล้ว'
   },
   zh: {
-    learnedRejection: '这个拒绝原因不在内置列表中，已作为新经验保存在这台电脑上（原文只保留在此项目中）。请按下面的计划修正；由用户自己回复并重新提交。之后的应用会在提交前得到此项检查。',
+    learnedRejection: '这个拒绝原因不在内置列表中，已作为新经验保存在这台电脑上（原文只保留在此项目中，只有匿名代码与 aaplug.com 共享）。请按下面的计划修正；由用户自己回复并重新提交。之后的应用会在提交前得到此项检查。',
     builtinRecorded: '已知的拒绝原因：使用内置修正计划，并在这台电脑的经验记录中计数。',
-    learnedNote: '这台电脑上之前审核学到的 {n} 条经验适用于此应用（learned_lessons）。',
+    learnedNote: '{n} 条审核经验适用于此应用（learned_lessons）。source "local" = 来自你在这台电脑上的审核，"shared" = 来自其他 AA Plug 2 用户的审核（匿名计数）。',
     lessonsPassed: '已记录：之前拒绝中学到的检查项是这次通过的一部分。',
     lessonForgotten: '已删除经验：{id}', lessonNotFound: '找不到经验：{id}。请查看 aaplug2_status 中的 lessons 列表。',
     infoNeeded: '在 App Store Connect 中，“需要更多信息（Information Needed）”也会显示为“被拒绝”。它通常是请你回复（有时需要示例密钥或说明），而不是要求新构建。回复由用户本人发送，AA Plug 2 不会自动回复 Apple。',
@@ -125,9 +125,9 @@ export const M = {
     stepDecide: '决定', stepGenerate: '生成素材', stepSubmit: '提交指南与批准', stepReview: '审核', stepDone: '已上架'
   },
   hi: {
-    learnedRejection: 'यह अस्वीकृति कारण बिल्ट-इन सूची में नहीं था, इसलिए इसे इस कंप्यूटर पर नए सबक के रूप में सहेजा गया (मूल संदेश सिर्फ़ इसी प्रोजेक्ट में रहता है)। नीचे दी गई योजना अपनाएँ; जवाब और दोबारा सबमिट उपयोगकर्ता खुद करता है। आगे के ऐप्स में यह सबमिट से पहले की जाँच बनेगा।',
+    learnedRejection: 'यह अस्वीकृति कारण बिल्ट-इन सूची में नहीं था, इसलिए इसे इस कंप्यूटर पर नए सबक के रूप में सहेजा गया (मूल संदेश सिर्फ़ इसी प्रोजेक्ट में रहता है; केवल गुमनाम कोड aaplug.com के साथ साझा होते हैं)। नीचे दी गई योजना अपनाएँ; जवाब और दोबारा सबमिट उपयोगकर्ता खुद करता है। आगे के ऐप्स में यह सबमिट से पहले की जाँच बनेगा।',
     builtinRecorded: 'जाना-पहचाना कारण: बिल्ट-इन सुधार योजना इस्तेमाल हो रही है, और इसे इस कंप्यूटर के सबक में गिना गया।',
-    learnedNote: 'इस कंप्यूटर पर पिछली समीक्षाओं से सीखे {n} सबक इस ऐप पर लागू होते हैं (learned_lessons)।',
+    learnedNote: 'समीक्षा के {n} सबक इस ऐप पर लागू होते हैं (learned_lessons)। source "local" = इस कंप्यूटर पर आपकी समीक्षाओं से, "shared" = दूसरे AA Plug 2 उपयोगकर्ताओं की समीक्षाओं से (गुमनाम गिनती)।',
     lessonsPassed: 'दर्ज किया गया कि पिछली अस्वीकृति से सीखी जाँचें इस मंज़ूरी का हिस्सा थीं।',
     lessonForgotten: 'सबक हटाया गया: {id}', lessonNotFound: 'सबक नहीं मिला: {id}. aaplug2_status में lessons सूची देखें।',
     infoNeeded: 'App Store Connect में “Information Needed” अनुरोध भी Rejected दिखता है। आमतौर पर यह जवाब (कभी-कभी सैंपल कुंजी या स्पष्टीकरण) माँगता है, नया बिल्ड नहीं। जवाब यूज़र खुद भेजता है; AA Plug 2 कभी Apple को अपने-आप जवाब नहीं देता।',

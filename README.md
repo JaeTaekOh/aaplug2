@@ -49,6 +49,7 @@ npm start            # = node server.mjs
 | `preview-screenshots/` | Screen captures (desktop 1366 / mobile 390) |
 | `sample-output/` | Example ZIP you get after finishing the sample |
 | `mcp/` | MCP server (for Grok Bot, Claude, Cursor) |
+| `workers/lessons/` | Cloudflare Worker for `https://aaplug.com/api/lessons` (shared, anonymized review lessons) |
 | `plugin-src/`, `plugin-package/` | Plugin source and build output (`bash tools/build_plugin.sh`) |
 
 ## Settings
@@ -68,6 +69,8 @@ npm run shots    # needs the server running; updates preview-screenshots/
 
 - Free, static files only, never asks for API keys or tokens
 - App files are read only inside the browser and uploaded nowhere (progress is saved only in this browser's localStorage)
+- Shared review lessons (0.1.4): a real pasted store result sends only `{store, codes, advice_id, event}` to `https://aaplug.com/api/lessons` so everyone gets better checks; never the store message, app name, ids or free text. Always on, explained in `privacy.html`; the demo never sends
+- Shared review lessons (0.1.4): a real pasted store result sends only `{store, codes, advice_id, event}` to `https://aaplug.com/api/lessons` so everyone gets better checks; never the store message, app name, ids or free text. Always on, explained in `privacy.html`; the demo never sends
 - Nothing after launch
 
 ## License

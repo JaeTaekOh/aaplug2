@@ -47,18 +47,48 @@
   }
   const appName = () => (S.A ? G.nameOf(S.A, S.lang) : '');
   const stores = () => F.stores(S.A, S.dec);
-  /* Review lessons learned on this device (localStorage only, never sent anywhere). Same schema and sanitizing as the MCP server. */
+  /* Review lessons learned on this device (localStorage). Same schema and sanitizing as the MCP server.
+     0.1.4: a real (non-demo) learned result also sends { v, event, store, codes, advice_id } to aaplug.com/api/lessons
+     (never the store message, app name, ids or any free text), and the aggregated feed of other users' lessons is
+     cached in localStorage for 12 hours. Network errors are ignored; nothing here can break the flow. */
   const LS = window.AAPLessons;
+  const SHARED_KEY = 'aaplug2.shared.v1', SHARED_TTL = 12 * 3600e3;
   function lessonsDb() { try { return LS.normDb(JSON.parse(localStorage.getItem(LS.KEY))); } catch (e) { return LS.empty(); } }
   function saveLessons(db) { try { localStorage.setItem(LS.KEY, JSON.stringify(LS.normDb(db))); } catch (e) { } }
-  const relLessons = only => (S.A ? LS.relevant(lessonsDb(), S.A, only || stores(), S.lang) : []);
+  function sharedCache() { try { const c = JSON.parse(localStorage.getItem(SHARED_KEY)); return c && Array.isArray(c.items) ? { at: +c.at || 0, items: LS.normShared({ lessons: c.items }) } : null; } catch (e) { return null; } }
+  const withTimeout = ms => { try { const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal; } catch (e) { return undefined; } };
+  let sharedBusy = false;
+  async function refreshShared() {
+    const c = sharedCache(); if ((c && Date.now() - c.at < SHARED_TTL) || sharedBusy) return false;
+    sharedBusy = true;
+    try {
+      const r = await fetch(LS.SHARE_URL, { headers: { Accept: 'application/json' }, signal: withTimeout(5000), credentials: 'omit' });
+      if (!r.ok) throw new Error('feed');
+      const items = LS.normShared(await r.json());
+      localStorage.setItem(SHARED_KEY, JSON.stringify({ at: Date.now(), items }));
+      return true;
+    } catch (e) { try { localStorage.setItem(SHARED_KEY, JSON.stringify({ at: Date.now() - SHARED_TTL + 15 * 60e3, items: c ? c.items : [] })); } catch (er) { } return false; }
+    finally { sharedBusy = false; }
+  }
+  function shareLesson(lesson, event) {
+    if (S.sample) return null;   // the demo never sends
+    const p = LS.sharePayload(lesson, event); if (!p) return null;
+    try { fetch(LS.SHARE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p), signal: withTimeout(5000), credentials: 'omit', keepalive: true }).catch(() => { }); } catch (e) { }
+    return p;
+  }
+  const relLessons = only => {
+    if (!S.A) return [];
+    const db = lessonsDb(), st = only || stores(), c = sharedCache();
+    return LS.mergeRelevant(LS.relevant(db, S.A, st, S.lang), c ? LS.relevantShared(c.items, S.A, st, S.lang, db) : [], S.lang);
+  };
   function lessonsCard(rel) {
     if (!rel.length) return '';
     return `<section class="card">
       <h2 class="h-ic">${ic('sparkle')}${esc(LS.tx(S.lang, 'step'))}</h2>
       <p class="muted">${esc(LS.tx(S.lang, 'stepD'))}</p>
       <ul class="issues">${rel.map(r => `<li class="issue"><div class="issue-top">${sevBadge(r.level === 'warning' ? 'warn' : 'tip')}${platChip(r.store === 'apple' ? 'ios' : 'android')}</div>
-        <b>${esc((r.codes.length ? r.codes.join(', ') + ' · ' : '') + (r.title || r.builtin))}</b><p>${esc(r.why)}</p>${r.check ? `<p class="ai-fix">${ic('check')}${esc(r.check)}</p>` : ''}${r.passed_note ? `<p class="small muted">${esc(r.passed_note)}</p>` : ''}</li>`).join('')}</ul>
+        ${r.from ? `<span class="chip small">${esc(r.from)}</span>` : ''}<b>${esc((r.codes.length ? r.codes.join(', ') + ' · ' : '') + (r.title || (r.builtin ? t('rj.' + r.builtin + '.t') : '')))}</b><p>${esc(r.why)}</p>${r.check ? `<p class="ai-fix">${ic('check')}${esc(r.check)}</p>` : ''}${r.passed_note ? `<p class="small muted">${esc(r.passed_note)}</p>` : ''}</li>`).join('')}</ul>
+      <p class="small muted">${esc(LS.tx(S.lang, 'shareNote'))} <a href="privacy.html#lessons">${esc(LS.tx(S.lang, 'shareMore'))}</a></p>
     </section>`;
   }
 
@@ -570,6 +600,7 @@
         <h2 class="h-ic">${ic('message')}${esc(t('rv.paste'))}</h2>
         <p class="muted">${esc(t('rv.paste.d'))}</p>
         <textarea id="rejText" rows="6" spellcheck="false">${esc(R.text || sample)}</textarea>
+        ${S.sample ? '' : `<p class="small muted">${esc(LS.tx(S.lang, 'shareNote'))} <a href="privacy.html#lessons">${esc(LS.tx(S.lang, 'shareMore'))}</a></p>`}
         <div class="row end"><button class="btn primary" id="analyzeRej" data-press data-ripple>${ic('wand')}<span>${esc(t('rv.analyze'))}</span></button></div>
       </div>`;
     } else if (R.status === 'fixing' && R.lesson) {
@@ -612,7 +643,7 @@
   }
   after.review = () => {
     const ok = $('#gotOk'); if (ok) ok.onclick = () => {
-      if (!S.sample && (S.lessonIds || []).length) { saveLessons(LS.recordPass(lessonsDb(), S.lessonIds).db); S.lessonIds = []; }
+      if (!S.sample && (S.lessonIds || []).length) { const pr = LS.recordPass(lessonsDb(), S.lessonIds); saveLessons(pr.db); pr.lessons.forEach(x => shareLesson(x, 'passed')); S.lessonIds = []; }
       S.review.status = 'approved'; S.review.doneAt = Date.now(); save(); go('done'); };
     const no = $('#gotNo'); if (no) no.onclick = () => { S.review.status = 'rejected'; save(); render('none'); };
     const an = $('#analyzeRej'); if (an) an.onclick = () => {
@@ -621,7 +652,7 @@
       /* Learn on this device: known reasons are counted, unknown ones become a generalized lesson. The demo sample never writes. */
       const store = rj ? rj.store : (!st.apple || (st.play && /google play|issue found|play console/i.test(text)) ? 'play' : 'apple');
       const lr = LS.learn(S.sample ? LS.empty() : lessonsDb(), text, store, rj ? rj.id : null);
-      if (!S.sample) { saveLessons(lr.db); S.lessonIds = [...new Set([...(S.lessonIds || []), lr.lesson.id])]; }
+      if (!S.sample) { saveLessons(lr.db); S.lessonIds = [...new Set([...(S.lessonIds || []), lr.lesson.id])]; shareLesson(lr.lesson, 'rejected'); }
       if (!rj) { S.review = { ...S.review, status: 'fixing', text, lesson: lr.lesson }; save(); render('none'); if (!S.sample) toast(LS.tx(S.lang, 'saved')); return; }
       S.review = { ...S.review, status: 'fixing', text, rid: rj.id }; save(); render('none');
     };
@@ -670,6 +701,8 @@
     Motion.use && Motion.use({ ripple: '[data-ripple]' });
     if (S.A && S.step !== 'home') { ensureGen().then(() => ensureShots()).then(() => render('none')); }
     render('none');
+    /* Shared lessons from other reviews: refresh in the background, redraw only screens that list lessons. */
+    refreshShared().then(ch => { if (ch && S.A && ['analyze', 'submit'].includes(S.step)) render('none'); });
   });
   window.AAPApp = { state: () => S, go };
 })();

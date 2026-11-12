@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.4
+- Review lessons are now shared so every user gets better checks. After a real (non-demo) learned review result, AA Plug 2 sends one anonymized record to `https://aaplug.com/api/lessons` in the background: `store`, `codes` (guideline / ITMS / fixed Google Play policy ids), `advice_id` (a key of the fixed advice table) and `event` (`rejected` or `passed`). Never the store message, app name, bundle / package id, project id, e-mail, paths or any free text. The result shows the exact record in `lesson.shared`.
+- The aggregated feed of other users' lessons is fetched (5-second timeout, cached in `~/.aaplug2/shared-lessons.json` for 12 hours) by `aaplug2_connect_app`, `aaplug2_get_report`, `aaplug2_get_decisions`, `aaplug2_generate_store_materials` and `aaplug2_submission_guide`, and merged into `learned_lessons` with `source: "shared"` / `from: "From other reviews"` (local ones: `source: "local"`, "From your reviews"). Titles and advice come only from the fixed table; server text is ignored. Shared lessons are reminders or warnings, never must-fix, and never recommend ATT because of ads.
+- Sharing is always on (no switch). The built-in demo never sends. Network errors and timeouts never affect the tools.
+- Web app: the same sharing and "From other reviews" items; a short privacy sentence next to the rejection box and the lessons card.
+- Server: a small Cloudflare Worker (`workers/lessons/`) with strict validation (unknown fields rejected), aggregate counts only, hashed one-hour rate limit and no body logging.
+
 ## 0.1.3
 - Learns from store review results automatically, on this computer only. `aaplug2_report_review` is the trigger: a rejection that is not in the built-in list is no longer forgotten. It becomes a generalized lesson (store, guideline numbers such as 5.1.1(v) or 4.8, ITMS codes, a short title, advice from a fixed table, a pre-submit reminder) and the result returns a fix plan from it (`matched: "learned"`, `status: "fixing"`, `auto_reply: false`), plus an English reply draft with placeholders. Known reasons keep the built-in fix plan and are only counted. Similar rejections update one lesson (`times_seen`) instead of creating duplicates. An approval after a rejection records `times_passed_after`.
 - Built-in matching is stricter: when a message cites guideline numbers outside a built-in reason's area (for example a 4.8 or 3.1.1 letter that mentions "log in"), it is learned instead of being mistaken for the demo-account reason.

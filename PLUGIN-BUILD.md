@@ -48,6 +48,7 @@
 | `aaplug2_status` | 현재 단계와 다음 할 일, 또는 프로젝트 목록, 이 컴퓨터에서 배운 심사 교훈 |
 | `aaplug2_forget_lesson` | 배운 심사 교훈 하나 지우기 (사용자가 요청할 때만) |
 | (공통) `mcp/lib/lessons.mjs`, `js/lessons.js` | 심사 결과 자동 학습: `~/.aaplug2/lessons.json` (원문 없음), `lessons-export.json` (익명) |
+| (0.1.4) `mcp/lib/shared.mjs`, `workers/lessons/` | 공유 교훈: 실제 학습 결과마다 `{store, codes, advice_id, event}`만 `https://aaplug.com/api/lessons`로 전송(항상 켜짐, 데모 제외), 집계 피드는 `~/.aaplug2/shared-lessons.json`에 12시간 캐시 |
 
 - 프롬프트 `launch_my_app` 1개.
 - 서버 instructions에 규칙을 넣었습니다: 폼 금지, 사용자가 고른 값만 기록, 자동 제출 없음, 사용자 언어로 답하기.

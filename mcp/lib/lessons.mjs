@@ -1,10 +1,12 @@
 /* AA Plug 2 MCP — review lessons kept on this machine only.
    $AAPLUG2_HOME/lessons.json (default ~/.aaplug2/lessons.json) holds generalized lessons, never raw store messages.
-   $AAPLUG2_HOME/lessons-export.json is an anonymized copy a person can review. Nothing here touches the network. */
+   $AAPLUG2_HOME/lessons-export.json is an anonymized copy a person can review. The network part (anonymized codes to
+   aaplug.com and the shared feed) lives in shared.mjs; this file only reads the cached feed. */
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { Lessons } from './runtime.mjs';
+import { sharedItems } from './shared.mjs';
 
 export const LHOME = process.env.AAPLUG2_HOME || path.join(os.homedir(), '.aaplug2');
 export const LESSONS_FILE = path.join(LHOME, 'lessons.json');
@@ -31,5 +33,11 @@ export function withLessons(fn) {
   try { const db = loadLessons(); const r = fn(db); if (r && r.db) saveLessons(r.db); return r; }
   catch (e) { console.error('[aaplug2] lessons:', e && e.message); return null; }
 }
-export const relevantLessons = (A, stores, lang) => { try { return Lessons.relevant(loadLessons(), A, stores, lang); } catch { return []; } };
+/* Local lessons ("from your reviews") first, then shared ones ("from other reviews"). Reminders / warnings only. */
+export const relevantLessons = (A, stores, lang) => {
+  let db = null, local = [], shared = [];
+  try { db = loadLessons(); local = Lessons.relevant(db, A, stores, lang); } catch { local = []; }
+  try { shared = Lessons.relevantShared(sharedItems(), A, stores, lang, db || Lessons.empty()); } catch { shared = []; }
+  return Lessons.mergeRelevant(local, shared, lang);
+};
 export const listLessons = () => { try { return loadLessons().lessons.map(Lessons.compact); } catch { return []; } };

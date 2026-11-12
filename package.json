@@ -1,6 +1,6 @@
 {
   "name": "aa-plug-2",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "AA Plug 2 — a free web tool that takes your app to launch; you just decide",
   "type": "module",
@@ -11,7 +11,7 @@
     "shots": "/workspace/venv-pw/bin/python tools/walkthrough.py",
     "mcp": "node mcp/server.mjs",
     "mcp:http": "node mcp/server.mjs --http",
-    "mcp:test": "node mcp/test/run.mjs && node mcp/test/lessons.mjs && node mcp/test/learning.mjs",
+    "mcp:test": "cd mcp && npm test",
     "plugin:build": "bash tools/build_plugin.sh"
   },
   "engines": {

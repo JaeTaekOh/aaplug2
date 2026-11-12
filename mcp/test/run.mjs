@@ -23,7 +23,7 @@ async function call(c, name, args) { return c.callTool({ name, arguments: args }
 
 async function stdioFlow() {
   console.log('\n[stdio] node server.mjs');
-  const transport = new StdioClientTransport({ command: process.execPath, args: [SERVER], env: { ...process.env, AAPLUG2_HOME: HOME }, stderr: 'pipe' });
+  const transport = new StdioClientTransport({ command: process.execPath, args: [SERVER], env: { ...process.env, AAPLUG2_HOME: HOME, AAPLUG2_LESSONS_API: 'http://127.0.0.1:9/api/lessons' }, stderr: 'pipe' });
   const c = new Client({ name: 'aaplug2-test', version: '1.0.0' });
   await c.connect(transport);
   const info = c.getServerVersion(); check(info && info.name === 'aaplug2', 'initialize → serverInfo aaplug2 ' + (info && info.version));
@@ -147,7 +147,7 @@ async function stdioFlow() {
 async function httpFlow() {
   const port = 5300 + Math.floor(Math.random() * 500);
   console.log(`\n[http] node server.mjs --http --port ${port}`);
-  const p = spawn(process.execPath, [SERVER, '--http', '--port', String(port)], { env: { ...process.env, AAPLUG2_HOME: HOME }, stdio: ['ignore', 'ignore', 'pipe'] });
+  const p = spawn(process.execPath, [SERVER, '--http', '--port', String(port)], { env: { ...process.env, AAPLUG2_HOME: HOME, AAPLUG2_LESSONS_API: 'http://127.0.0.1:9/api/lessons' }, stdio: ['ignore', 'ignore', 'pipe'] });
   await new Promise((res, rej) => { p.stderr.on('data', d => /on http/.test(String(d)) && res()); p.on('exit', rej); setTimeout(() => rej(new Error('timeout')), 15000); });
   try {
     const c = new Client({ name: 'aaplug2-test-http', version: '1.0.0' });

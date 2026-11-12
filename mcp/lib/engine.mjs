@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import { Analyzer, Gen, Gfx, Flow, Sources, Zip, CFG, tr, hasGraphics, Lessons } from './runtime.mjs';
 import { msg } from './messages.mjs';
 import { withLessons, relevantLessons, listLessons } from './lessons.mjs';
+import { shareLesson } from './shared.mjs';
 
 /* Texts come in five languages; English is the default whenever lang is omitted or unknown. */
 export const LANGS = ['en', 'ko', 'th', 'zh', 'hi'];
@@ -264,7 +265,7 @@ export function guide(st, store, lang) {
   if (rel.length) {
     const fin = steps.findIndex(s => s.final); const at = fin < 0 ? steps.length : fin;
     steps.splice(at, 0, { n: 0, id: 'learned-checks', title: Lessons.tx(L, 'step'), what: Lessons.tx(L, 'stepD'), how: [],
-      fields: rel.map(r => ({ label: `${r.codes.length ? r.codes.join(', ') + ' · ' : ''}${r.title || r.builtin}${r.times_seen ? ' (' + Lessons.tx(L, 'seen', { n: r.times_seen }) + ')' : ''}`, value: [r.check || r.why, r.passed_note].filter(Boolean).join(' ') })) });
+      fields: rel.map(r => ({ label: `${r.from ? '[' + r.from + '] ' : ''}${r.codes.length ? r.codes.join(', ') + ' · ' : ''}${r.title || r.builtin}${r.times_seen ? ' (' + Lessons.tx(L, 'seen', { n: r.times_seen }) + ')' : ''}`, value: [r.check || r.why, r.passed_note].filter(Boolean).join(' ') })) });
     steps.forEach((s, k) => { s.n = k + 1; });
   }
   return { project_id: st.id, store: STORE_NAME[store], approved, materials: st.generated ? { folder: st.generated.folder, zip: st.generated.zip } : null,
@@ -299,6 +300,8 @@ export function review(st, { store, event, rejection_text }, lang) {
       const lr = st.sample ? learnFn(Lessons.empty()) : withLessons(learnFn);   // the built-in demo never writes to the user's lessons
       const les = lr && lr.lesson;
       if (les && !st.sample) { st.lessonIds = st.lessonIds || {}; const a = st.lessonIds[store] || []; if (!a.includes(les.id)) a.push(les.id); st.lessonIds[store] = a; }
+      /* Anonymized event to aaplug.com in the background (store + codes + fixed advice id only). The demo never sends. */
+      const sharedPayload = les && !st.sample ? shareLesson(les, 'rejected') : null;
       if (!rj && les) {
         st.review[store] = { ...R, status: 'fixing', text: rejection_text, lesson: les.id };
         out = { ...out, status: 'fixing', matched: 'learned', information_needed: infoNeeded, reason: les.title, why: les.advice, fix_plan: Lessons.planFor(les, L), auto_reply: false,
@@ -313,6 +316,7 @@ export function review(st, { store, event, rejection_text }, lang) {
           lesson: les ? { ...Lessons.compact(les), note: msg(L, 'builtinRecorded') } : undefined,
           next: t('rv.approveFix.d') + ' → aaplug2_report_review event=resubmitted' };
       }
+      if (out.lesson) out.lesson.shared = sharedPayload || false;
     }
   } else if (event === 'approved') {
     st.review[store] = { ...R, status: 'live', liveAt: new Date().toISOString() };
@@ -323,6 +327,7 @@ export function review(st, { store, event, rejection_text }, lang) {
     const pend = ((st.lessonIds || {})[store] || []).filter(id => !((st.lessonsPassed || {})[store] || []).includes(id));
     const pr = pend.length ? withLessons(db => Lessons.recordPass(db, pend)) : null;
     if (pr) { st.lessonsPassed = st.lessonsPassed || {}; st.lessonsPassed[store] = [...((st.lessonsPassed[store]) || []), ...pend]; }
+    if (pr && !st.sample) pr.lessons.forEach(x => shareLesson(x, 'passed'));   // community pass count: codes + advice id only, no project identity
     out = { ...out, status: 'live', message: allLive ? msg(L, 'allLive', { url: CFG.feedbackUrl }) : msg(L, 'live', { store: S }), all_launched: allLive,
       remaining_stores: chosen.filter(k => !(st.review[k] && st.review[k].status === 'live')).map(k => STORE_NAME[k]),
       lessons_confirmed: pr && pr.lessons.length ? pr.lessons.map(Lessons.compact) : undefined, lessons_note: pr && pr.lessons.length ? msg(L, 'lessonsPassed') + ' ' + Lessons.tx(L, 'passed') : undefined };

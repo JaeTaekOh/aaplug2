@@ -1,0 +1,13 @@
+# AA Plug 2 shared lessons API. Only https://aaplug.com/api/lessons is routed here; site pages stay on GitHub Pages.
+# Deployed with the Cloudflare API (see README.md); this file is for local `wrangler dev` / reference.
+name = "aaplug2-lessons"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+workers_dev = false
+routes = [
+  { pattern = "aaplug.com/api/lessons*", zone_name = "aaplug.com" },
+  { pattern = "www.aaplug.com/api/lessons*", zone_name = "aaplug.com" }
+]
+[[kv_namespaces]]
+binding = "LESSONS"
+id = "0a7f5adba4f64c62beaf9e4bd3703416"

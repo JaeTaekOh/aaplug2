@@ -1,6 +1,6 @@
 {
   "name": "aaplug2-mcp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "AA Plug 2 MCP server: from a finished app to launched on Google Play / App Store. You only pick and approve. Free, no API keys.",
   "type": "module",
   "bin": { "aaplug2-mcp": "mcp/dist/aaplug2-mcp.mjs" },

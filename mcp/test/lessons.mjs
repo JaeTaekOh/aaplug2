@@ -8,6 +8,7 @@ import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'
 
 const HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'aaplug2-lessons-'));
 process.env.AAPLUG2_HOME = HOME;
+process.env.AAPLUG2_LESSONS_API = 'http://127.0.0.1:9/api/lessons';   // never production in tests
 const E = await import('../lib/engine.mjs');
 let pass = 0, failN = 0;
 const check = (cond, name, extra) => { if (cond) { pass++; console.log('  ✓', name); } else { failN++; console.log('  ✗', name, extra !== undefined ? JSON.stringify(extra).slice(0, 600) : ''); } };

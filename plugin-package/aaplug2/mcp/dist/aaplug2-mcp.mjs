@@ -3373,8 +3373,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path4) {
-      let input2 = path4;
+    function removeDotSegments(path5) {
+      let input2 = path5;
       const output2 = [];
       let nextSlash = -1;
       let len = 0;
@@ -3448,11 +3448,11 @@ var require_utils = __commonJS({
       }
       return output2.join("");
     }
-    function removeDotSegmentsRelative(path4) {
-      if (path4 === "" || path4[0] === "/") {
-        return removeDotSegments(path4);
+    function removeDotSegmentsRelative(path5) {
+      if (path5 === "" || path5[0] === "/") {
+        return removeDotSegments(path5);
       }
-      const segments = path4.split("/");
+      const segments = path5.split("/");
       const last = segments.length - 1;
       const output2 = [];
       let trailingDirectory = false;
@@ -3815,8 +3815,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path4 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path4 && path4 !== "/" ? path4 : void 0;
+        const path5 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path5 && path5 !== "/" ? path5 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -7353,12 +7353,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f;
     };
-    function addFormats(ajv, list, fs4, exportName) {
+    function addFormats(ajv, list, fs5, exportName) {
       var _a5;
       var _b;
       (_a5 = (_b = ajv.opts.code).formats) !== null && _a5 !== void 0 ? _a5 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs4[f]);
+        ajv.addFormat(f, fs5[f]);
     }
     module.exports = exports = formatsPlugin;
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -8221,10 +8221,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path4) {
-  if (!path4)
+function getElementAtPath(obj, path5) {
+  if (!path5)
     return obj;
-  return path4.reduce((acc, key2) => acc?.[key2], obj);
+  return path5.reduce((acc, key2) => acc?.[key2], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys2 = Object.keys(promisesObj);
@@ -8564,11 +8564,11 @@ function explicitlyAborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path4, issues) {
+function prefixIssues(path5, issues) {
   return issues.map((iss) => {
     var _a5;
     (_a5 = iss).path ?? (_a5.path = []);
-    iss.path.unshift(path4);
+    iss.path.unshift(path5);
     return iss;
   });
 }
@@ -9030,16 +9030,16 @@ function flattenError(error62, mapper = (issue2) => issue2.message) {
 }
 function formatError(error62, mapper = (issue2) => issue2.message) {
   const fieldErrors = { _errors: [] };
-  const processError = (error63, path4 = []) => {
+  const processError = (error63, path5 = []) => {
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path4, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path5, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path4, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path4, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
       } else {
-        const fullpath = [...path4, ...issue2.path];
+        const fullpath = [...path5, ...issue2.path];
         if (fullpath.length === 0) {
           fieldErrors._errors.push(mapper(issue2));
         } else {
@@ -9078,17 +9078,17 @@ function formatError(error62, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error62, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error63, path4 = []) => {
+  const processError = (error63, path5 = []) => {
     var _a5;
     for (const issue2 of error63.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
-        issue2.errors.map((issues) => processError({ issues }, [...path4, ...issue2.path]));
+        issue2.errors.map((issues) => processError({ issues }, [...path5, ...issue2.path]));
       } else if (issue2.code === "invalid_key") {
-        processError({ issues: issue2.issues }, [...path4, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
       } else if (issue2.code === "invalid_element") {
-        processError({ issues: issue2.issues }, [...path4, ...issue2.path]);
+        processError({ issues: issue2.issues }, [...path5, ...issue2.path]);
       } else {
-        const fullpath = [...path4, ...issue2.path];
+        const fullpath = [...path5, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -9127,8 +9127,8 @@ function treeifyError(error62, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path4 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path4) {
+  const path5 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path5) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -24097,13 +24097,13 @@ var recordProcessor = (schema, ctx, _json, params) => {
         ...params,
         path: [...params.path, "propertyNames"]
       });
-      let pending = pendingRecords.get(ctx);
-      if (!pending) {
-        pending = [];
-        pendingRecords.set(ctx, pending);
+      let pending2 = pendingRecords.get(ctx);
+      if (!pending2) {
+        pending2 = [];
+        pendingRecords.set(ctx, pending2);
         ctx.deferred.push(() => rewriteKeyNames(ctx));
       }
-      pending.push(schema);
+      pending2.push(schema);
     }
     json4.additionalProperties = processSchema(def.valueType, ctx, {
       ...params,
@@ -26266,13 +26266,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path4 = ref.slice(1).split("/").filter(Boolean);
-  if (path4.length === 0) {
+  const path5 = ref.slice(1).split("/").filter(Boolean);
+  if (path5.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path4[0] === defsKey) {
-    const key2 = path4[1] === void 0 ? void 0 : decodeJSONPointerSegment(path4[1]);
+  if (path5[0] === defsKey) {
+    const key2 = path5[1] === void 0 ? void 0 : decodeJSONPointerSegment(path5[1]);
     if (!key2 || !ctx.defs[key2]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -31264,8 +31264,8 @@ function getErrorMap2() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path4, errorMaps, issueData } = params;
-  const fullPath = [...path4, ...issueData.path || []];
+  const { data, path: path5, errorMaps, issueData } = params;
+  const fullPath = [...path5, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -31380,11 +31380,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path4, key2) {
+  constructor(parent, value, path5, key2) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path4;
+    this._path = path5;
     this._key = key2;
   }
   get path() {
@@ -34935,11 +34935,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path4) {
-  if (path4.length === 0) {
+function getDotPath(path5) {
+  if (path5.length === 0) {
     return "object root";
   }
-  return path4.reduce((acc, seg, index) => {
+  return path5.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -38935,9 +38935,9 @@ var EMPTY_COMPLETION_RESULT = {
 };
 
 // lib/engine.mjs
-import fs3 from "node:fs";
-import path3 from "node:path";
-import os2 from "node:os";
+import fs4 from "node:fs";
+import path4 from "node:path";
+import os3 from "node:os";
 import crypto2 from "node:crypto";
 
 // lib/runtime.mjs
@@ -42265,11 +42265,11 @@ function getAtomFeed(feedRoot) {
       if (href2) {
         entry.link = href2;
       }
-      const description = fetch("summary", children) || fetch("content", children);
+      const description = fetch2("summary", children) || fetch2("content", children);
       if (description) {
         entry.description = description;
       }
-      const pubDate = fetch("updated", children);
+      const pubDate = fetch2("updated", children);
       if (pubDate) {
         entry.pubDate = new Date(pubDate);
       }
@@ -42283,7 +42283,7 @@ function getAtomFeed(feedRoot) {
     feed.link = href;
   }
   addConditionally(feed, "description", "subtitle", childs);
-  const updated = fetch("updated", childs);
+  const updated = fetch2("updated", childs);
   if (updated) {
     feed.updated = new Date(updated);
   }
@@ -42303,7 +42303,7 @@ function getRssFeed(feedRoot) {
       addConditionally(entry, "title", "title", children);
       addConditionally(entry, "link", "link", children);
       addConditionally(entry, "description", "description", children);
-      const pubDate = fetch("pubDate", children) || fetch("dc:date", children);
+      const pubDate = fetch2("pubDate", children) || fetch2("dc:date", children);
       if (pubDate)
         entry.pubDate = new Date(pubDate);
       return entry;
@@ -42312,7 +42312,7 @@ function getRssFeed(feedRoot) {
   addConditionally(feed, "title", "title", childs);
   addConditionally(feed, "link", "link", childs);
   addConditionally(feed, "description", "description", childs);
-  const updated = fetch("lastBuildDate", childs);
+  const updated = fetch2("lastBuildDate", childs);
   if (updated) {
     feed.updated = new Date(updated);
   }
@@ -42356,11 +42356,11 @@ function getMediaElements(where) {
 function getOneElement(tagName19, node2) {
   return getElementsByTagName(tagName19, node2, true, 1)[0];
 }
-function fetch(tagName19, where, recurse = false) {
+function fetch2(tagName19, where, recurse = false) {
   return textContent(getElementsByTagName(tagName19, where, recurse, 1)).trim();
 }
 function addConditionally(obj, prop2, tagName19, where, recurse = false) {
-  const val = fetch(tagName19, where, recurse);
+  const val = fetch2(tagName19, where, recurse);
   if (val)
     obj[prop2] = val;
 }
@@ -44513,11 +44513,11 @@ function getAtomFeed2(feedRoot) {
       if (href2) {
         entry.link = href2;
       }
-      const description = fetch2("summary", children) || fetch2("content", children);
+      const description = fetch3("summary", children) || fetch3("content", children);
       if (description) {
         entry.description = description;
       }
-      const pubDate = fetch2("updated", children);
+      const pubDate = fetch3("updated", children);
       if (pubDate) {
         entry.pubDate = new Date(pubDate);
       }
@@ -44531,7 +44531,7 @@ function getAtomFeed2(feedRoot) {
     feed.link = href;
   }
   addConditionally2(feed, "description", "subtitle", childs);
-  const updated = fetch2("updated", childs);
+  const updated = fetch3("updated", childs);
   if (updated) {
     feed.updated = new Date(updated);
   }
@@ -44550,7 +44550,7 @@ function getRssFeed2(feedRoot) {
       addConditionally2(entry, "title", "title", children);
       addConditionally2(entry, "link", "link", children);
       addConditionally2(entry, "description", "description", children);
-      const pubDate = fetch2("pubDate", children) || fetch2("dc:date", children);
+      const pubDate = fetch3("pubDate", children) || fetch3("dc:date", children);
       if (pubDate)
         entry.pubDate = new Date(pubDate);
       return entry;
@@ -44559,7 +44559,7 @@ function getRssFeed2(feedRoot) {
   addConditionally2(feed, "title", "title", childs);
   addConditionally2(feed, "link", "link", childs);
   addConditionally2(feed, "description", "description", childs);
-  const updated = fetch2("lastBuildDate", childs);
+  const updated = fetch3("lastBuildDate", childs);
   if (updated) {
     feed.updated = new Date(updated);
   }
@@ -44603,11 +44603,11 @@ function getMediaElements2(where) {
 function getOneElement2(tagName19, node2) {
   return getElementsByTagName2(tagName19, node2, true, 1)[0];
 }
-function fetch2(tagName19, where, recurse = false) {
+function fetch3(tagName19, where, recurse = false) {
   return textContent2(getElementsByTagName2(tagName19, where, recurse, 1)).trim();
 }
 function addConditionally2(object3, property, tagName19, where, recurse = false) {
-  const value = fetch2(tagName19, where, recurse);
+  const value = fetch3(tagName19, where, recurse);
   if (value)
     object3[property] = value;
 }
@@ -58722,9 +58722,9 @@ var tr = (lang2, k, v) => g.AAPi18n.t(lang2, k, v);
 // lib/messages.mjs
 var M = {
   ko: {
-    learnedRejection: "\uC790\uB3D9 \uBAA9\uB85D\uC5D0 \uC5C6\uB358 \uBC18\uB824 \uC0AC\uC720\uB77C\uC11C \uC774 \uCEF4\uD4E8\uD130\uC5D0 \uC0C8 \uAD50\uD6C8\uC73C\uB85C \uC800\uC7A5\uD588\uC5B4\uC694 (\uC6D0\uBB38\uC740 \uC774 \uD504\uB85C\uC81D\uD2B8\uC5D0\uB9CC \uB0A8\uC544\uC694). \uC544\uB798 \uACC4\uD68D\uB300\uB85C \uACE0\uCE5C \uB4A4 \uC0AC\uC6A9\uC790\uAC00 \uC9C1\uC811 \uB2F5\uC7A5\uD558\uACE0 \uB2E4\uC2DC \uC81C\uCD9C\uD558\uC138\uC694. \uB2E4\uC74C \uC571\uBD80\uD130\uB294 \uC81C\uCD9C \uC804\uC5D0 \uC774 \uC810\uC744 \uC54C\uB824 \uB4DC\uB824\uC694.",
+    learnedRejection: "\uC790\uB3D9 \uBAA9\uB85D\uC5D0 \uC5C6\uB358 \uBC18\uB824 \uC0AC\uC720\uB77C\uC11C \uC774 \uCEF4\uD4E8\uD130\uC5D0 \uC0C8 \uAD50\uD6C8\uC73C\uB85C \uC800\uC7A5\uD588\uC5B4\uC694 (\uC6D0\uBB38\uC740 \uC774 \uD504\uB85C\uC81D\uD2B8\uC5D0\uB9CC \uB0A8\uACE0, \uC775\uBA85 \uCF54\uB4DC\uB9CC aaplug.com\uC5D0 \uACF5\uC720\uB3FC\uC694). \uC544\uB798 \uACC4\uD68D\uB300\uB85C \uACE0\uCE5C \uB4A4 \uC0AC\uC6A9\uC790\uAC00 \uC9C1\uC811 \uB2F5\uC7A5\uD558\uACE0 \uB2E4\uC2DC \uC81C\uCD9C\uD558\uC138\uC694. \uB2E4\uC74C \uC571\uBD80\uD130\uB294 \uC81C\uCD9C \uC804\uC5D0 \uC774 \uC810\uC744 \uC54C\uB824 \uB4DC\uB824\uC694.",
     builtinRecorded: "\uC54C\uB824\uC9C4 \uBC18\uB824 \uC0AC\uC720\uC608\uC694. \uAE30\uBCF8 \uC218\uC815 \uACC4\uD68D\uC744 \uC4F0\uACE0, \uC774 \uCEF4\uD4E8\uD130\uC758 \uAD50\uD6C8 \uAE30\uB85D\uC5D0 \uD69F\uC218\uB9CC \uB354\uD588\uC5B4\uC694.",
-    learnedNote: "\uC774 \uCEF4\uD4E8\uD130\uC758 \uC774\uC804 \uC2EC\uC0AC\uC5D0\uC11C \uBC30\uC6B4 \uAD50\uD6C8 {n}\uAC1C\uAC00 \uC774 \uC571\uC5D0 \uD574\uB2F9\uD574\uC694 (learned_lessons).",
+    learnedNote: '\uC2EC\uC0AC \uAD50\uD6C8 {n}\uAC1C\uAC00 \uC774 \uC571\uC5D0 \uD574\uB2F9\uD574\uC694 (learned_lessons). source "local" = \uC774 \uCEF4\uD4E8\uD130\uC758 \uB0B4 \uC2EC\uC0AC\uC5D0\uC11C, "shared" = \uB2E4\uB978 AA Plug 2 \uC0AC\uC6A9\uC790 \uC2EC\uC0AC\uC5D0\uC11C(\uC775\uBA85 \uC9D1\uACC4).',
     lessonsPassed: "\uC774\uC804 \uBC18\uB824\uC5D0\uC11C \uBC30\uC6B4 \uD655\uC778 \uC0AC\uD56D\uC774 \uC774\uBC88 \uC2B9\uC778\uC5D0 \uD3EC\uD568\uB410\uB2E4\uACE0 \uAE30\uB85D\uD588\uC5B4\uC694.",
     lessonForgotten: "\uAD50\uD6C8\uC744 \uC9C0\uC6E0\uC5B4\uC694: {id}",
     lessonNotFound: "\uAD50\uD6C8\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC5B4\uC694: {id}. aaplug2_status \uC758 lessons \uBAA9\uB85D\uC744 \uD655\uC778\uD558\uC138\uC694.",
@@ -58758,9 +58758,9 @@ var M = {
     stepDone: "\uCD9C\uC2DC \uC644\uB8CC"
   },
   en: {
-    learnedRejection: "This rejection reason was not in the built-in list, so it was saved as a new lesson on this computer (the original message stays only in this project). Follow the plan below; the user sends the reply and resubmits. Future apps will get this as a pre-submit check.",
+    learnedRejection: "This rejection reason was not in the built-in list, so it was saved as a new lesson on this computer (the original message stays only in this project; only anonymized codes are shared with aaplug.com). Follow the plan below; the user sends the reply and resubmits. Future apps will get this as a pre-submit check.",
     builtinRecorded: "Known rejection reason: using the built-in fix plan, and counting it in this computer's lessons.",
-    learnedNote: "{n} lessons learned from earlier reviews on this computer apply to this app (learned_lessons).",
+    learnedNote: `{n} review lessons apply to this app (learned_lessons). source "local" = from your reviews on this computer, "shared" = from other AA Plug 2 users' reviews (anonymized counts).`,
     lessonsPassed: "Recorded that the checks learned from the earlier rejection were part of this approval.",
     lessonForgotten: "Lesson removed: {id}",
     lessonNotFound: "Lesson not found: {id}. See the lessons list in aaplug2_status.",
@@ -58794,9 +58794,9 @@ var M = {
     stepDone: "Launched"
   },
   th: {
-    learnedRejection: "\u0E40\u0E2B\u0E15\u0E38\u0E1C\u0E25\u0E19\u0E35\u0E49\u0E44\u0E21\u0E48\u0E2D\u0E22\u0E39\u0E48\u0E43\u0E19\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23\u0E43\u0E19\u0E15\u0E31\u0E27 \u0E08\u0E36\u0E07\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E40\u0E1B\u0E47\u0E19\u0E1A\u0E17\u0E40\u0E23\u0E35\u0E22\u0E19\u0E43\u0E2B\u0E21\u0E48\u0E1A\u0E19\u0E04\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07\u0E19\u0E35\u0E49 (\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E15\u0E49\u0E19\u0E09\u0E1A\u0E31\u0E1A\u0E2D\u0E22\u0E39\u0E48\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E43\u0E19\u0E42\u0E1B\u0E23\u0E40\u0E08\u0E01\u0E15\u0E4C\u0E19\u0E35\u0E49) \u0E17\u0E33\u0E15\u0E32\u0E21\u0E41\u0E1C\u0E19\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07 \u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49\u0E2A\u0E48\u0E07\u0E04\u0E33\u0E15\u0E2D\u0E1A\u0E41\u0E25\u0E30\u0E2A\u0E48\u0E07\u0E43\u0E2B\u0E21\u0E48\u0E40\u0E2D\u0E07 \u0E41\u0E2D\u0E1B\u0E16\u0E31\u0E14\u0E44\u0E1B\u0E08\u0E30\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E01\u0E32\u0E23\u0E15\u0E23\u0E27\u0E08\u0E19\u0E35\u0E49\u0E01\u0E48\u0E2D\u0E19\u0E2A\u0E48\u0E07",
+    learnedRejection: "\u0E40\u0E2B\u0E15\u0E38\u0E1C\u0E25\u0E19\u0E35\u0E49\u0E44\u0E21\u0E48\u0E2D\u0E22\u0E39\u0E48\u0E43\u0E19\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23\u0E43\u0E19\u0E15\u0E31\u0E27 \u0E08\u0E36\u0E07\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E40\u0E1B\u0E47\u0E19\u0E1A\u0E17\u0E40\u0E23\u0E35\u0E22\u0E19\u0E43\u0E2B\u0E21\u0E48\u0E1A\u0E19\u0E04\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07\u0E19\u0E35\u0E49 (\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E15\u0E49\u0E19\u0E09\u0E1A\u0E31\u0E1A\u0E2D\u0E22\u0E39\u0E48\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E43\u0E19\u0E42\u0E1B\u0E23\u0E40\u0E08\u0E01\u0E15\u0E4C\u0E19\u0E35\u0E49 \u0E41\u0E0A\u0E23\u0E4C\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E23\u0E2B\u0E31\u0E2A\u0E41\u0E1A\u0E1A\u0E44\u0E21\u0E48\u0E23\u0E30\u0E1A\u0E38\u0E15\u0E31\u0E27\u0E15\u0E19\u0E01\u0E31\u0E1A aaplug.com) \u0E17\u0E33\u0E15\u0E32\u0E21\u0E41\u0E1C\u0E19\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07 \u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49\u0E2A\u0E48\u0E07\u0E04\u0E33\u0E15\u0E2D\u0E1A\u0E41\u0E25\u0E30\u0E2A\u0E48\u0E07\u0E43\u0E2B\u0E21\u0E48\u0E40\u0E2D\u0E07 \u0E41\u0E2D\u0E1B\u0E16\u0E31\u0E14\u0E44\u0E1B\u0E08\u0E30\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E01\u0E32\u0E23\u0E15\u0E23\u0E27\u0E08\u0E19\u0E35\u0E49\u0E01\u0E48\u0E2D\u0E19\u0E2A\u0E48\u0E07",
     builtinRecorded: "\u0E40\u0E2B\u0E15\u0E38\u0E1C\u0E25\u0E17\u0E35\u0E48\u0E23\u0E39\u0E49\u0E08\u0E31\u0E01\u0E41\u0E25\u0E49\u0E27: \u0E43\u0E0A\u0E49\u0E41\u0E1C\u0E19\u0E41\u0E01\u0E49\u0E44\u0E02\u0E43\u0E19\u0E15\u0E31\u0E27 \u0E41\u0E25\u0E30\u0E19\u0E31\u0E1A\u0E40\u0E1E\u0E34\u0E48\u0E21\u0E43\u0E19\u0E1A\u0E17\u0E40\u0E23\u0E35\u0E22\u0E19\u0E02\u0E2D\u0E07\u0E04\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07\u0E19\u0E35\u0E49",
-    learnedNote: "\u0E1A\u0E17\u0E40\u0E23\u0E35\u0E22\u0E19 {n} \u0E02\u0E49\u0E2D\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E23\u0E35\u0E27\u0E34\u0E27\u0E04\u0E23\u0E31\u0E49\u0E07\u0E01\u0E48\u0E2D\u0E19\u0E1A\u0E19\u0E04\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07\u0E19\u0E35\u0E49\u0E40\u0E01\u0E35\u0E48\u0E22\u0E27\u0E02\u0E49\u0E2D\u0E07\u0E01\u0E31\u0E1A\u0E41\u0E2D\u0E1B\u0E19\u0E35\u0E49 (learned_lessons)",
+    learnedNote: '\u0E1A\u0E17\u0E40\u0E23\u0E35\u0E22\u0E19\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E23\u0E35\u0E27\u0E34\u0E27 {n} \u0E02\u0E49\u0E2D\u0E40\u0E01\u0E35\u0E48\u0E22\u0E27\u0E02\u0E49\u0E2D\u0E07\u0E01\u0E31\u0E1A\u0E41\u0E2D\u0E1B\u0E19\u0E35\u0E49 (learned_lessons) source "local" = \u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E23\u0E35\u0E27\u0E34\u0E27\u0E02\u0E2D\u0E07\u0E04\u0E38\u0E13\u0E1A\u0E19\u0E04\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\u0E19\u0E35\u0E49 "shared" = \u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E23\u0E35\u0E27\u0E34\u0E27\u0E02\u0E2D\u0E07\u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49 AA Plug 2 \u0E04\u0E19\u0E2D\u0E37\u0E48\u0E19 (\u0E19\u0E31\u0E1A\u0E41\u0E1A\u0E1A\u0E44\u0E21\u0E48\u0E23\u0E30\u0E1A\u0E38\u0E15\u0E31\u0E27\u0E15\u0E19)',
     lessonsPassed: "\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E41\u0E25\u0E49\u0E27\u0E27\u0E48\u0E32\u0E01\u0E32\u0E23\u0E15\u0E23\u0E27\u0E08\u0E17\u0E35\u0E48\u0E40\u0E23\u0E35\u0E22\u0E19\u0E23\u0E39\u0E49\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E1B\u0E0F\u0E34\u0E40\u0E2A\u0E18\u0E04\u0E23\u0E31\u0E49\u0E07\u0E01\u0E48\u0E2D\u0E19\u0E40\u0E1B\u0E47\u0E19\u0E2A\u0E48\u0E27\u0E19\u0E2B\u0E19\u0E36\u0E48\u0E07\u0E02\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34\u0E19\u0E35\u0E49",
     lessonForgotten: "\u0E25\u0E1A\u0E1A\u0E17\u0E40\u0E23\u0E35\u0E22\u0E19\u0E41\u0E25\u0E49\u0E27: {id}",
     lessonNotFound: "\u0E44\u0E21\u0E48\u0E1E\u0E1A\u0E1A\u0E17\u0E40\u0E23\u0E35\u0E22\u0E19: {id} \u0E14\u0E39\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23 lessons \u0E43\u0E19 aaplug2_status",
@@ -58830,9 +58830,9 @@ var M = {
     stepDone: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E41\u0E25\u0E49\u0E27"
   },
   zh: {
-    learnedRejection: "\u8FD9\u4E2A\u62D2\u7EDD\u539F\u56E0\u4E0D\u5728\u5185\u7F6E\u5217\u8868\u4E2D\uFF0C\u5DF2\u4F5C\u4E3A\u65B0\u7ECF\u9A8C\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\uFF08\u539F\u6587\u53EA\u4FDD\u7559\u5728\u6B64\u9879\u76EE\u4E2D\uFF09\u3002\u8BF7\u6309\u4E0B\u9762\u7684\u8BA1\u5212\u4FEE\u6B63\uFF1B\u7531\u7528\u6237\u81EA\u5DF1\u56DE\u590D\u5E76\u91CD\u65B0\u63D0\u4EA4\u3002\u4E4B\u540E\u7684\u5E94\u7528\u4F1A\u5728\u63D0\u4EA4\u524D\u5F97\u5230\u6B64\u9879\u68C0\u67E5\u3002",
+    learnedRejection: "\u8FD9\u4E2A\u62D2\u7EDD\u539F\u56E0\u4E0D\u5728\u5185\u7F6E\u5217\u8868\u4E2D\uFF0C\u5DF2\u4F5C\u4E3A\u65B0\u7ECF\u9A8C\u4FDD\u5B58\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\uFF08\u539F\u6587\u53EA\u4FDD\u7559\u5728\u6B64\u9879\u76EE\u4E2D\uFF0C\u53EA\u6709\u533F\u540D\u4EE3\u7801\u4E0E aaplug.com \u5171\u4EAB\uFF09\u3002\u8BF7\u6309\u4E0B\u9762\u7684\u8BA1\u5212\u4FEE\u6B63\uFF1B\u7531\u7528\u6237\u81EA\u5DF1\u56DE\u590D\u5E76\u91CD\u65B0\u63D0\u4EA4\u3002\u4E4B\u540E\u7684\u5E94\u7528\u4F1A\u5728\u63D0\u4EA4\u524D\u5F97\u5230\u6B64\u9879\u68C0\u67E5\u3002",
     builtinRecorded: "\u5DF2\u77E5\u7684\u62D2\u7EDD\u539F\u56E0\uFF1A\u4F7F\u7528\u5185\u7F6E\u4FEE\u6B63\u8BA1\u5212\uFF0C\u5E76\u5728\u8FD9\u53F0\u7535\u8111\u7684\u7ECF\u9A8C\u8BB0\u5F55\u4E2D\u8BA1\u6570\u3002",
-    learnedNote: "\u8FD9\u53F0\u7535\u8111\u4E0A\u4E4B\u524D\u5BA1\u6838\u5B66\u5230\u7684 {n} \u6761\u7ECF\u9A8C\u9002\u7528\u4E8E\u6B64\u5E94\u7528\uFF08learned_lessons\uFF09\u3002",
+    learnedNote: '{n} \u6761\u5BA1\u6838\u7ECF\u9A8C\u9002\u7528\u4E8E\u6B64\u5E94\u7528\uFF08learned_lessons\uFF09\u3002source "local" = \u6765\u81EA\u4F60\u5728\u8FD9\u53F0\u7535\u8111\u4E0A\u7684\u5BA1\u6838\uFF0C"shared" = \u6765\u81EA\u5176\u4ED6 AA Plug 2 \u7528\u6237\u7684\u5BA1\u6838\uFF08\u533F\u540D\u8BA1\u6570\uFF09\u3002',
     lessonsPassed: "\u5DF2\u8BB0\u5F55\uFF1A\u4E4B\u524D\u62D2\u7EDD\u4E2D\u5B66\u5230\u7684\u68C0\u67E5\u9879\u662F\u8FD9\u6B21\u901A\u8FC7\u7684\u4E00\u90E8\u5206\u3002",
     lessonForgotten: "\u5DF2\u5220\u9664\u7ECF\u9A8C\uFF1A{id}",
     lessonNotFound: "\u627E\u4E0D\u5230\u7ECF\u9A8C\uFF1A{id}\u3002\u8BF7\u67E5\u770B aaplug2_status \u4E2D\u7684 lessons \u5217\u8868\u3002",
@@ -58866,9 +58866,9 @@ var M = {
     stepDone: "\u5DF2\u4E0A\u67B6"
   },
   hi: {
-    learnedRejection: "\u092F\u0939 \u0905\u0938\u094D\u0935\u0940\u0915\u0943\u0924\u093F \u0915\u093E\u0930\u0923 \u092C\u093F\u0932\u094D\u091F-\u0907\u0928 \u0938\u0942\u091A\u0940 \u092E\u0947\u0902 \u0928\u0939\u0940\u0902 \u0925\u093E, \u0907\u0938\u0932\u093F\u090F \u0907\u0938\u0947 \u0907\u0938 \u0915\u0902\u092A\u094D\u092F\u0942\u091F\u0930 \u092A\u0930 \u0928\u090F \u0938\u092C\u0915 \u0915\u0947 \u0930\u0942\u092A \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u093E \u0917\u092F\u093E (\u092E\u0942\u0932 \u0938\u0902\u0926\u0947\u0936 \u0938\u093F\u0930\u094D\u092B\u093C \u0907\u0938\u0940 \u092A\u094D\u0930\u094B\u091C\u0947\u0915\u094D\u091F \u092E\u0947\u0902 \u0930\u0939\u0924\u093E \u0939\u0948)\u0964 \u0928\u0940\u091A\u0947 \u0926\u0940 \u0917\u0908 \u092F\u094B\u091C\u0928\u093E \u0905\u092A\u0928\u093E\u090F\u0901; \u091C\u0935\u093E\u092C \u0914\u0930 \u0926\u094B\u092C\u093E\u0930\u093E \u0938\u092C\u092E\u093F\u091F \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0916\u0941\u0926 \u0915\u0930\u0924\u093E \u0939\u0948\u0964 \u0906\u0917\u0947 \u0915\u0947 \u0910\u092A\u094D\u0938 \u092E\u0947\u0902 \u092F\u0939 \u0938\u092C\u092E\u093F\u091F \u0938\u0947 \u092A\u0939\u0932\u0947 \u0915\u0940 \u091C\u093E\u0901\u091A \u092C\u0928\u0947\u0917\u093E\u0964",
+    learnedRejection: "\u092F\u0939 \u0905\u0938\u094D\u0935\u0940\u0915\u0943\u0924\u093F \u0915\u093E\u0930\u0923 \u092C\u093F\u0932\u094D\u091F-\u0907\u0928 \u0938\u0942\u091A\u0940 \u092E\u0947\u0902 \u0928\u0939\u0940\u0902 \u0925\u093E, \u0907\u0938\u0932\u093F\u090F \u0907\u0938\u0947 \u0907\u0938 \u0915\u0902\u092A\u094D\u092F\u0942\u091F\u0930 \u092A\u0930 \u0928\u090F \u0938\u092C\u0915 \u0915\u0947 \u0930\u0942\u092A \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u093E \u0917\u092F\u093E (\u092E\u0942\u0932 \u0938\u0902\u0926\u0947\u0936 \u0938\u093F\u0930\u094D\u092B\u093C \u0907\u0938\u0940 \u092A\u094D\u0930\u094B\u091C\u0947\u0915\u094D\u091F \u092E\u0947\u0902 \u0930\u0939\u0924\u093E \u0939\u0948; \u0915\u0947\u0935\u0932 \u0917\u0941\u092E\u0928\u093E\u092E \u0915\u094B\u0921 aaplug.com \u0915\u0947 \u0938\u093E\u0925 \u0938\u093E\u091D\u093E \u0939\u094B\u0924\u0947 \u0939\u0948\u0902)\u0964 \u0928\u0940\u091A\u0947 \u0926\u0940 \u0917\u0908 \u092F\u094B\u091C\u0928\u093E \u0905\u092A\u0928\u093E\u090F\u0901; \u091C\u0935\u093E\u092C \u0914\u0930 \u0926\u094B\u092C\u093E\u0930\u093E \u0938\u092C\u092E\u093F\u091F \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0916\u0941\u0926 \u0915\u0930\u0924\u093E \u0939\u0948\u0964 \u0906\u0917\u0947 \u0915\u0947 \u0910\u092A\u094D\u0938 \u092E\u0947\u0902 \u092F\u0939 \u0938\u092C\u092E\u093F\u091F \u0938\u0947 \u092A\u0939\u0932\u0947 \u0915\u0940 \u091C\u093E\u0901\u091A \u092C\u0928\u0947\u0917\u093E\u0964",
     builtinRecorded: "\u091C\u093E\u0928\u093E-\u092A\u0939\u091A\u093E\u0928\u093E \u0915\u093E\u0930\u0923: \u092C\u093F\u0932\u094D\u091F-\u0907\u0928 \u0938\u0941\u0927\u093E\u0930 \u092F\u094B\u091C\u0928\u093E \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B \u0930\u0939\u0940 \u0939\u0948, \u0914\u0930 \u0907\u0938\u0947 \u0907\u0938 \u0915\u0902\u092A\u094D\u092F\u0942\u091F\u0930 \u0915\u0947 \u0938\u092C\u0915 \u092E\u0947\u0902 \u0917\u093F\u0928\u093E \u0917\u092F\u093E\u0964",
-    learnedNote: "\u0907\u0938 \u0915\u0902\u092A\u094D\u092F\u0942\u091F\u0930 \u092A\u0930 \u092A\u093F\u091B\u0932\u0940 \u0938\u092E\u0940\u0915\u094D\u0937\u093E\u0913\u0902 \u0938\u0947 \u0938\u0940\u0916\u0947 {n} \u0938\u092C\u0915 \u0907\u0938 \u0910\u092A \u092A\u0930 \u0932\u093E\u0917\u0942 \u0939\u094B\u0924\u0947 \u0939\u0948\u0902 (learned_lessons)\u0964",
+    learnedNote: '\u0938\u092E\u0940\u0915\u094D\u0937\u093E \u0915\u0947 {n} \u0938\u092C\u0915 \u0907\u0938 \u0910\u092A \u092A\u0930 \u0932\u093E\u0917\u0942 \u0939\u094B\u0924\u0947 \u0939\u0948\u0902 (learned_lessons)\u0964 source "local" = \u0907\u0938 \u0915\u0902\u092A\u094D\u092F\u0942\u091F\u0930 \u092A\u0930 \u0906\u092A\u0915\u0940 \u0938\u092E\u0940\u0915\u094D\u0937\u093E\u0913\u0902 \u0938\u0947, "shared" = \u0926\u0942\u0938\u0930\u0947 AA Plug 2 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E\u0913\u0902 \u0915\u0940 \u0938\u092E\u0940\u0915\u094D\u0937\u093E\u0913\u0902 \u0938\u0947 (\u0917\u0941\u092E\u0928\u093E\u092E \u0917\u093F\u0928\u0924\u0940)\u0964',
     lessonsPassed: "\u0926\u0930\u094D\u091C \u0915\u093F\u092F\u093E \u0917\u092F\u093E \u0915\u093F \u092A\u093F\u091B\u0932\u0940 \u0905\u0938\u094D\u0935\u0940\u0915\u0943\u0924\u093F \u0938\u0947 \u0938\u0940\u0916\u0940 \u091C\u093E\u0901\u091A\u0947\u0902 \u0907\u0938 \u092E\u0902\u091C\u093C\u0942\u0930\u0940 \u0915\u093E \u0939\u093F\u0938\u094D\u0938\u093E \u0925\u0940\u0902\u0964",
     lessonForgotten: "\u0938\u092C\u0915 \u0939\u091F\u093E\u092F\u093E \u0917\u092F\u093E: {id}",
     lessonNotFound: "\u0938\u092C\u0915 \u0928\u0939\u0940\u0902 \u092E\u093F\u0932\u093E: {id}. aaplug2_status \u092E\u0947\u0902 lessons \u0938\u0942\u091A\u0940 \u0926\u0947\u0916\u0947\u0902\u0964",
@@ -58909,22 +58909,101 @@ var msg = (lang2, k, v) => {
 };
 
 // lib/lessons.mjs
+import fs3 from "node:fs";
+import path3 from "node:path";
+import os2 from "node:os";
+
+// lib/shared.mjs
 import fs2 from "node:fs";
 import path2 from "node:path";
 import os from "node:os";
+var API = process.env.AAPLUG2_LESSONS_API || Lessons.SHARE_URL;
 var LHOME = process.env.AAPLUG2_HOME || path2.join(os.homedir(), ".aaplug2");
-var LESSONS_FILE = path2.join(LHOME, "lessons.json");
-var EXPORT_FILE = path2.join(LHOME, "lessons-export.json");
+var SHARED_FILE = path2.join(LHOME, "shared-lessons.json");
+var TTL = 12 * 36e5;
+var RETRY_AFTER_FAIL = 15 * 6e4;
+var TIMEOUT = 5e3;
+var pending = /* @__PURE__ */ new Set();
+var lastFail = 0;
+var mem = null;
+var timeoutSignal = (ms) => typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(ms) : void 0;
+function track(p) {
+  const q = Promise.resolve(p).catch(() => null).finally(() => pending.delete(q));
+  pending.add(q);
+  return q;
+}
+function shareLesson(lesson, event) {
+  let payload = null;
+  try {
+    payload = Lessons.sharePayload(lesson, event);
+  } catch {
+    payload = null;
+  }
+  if (!payload) return null;
+  try {
+    track(fetch(API, { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "aaplug2-mcp" }, body: JSON.stringify(payload), signal: timeoutSignal(TIMEOUT) }).then((r) => {
+      try {
+        r.body && r.body.cancel && r.body.cancel();
+      } catch {
+      }
+    }));
+  } catch {
+  }
+  return payload;
+}
+function readCache() {
+  try {
+    const c = JSON.parse(fs2.readFileSync(SHARED_FILE, "utf8"));
+    return { at: Number(c.fetched_at) || 0, items: Lessons.normShared(c.feed) };
+  } catch {
+    return null;
+  }
+}
+async function ensureShared() {
+  const c = mem || readCache();
+  mem = c;
+  const now = Date.now();
+  if (c && now - c.at < TTL) return c.items;
+  if (now - lastFail < RETRY_AFTER_FAIL) return c ? c.items : [];
+  try {
+    const r = await track(fetch(API, { headers: { Accept: "application/json", "User-Agent": "aaplug2-mcp" }, signal: timeoutSignal(TIMEOUT) }));
+    if (!r || !r.ok) throw new Error("feed " + (r && r.status));
+    const txt = await r.text();
+    if (txt.length > 512 * 1024) throw new Error("feed too large");
+    const feed = JSON.parse(txt), items = Lessons.normShared(feed);
+    const clean = { lessons: items };
+    try {
+      fs2.mkdirSync(LHOME, { recursive: true });
+      fs2.writeFileSync(SHARED_FILE, JSON.stringify({ fetched_at: now, source: API, feed: clean }, null, 1), { mode: 384 });
+    } catch {
+    }
+    mem = { at: now, items };
+    return items;
+  } catch {
+    lastFail = now;
+    return c ? c.items : [];
+  }
+}
+function sharedItems() {
+  const c = mem || readCache();
+  mem = c;
+  return c ? c.items : [];
+}
+
+// lib/lessons.mjs
+var LHOME2 = process.env.AAPLUG2_HOME || path3.join(os2.homedir(), ".aaplug2");
+var LESSONS_FILE = path3.join(LHOME2, "lessons.json");
+var EXPORT_FILE = path3.join(LHOME2, "lessons-export.json");
 function writeAtomic(f, data) {
-  fs2.mkdirSync(path2.dirname(f), { recursive: true });
+  fs3.mkdirSync(path3.dirname(f), { recursive: true });
   const tmp = f + "." + process.pid + ".tmp";
-  fs2.writeFileSync(tmp, data, { mode: 384 });
-  fs2.renameSync(tmp, f);
+  fs3.writeFileSync(tmp, data, { mode: 384 });
+  fs3.renameSync(tmp, f);
 }
 function loadLessons() {
   let raw;
   try {
-    raw = fs2.readFileSync(LESSONS_FILE, "utf8");
+    raw = fs3.readFileSync(LESSONS_FILE, "utf8");
   } catch {
     return Lessons.empty();
   }
@@ -58932,7 +59011,7 @@ function loadLessons() {
     return Lessons.normDb(JSON.parse(raw));
   } catch {
     try {
-      fs2.renameSync(LESSONS_FILE, LESSONS_FILE + ".bad-" + Date.now());
+      fs3.renameSync(LESSONS_FILE, LESSONS_FILE + ".bad-" + Date.now());
     } catch {
     }
     return Lessons.empty();
@@ -58956,11 +59035,19 @@ function withLessons(fn) {
   }
 }
 var relevantLessons = (A, stores, lang2) => {
+  let db = null, local = [], shared = [];
   try {
-    return Lessons.relevant(loadLessons(), A, stores, lang2);
+    db = loadLessons();
+    local = Lessons.relevant(db, A, stores, lang2);
   } catch {
-    return [];
+    local = [];
   }
+  try {
+    shared = Lessons.relevantShared(sharedItems(), A, stores, lang2, db || Lessons.empty());
+  } catch {
+    shared = [];
+  }
+  return Lessons.mergeRelevant(local, shared, lang2);
 };
 var listLessons = () => {
   try {
@@ -58972,8 +59059,8 @@ var listLessons = () => {
 
 // lib/engine.mjs
 var LANGS = ["en", "ko", "th", "zh", "hi"];
-var HOME = process.env.AAPLUG2_HOME || path3.join(os2.homedir(), ".aaplug2");
-var PROJ = path3.join(HOME, "projects");
+var HOME = process.env.AAPLUG2_HOME || path4.join(os3.homedir(), ".aaplug2");
+var PROJ = path4.join(HOME, "projects");
 var normLang = (l) => {
   const p = String(l || "").trim().toLowerCase().split(/[-_]/)[0];
   return LANGS.includes(p) ? p : "en";
@@ -58987,50 +59074,50 @@ var UserError = class extends Error {
   }
 };
 var idOk = (id) => typeof id === "string" && /^[a-z0-9][\w.-]{2,80}$/i.test(id);
-var dirOf = (id) => path3.join(PROJ, id);
+var dirOf = (id) => path4.join(PROJ, id);
 function save(st) {
-  fs3.mkdirSync(dirOf(st.id), { recursive: true });
+  fs4.mkdirSync(dirOf(st.id), { recursive: true });
   st.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
-  fs3.writeFileSync(path3.join(dirOf(st.id), "state.json"), JSON.stringify(st));
+  fs4.writeFileSync(path4.join(dirOf(st.id), "state.json"), JSON.stringify(st));
 }
 function load(id, lang2) {
   if (!idOk(id)) throw new UserError(msg(normLang(lang2), "noProject", { id }), "noProject");
-  const f = path3.join(dirOf(id), "state.json");
-  if (!fs3.existsSync(f)) throw new UserError(msg(normLang(lang2), "noProject", { id }), "noProject");
-  return JSON.parse(fs3.readFileSync(f, "utf8"));
+  const f = path4.join(dirOf(id), "state.json");
+  if (!fs4.existsSync(f)) throw new UserError(msg(normLang(lang2), "noProject", { id }), "noProject");
+  return JSON.parse(fs4.readFileSync(f, "utf8"));
 }
 var T = (lang2) => (k, v) => tr(lang2, k, v);
 var appName = (st, lang2) => Gen.nameOf(st.A, lang2);
 async function walkDir(root) {
-  const top = path3.basename(path3.resolve(root)) || "project";
+  const top = path4.basename(path4.resolve(root)) || "project";
   const out = [];
   async function walk(dir, rel) {
     let ents;
     try {
-      ents = await fs3.promises.readdir(dir, { withFileTypes: true });
+      ents = await fs4.promises.readdir(dir, { withFileTypes: true });
     } catch {
       return;
     }
     for (const e of ents) {
       if (out.length > 2e4) return;
-      const abs = path3.join(dir, e.name), r = rel ? rel + "/" + e.name : e.name;
+      const abs = path4.join(dir, e.name), r = rel ? rel + "/" + e.name : e.name;
       if (e.isDirectory()) {
         if (!SKIP_DIRS.has(e.name)) await walk(abs, r);
       } else if (e.isFile()) {
         let size = 0;
         try {
-          size = (await fs3.promises.stat(abs)).size;
+          size = (await fs4.promises.stat(abs)).size;
         } catch {
           continue;
         }
         out.push({ name: e.name, webkitRelativePath: top + "/" + r, size, arrayBuffer: async () => {
-          const b = await fs3.promises.readFile(abs);
+          const b = await fs4.promises.readFile(abs);
           return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
         } });
       }
     }
   }
-  await walk(path3.resolve(root), "");
+  await walk(path4.resolve(root), "");
   return out;
 }
 async function connect({ source, github_url, path: p, lang: lang2 }, { allowPath }) {
@@ -59042,11 +59129,11 @@ async function connect({ source, github_url, path: p, lang: lang2 }, { allowPath
     else if (source === "github") project = await Sources.fromGitHub(github_url || "");
     else if (source === "path") {
       if (!allowPath) throw new UserError(msg(L, "pathDisabled"), "pathDisabled");
-      const abs = path3.resolve(String(p || "").replace(/^~(?=$|\/)/, os2.homedir()));
-      const stat = fs3.statSync(abs);
+      const abs = path4.resolve(String(p || "").replace(/^~(?=$|\/)/, os3.homedir()));
+      const stat = fs4.statSync(abs);
       if (stat.isFile() && /\.zip$/i.test(abs)) {
-        const b = fs3.readFileSync(abs);
-        project = await Sources.fromZipFile({ name: path3.basename(abs), arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) });
+        const b = fs4.readFileSync(abs);
+        project = await Sources.fromZipFile({ name: path4.basename(abs), arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) });
       } else if (stat.isDirectory()) project = await Sources.fromFileList(await walkDir(abs));
       else throw new UserError(t("err.noapp"), "noapp");
     } else throw new UserError("source must be sample | github | path", "badsource");
@@ -59252,13 +59339,13 @@ async function preview(st, kind, lang2) {
   const L = normLang(lang2 || st.lang);
   const g2 = await graphics(st, L, [kind]);
   if (!g2) return { note: msg(L, "noGraphics"), images: [] };
-  const dir = path3.join(dirOf(st.id), "previews");
-  fs3.mkdirSync(dir, { recursive: true });
+  const dir = path4.join(dirOf(st.id), "previews");
+  fs4.mkdirSync(dir, { recursive: true });
   const t = T(L);
   const imgs = [];
   const put = (name, url2, label) => {
-    const f = path3.join(dir, name);
-    fs3.writeFileSync(f, Buffer.from(b64(url2), "base64"));
+    const f = path4.join(dir, name);
+    fs4.writeFileSync(f, Buffer.from(b64(url2), "base64"));
     imgs.push({ file: f, label, data: b64(url2) });
   };
   if (kind === "icons") g2.icons.forEach((u, k) => put(`icon-${k}-${STYLE2.icon[k]}.png`, u, `${k}: ${t("icon." + STYLE2.icon[k])} (512\xD7512)`));
@@ -59287,18 +59374,18 @@ ${t("zip.readme")}
 
 Feedback: ${CFG.feedbackUrl}
 ` });
-  const base = output_dir && allowPath ? path3.resolve(String(output_dir).replace(/^~(?=$|\/)/, os2.homedir())) : path3.join(dirOf(st.id), "store-materials");
-  const slug = Flow.slugOf(A), folder = path3.join(base, "aaplug2-" + slug);
-  fs3.rmSync(folder, { recursive: true, force: true });
+  const base = output_dir && allowPath ? path4.resolve(String(output_dir).replace(/^~(?=$|\/)/, os3.homedir())) : path4.join(dirOf(st.id), "store-materials");
+  const slug = Flow.slugOf(A), folder = path4.join(base, "aaplug2-" + slug);
+  fs4.rmSync(folder, { recursive: true, force: true });
   for (const f of files) {
-    const p = path3.join(folder, f.path);
-    fs3.mkdirSync(path3.dirname(p), { recursive: true });
-    fs3.writeFileSync(p, f.data);
+    const p = path4.join(folder, f.path);
+    fs4.mkdirSync(path4.dirname(p), { recursive: true });
+    fs4.writeFileSync(p, f.data);
   }
   const zipBlob = Zip.writeZip(files.map((f) => ({ path: f.path, data: typeof f.data === "string" ? f.data : new Uint8Array(f.data) })));
   const zipBuf = Buffer.from(await zipBlob.arrayBuffer());
   const zipPath = folder + ".zip";
-  fs3.writeFileSync(zipPath, zipBuf);
+  fs4.writeFileSync(zipPath, zipBuf);
   st.generated = { at: (/* @__PURE__ */ new Date()).toISOString(), folder, zip: zipPath, lang: L };
   save(st);
   const listing = {};
@@ -59364,7 +59451,7 @@ function guide(st, store2, lang2) {
       title: Lessons.tx(L, "step"),
       what: Lessons.tx(L, "stepD"),
       how: [],
-      fields: rel.map((r) => ({ label: `${r.codes.length ? r.codes.join(", ") + " \xB7 " : ""}${r.title || r.builtin}${r.times_seen ? " (" + Lessons.tx(L, "seen", { n: r.times_seen }) + ")" : ""}`, value: [r.check || r.why, r.passed_note].filter(Boolean).join(" ") }))
+      fields: rel.map((r) => ({ label: `${r.from ? "[" + r.from + "] " : ""}${r.codes.length ? r.codes.join(", ") + " \xB7 " : ""}${r.title || r.builtin}${r.times_seen ? " (" + Lessons.tx(L, "seen", { n: r.times_seen }) + ")" : ""}`, value: [r.check || r.why, r.passed_note].filter(Boolean).join(" ") }))
     });
     steps.forEach((s, k) => {
       s.n = k + 1;
@@ -59416,6 +59503,7 @@ function review(st, { store: store2, event, rejection_text }, lang2) {
         if (!a.includes(les.id)) a.push(les.id);
         st.lessonIds[store2] = a;
       }
+      const sharedPayload = les && !st.sample ? shareLesson(les, "rejected") : null;
       if (!rj && les) {
         st.review[store2] = { ...R, status: "fixing", text: rejection_text, lesson: les.id };
         out = {
@@ -59453,6 +59541,7 @@ function review(st, { store: store2, event, rejection_text }, lang2) {
           next: t("rv.approveFix.d") + " \u2192 aaplug2_report_review event=resubmitted"
         };
       }
+      if (out.lesson) out.lesson.shared = sharedPayload || false;
     }
   } else if (event === "approved") {
     st.review[store2] = { ...R, status: "live", liveAt: (/* @__PURE__ */ new Date()).toISOString() };
@@ -59465,6 +59554,7 @@ function review(st, { store: store2, event, rejection_text }, lang2) {
       st.lessonsPassed = st.lessonsPassed || {};
       st.lessonsPassed[store2] = [...st.lessonsPassed[store2] || [], ...pend];
     }
+    if (pr && !st.sample) pr.lessons.forEach((x) => shareLesson(x, "passed"));
     out = {
       ...out,
       status: "live",
@@ -59497,7 +59587,7 @@ function status(id, lang2) {
   }
   let ids = [];
   try {
-    ids = fs3.readdirSync(PROJ);
+    ids = fs4.readdirSync(PROJ);
   } catch {
   }
   const list = ids.map((i) => {
@@ -59518,7 +59608,7 @@ function forgetLesson(id, lang2) {
 }
 
 // lib/tools.mjs
-var VERSION = "0.1.3";
+var VERSION = "0.1.4";
 var INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
 How to use it:
 1. When the user says their app is finished or asks for help publishing, call aaplug2_connect_app ONCE with a public GitHub URL, a local folder/ZIP path, or source=sample for a demo. Never ask the user for tokens, passwords or store metadata forms.
@@ -59527,7 +59617,7 @@ How to use it:
 4. Call aaplug2_generate_store_materials, then aaplug2_submission_guide for each store and walk the user through the console steps.
 5. The final submit step stays locked until the user explicitly approves; then call aaplug2_approve_submission. AA Plug 2 never submits to any store itself: the user presses the submit button in Play Console / App Store Connect.
 6. When the user reports the review result, call aaplug2_report_review (submitted / rejected with the store's message / resubmitted / approved). When every chosen store is live, the job is done. In App Store Connect an "Information Needed" request also shows as Rejected; it asks for a reply, not always a new build. Never reply to Apple or Google yourself: draft the reply and let the user send it.
-7. Reported review results are learned automatically and locally: an unknown rejection becomes a generalized lesson (store, guideline/ITMS codes, short advice) saved only on this computer, and known ones are counted. Later reports, choices, submission guides and review notes for every app on this computer show the relevant lessons as warnings or pre-submit checks (field learned_lessons); show them to the user. Nothing is sent off the machine, raw store messages are not kept in the shared lessons file, and learned lessons never override the default checks (for example they never mean "add ATT because of ads"). aaplug2_status lists the lessons; aaplug2_forget_lesson removes one if the user asks.
+7. Reported review results are learned automatically: an unknown rejection becomes a generalized lesson (store, guideline/ITMS codes, short advice from a fixed table) saved on this computer, and known ones are counted. To improve checks for every user, each real (non-demo) learned result also sends an anonymized event to https://aaplug.com/api/lessons containing only the store, guideline/ITMS/Play policy codes and a fixed advice id (field lesson.shared shows the exact payload); the store message, app name, bundle/package id, project id, e-mail and any free text are never sent. The aggregated feed from other users is fetched and cached on this computer. Reports, choices, submission guides and review notes show relevant lessons as warnings or pre-submit checks (field learned_lessons): source "local" = from the user's own reviews, "shared" = from other AA Plug 2 users' reviews; tell the user which is which. Lessons never become must-fix items and never override the default checks (for example they never mean "add ATT because of ads"). If aaplug.com cannot be reached, everything still works locally. aaplug2_status lists the local lessons; aaplug2_forget_lesson removes one if the user asks.
 App Store review rules the analysis follows (explain them in plain words when they come up):
 - Tracking, ATT, PrivacyInfo.xcprivacy, the App Privacy form and real behavior must match from the first submit. Default for apps with ads: no ATT prompt or NSUserTrackingUsageDescription, NSPrivacyTracking=false with no tracking domains, every ad request non-personalized (npa=1), App Privacy "No, we do not track". Never suggest adding ATT just because the app shows ads. Keep an already fully aligned tracking setup, but never leave a mixed one.
 - Core features should work without login (5.1.1(v)); third-party login on iOS needs Sign in with Apple; accounts need in-app and web deletion; the Support URL must show a contact method; ads are mentioned only in the privacy policy; no "free" or other brands' names in subtitle/keywords; review notes for user-supplied API keys say there is no IAP and the developer does not sell keys, with a review-only key the user attaches (never put real keys anywhere).
@@ -59560,19 +59650,28 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
       lang
     },
     annotations: { ...W, openWorldHint: true }
-  }, wrap(async (a) => ok((await connect(a, { allowPath })).report)));
+  }, wrap(async (a) => {
+    await ensureShared();
+    return ok((await connect(a, { allowPath })).report);
+  }));
   server.registerTool("aaplug2_get_report", {
     title: "Show the analysis report",
     description: "Show the analysis of a connected app again: launch readiness, every issue that can block store review with a plain-language reason, and what AA Plug 2 can fix.",
     inputSchema: { project_id: pid, lang },
-    annotations: RO
-  }, wrap(async (a) => ok(report(load(a.project_id, a.lang), a.lang))));
+    annotations: { ...RO, openWorldHint: true }
+  }, wrap(async (a) => {
+    await ensureShared();
+    return ok(report(load(a.project_id, a.lang), a.lang));
+  }));
   server.registerTool("aaplug2_get_decisions", {
     title: "List choices for the user",
     description: "List what the user needs to decide, each with ready-made options and a recommended one: code fixes to apply or skip, which stores, store title, short description, tone, category, store languages, icon, feature graphic, screenshots, privacy policy, Data safety / App Privacy answers, content rating answers and release track. Present these to the user as simple choices; the user does not type metadata. Use only_open=true to see just the undecided ones.",
     inputSchema: { project_id: pid, only_open: external_exports.boolean().optional().describe("Only undecided items (default true)"), lang },
-    annotations: RO
-  }, wrap(async (a) => ok(decisions(load(a.project_id, a.lang), a.lang, a.only_open !== false))));
+    annotations: { ...RO, openWorldHint: true }
+  }, wrap(async (a) => {
+    await ensureShared();
+    return ok(decisions(load(a.project_id, a.lang), a.lang, a.only_open !== false));
+  }));
   server.registerTool("aaplug2_decide", {
     title: "Record the user's choices",
     description: "Record choices the user made. Pass each as {key, value} using the key and an option value from aaplug2_get_decisions. Only send what the user actually picked or approved. Set accept_all_recommended=true only when the user explicitly said to accept all recommendations; it fills every undecided item with the recommended option. Changing a decision clears earlier submission approvals and generated files.",
@@ -59597,8 +59696,9 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
     title: "Make all store materials",
     description: "After every decision is made, create the full launch kit: store listing text per chosen language (English by default; Korean, Thai, Simplified Chinese or Hindi if picked), privacy policy and account-deletion pages, Data safety CSV and App Privacy answers, content-rating answers, PrivacyInfo.xcprivacy, code-fix diff for the approved fixes, icon, feature graphic and screenshots. Saves a folder and a ZIP and returns the texts so you can show them.",
     inputSchema: { project_id: pid, output_dir: external_exports.string().optional().describe("Optional folder to save into (local stdio use only). Default: ~/.aaplug2/projects/<id>/store-materials"), lang },
-    annotations: W
+    annotations: { ...W, openWorldHint: true }
   }, wrap(async (a) => {
+    await ensureShared();
     const r = await generate2(load(a.project_id, a.lang), a, { allowPath });
     const extra = inlineZip ? [{ type: "resource", resource: { uri: `aaplug2://${r.project_id}/store-materials.zip`, mimeType: "application/zip", blob: r._zipBase64 } }] : [];
     return ok(r, extra);
@@ -59607,8 +59707,11 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
     title: "Step-by-step console guide",
     description: "Plain-language, step-by-step guide for Google Play Console (store=play) or App Store Connect (store=apple) with the exact value to paste into every field. The final submit step stays locked until the user approves with aaplug2_approve_submission.",
     inputSchema: { project_id: pid, store, lang },
-    annotations: RO
-  }, wrap(async (a) => ok(guide(load(a.project_id, a.lang), a.store, a.lang))));
+    annotations: { ...RO, openWorldHint: true }
+  }, wrap(async (a) => {
+    await ensureShared();
+    return ok(guide(load(a.project_id, a.lang), a.store, a.lang));
+  }));
   server.registerTool("aaplug2_approve_submission", {
     title: "Record the user's approval to submit",
     description: `Call only after the user explicitly approves submitting this app to the given store in this conversation (for example "yes, submit it"). Unlocks the final step of the guide. This does NOT submit anything: the user presses the submit button in the store console themselves. Pass the user's own words in user_confirmation.`,
@@ -59617,9 +59720,9 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
   }, wrap(async (a) => ok(approve(load(a.project_id, a.lang), a.store, a.user_confirmation, a.lang))));
   server.registerTool("aaplug2_report_review", {
     title: "Report a store review result",
-    description: "Record what happened at the store, as told by the user: event=submitted (user pressed submit), rejected (include the store's rejection message in rejection_text to get a fix plan and a reply to the reviewer), resubmitted (after the user approved the fix and resubmitted), approved (the app is live). A rejection is learned automatically on this computer: a known reason returns the built-in fix plan, an unknown one is saved as a generalized lesson (no raw message stored in the shared lessons file) and returns a plan from it; an approval records that the learned checks were part of a later approval. Nothing is sent anywhere and AA Plug 2 never replies to the store. When every chosen store is live, AA Plug 2's job is finished.",
+    description: "Record what happened at the store, as told by the user: event=submitted (user pressed submit), rejected (include the store's rejection message in rejection_text to get a fix plan and a reply to the reviewer), resubmitted (after the user approved the fix and resubmitted), approved (the app is live). A rejection is learned automatically on this computer: a known reason returns the built-in fix plan, an unknown one is saved as a generalized lesson (no raw message stored in the lessons file) and returns a plan from it; an approval records that the learned checks were part of a later approval. For real (non-demo) projects an anonymized event (store, guideline/ITMS/policy codes, fixed advice id; never the message, app name or ids) is sent to aaplug.com in the background so every user gets better checks (lesson.shared shows it); a network failure never affects the result. AA Plug 2 never replies to the store. When every chosen store is live, AA Plug 2's job is finished.",
     inputSchema: { project_id: pid, store, event: external_exports.enum(["submitted", "rejected", "resubmitted", "approved"]), rejection_text: external_exports.string().optional(), lang },
-    annotations: W
+    annotations: { ...W, openWorldHint: true }
   }, wrap(async (a) => ok(review(load(a.project_id, a.lang), a, a.lang))));
   server.registerTool("aaplug2_status", {
     title: "Where am I?",

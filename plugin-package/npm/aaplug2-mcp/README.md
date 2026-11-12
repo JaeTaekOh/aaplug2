@@ -39,9 +39,9 @@ Ask your assistant: *"Use AA Plug 2 with the sample app."* or *"My app is finish
 ## Requirements and data
 
 - Node.js 20 or later. The server runs on the computer of the AI client (stdio).
-- App files are read only on that computer. Public GitHub repos are read through the GitHub public API. Nothing is uploaded anywhere else. No telemetry, no accounts.
+- App files are read only on that computer. Public GitHub repos are read through the GitHub public API. Apart from the anonymized review-lesson record below, nothing is uploaded. No telemetry, no accounts.
 - Progress is saved in `~/.aaplug2` (change it with `AAPLUG2_HOME`).
-- Review results you report are learned locally: an unknown rejection becomes a generalized lesson in `~/.aaplug2/lessons.json` (no original store message, app names or emails) and is reused as warnings, pre-submit checks and review-note lines for your later apps. Nothing is uploaded.
+- Review results you report are learned locally: an unknown rejection becomes a generalized lesson in `~/.aaplug2/lessons.json` (no original store message, app names or emails) and is reused as warnings, pre-submit checks and review-note lines for your later apps. To improve checks for everyone, an anonymized record (store, guideline / ITMS / Play policy codes, a fixed advice id; never the store message, app name or ids) is sent to `https://aaplug.com/api/lessons`, and other users' combined lessons are shown as "From other reviews" reminders. Sharing is always on; the demo never sends; the plugin works normally if the server is unreachable.
 - Graphics need the optional `@napi-rs/canvas` package. Run `npm install` in `mcp/` to turn graphics on. Without it, everything else still works.
 
 - Languages: tool texts come in English (default), Korean, Thai, Simplified Chinese and Hindi (`lang`: `en`, `ko`, `th`, `zh`, `hi`); without `lang` they are in English. Store listings default to English.

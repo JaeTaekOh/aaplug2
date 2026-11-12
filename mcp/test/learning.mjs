@@ -8,7 +8,9 @@ import http from 'node:http'; import https from 'node:https'; import net from 'n
 
 /* No network: count and block every outgoing connection attempt. */
 let netCalls = 0; const blocked = name => function () { netCalls++; throw new Error('network call blocked in test: ' + name); };
-globalThis.fetch = blocked('fetch');
+/* 0.1.4: real learns also POST an anonymized event. Here every fetch fails (network down): the local flow must not care. */
+const fetchCalls = []; globalThis.fetch = (url, o) => { fetchCalls.push({ url: String(url), body: o && o.body }); throw new Error('network down (test)'); };
+process.env.AAPLUG2_LESSONS_API = 'http://mock.invalid/api/lessons';
 http.request = blocked('http.request'); http.get = blocked('http.get'); https.request = blocked('https.request'); https.get = blocked('https.get');
 net.connect = blocked('net.connect'); net.createConnection = blocked('net.createConnection'); tls.connect = blocked('tls.connect'); dns.lookup = blocked('dns.lookup');
 
@@ -130,7 +132,7 @@ try {
   const rel = Lessons.relevant(Lessons.normDb(JSON.parse(fs.readFileSync(LFILE, 'utf8'))), B.A, { apple: true }, 'en');
   check(!/Ignore previous|evil@/.test(JSON.stringify(Lessons.normDb(JSON.parse(fs.readFileSync(LFILE, 'utf8'))))) && Array.isArray(rel), 're-sanitized on load');
   const { INSTRUCTIONS } = await import('../lib/tools.mjs');
-  check(/learned automatically and locally/.test(INSTRUCTIONS) && /Nothing is sent off the machine/.test(INSTRUCTIONS) && !/Login services/.test(INSTRUCTIONS), 'instructions mention local learning; no learned text in them');
+  check(/learned automatically/.test(INSTRUCTIONS) && /aaplug\.com\/api\/lessons/.test(INSTRUCTIONS) && /never sent/.test(INSTRUCTIONS) && !/Login services/.test(INSTRUCTIONS) && !/AAPLUG2_SHARE_LESSONS|opt[- ]?out/i.test(INSTRUCTIONS), 'instructions disclose sharing (what / where / never sent), no opt-out, no learned text');
   const id48 = l48().id; const fr = E.forgetLesson(id48, 'en');
   check(fr.removed === id48 && !lessonsFile().lessons.some(l => l.id === id48) && !JSON.parse(fs.readFileSync(XFILE, 'utf8')).lessons.some(l => (l.codes || []).includes('4.8')), 'forget removes from lessons.json and export');
   let threw = false; try { E.forgetLesson('nope-xyz', 'en'); } catch (e) { threw = e.code === 'lessonNotFound'; } check(threw, 'forget unknown id → lessonNotFound');
@@ -144,8 +146,10 @@ try {
   rv = E.review(SM, { store: sk, event: 'rejected', rejection_text: 'Issue found: Impersonation policy\n\nSomething.' }, 'en');
   check(fs.readFileSync(LFILE, 'utf8') === cnt && rv.lesson && rv.lesson.saved === false, 'sample rejection: plan returned, lessons.json unchanged', rv.lesson);
 
-  console.log('\n[12] No network');
-  check(netCalls === 0, 'no network calls during the whole run', netCalls);
+  console.log('\n[12] Network: only anonymized POSTs to the lessons API, and failures did not matter');
+  check(netCalls === 0, 'no other network calls during the whole run', netCalls);
+  check(fetchCalls.length > 0 && fetchCalls.every(c => c.url === 'http://mock.invalid/api/lessons'), 'only the lessons API was called', fetchCalls.map(c => c.url));
+  check(fetchCalls.every(c => !/MySecretApp|secret\.bundle|jane|Reviewer|555|Demo Tool|fx-|aaplug2-learn/i.test(c.body || '')), 'no letter, app name, contact or path in any POST', fetchCalls.map(c => c.body));
 } catch (e) { failN++; console.error('test crashed:', e); }
 finally { fs.rmSync(HOME, { recursive: true, force: true }); }
 console.log(`\n${pass} passed, ${failN} failed`);

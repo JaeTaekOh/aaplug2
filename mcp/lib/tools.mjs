@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as E from './engine.mjs';
 import { CFG } from './runtime.mjs';
+import { ensureShared } from './shared.mjs';
 
-export const VERSION = '0.1.3';
+export const VERSION = '0.1.4';
 
 export const INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
 How to use it:
@@ -14,7 +15,7 @@ How to use it:
 4. Call aaplug2_generate_store_materials, then aaplug2_submission_guide for each store and walk the user through the console steps.
 5. The final submit step stays locked until the user explicitly approves; then call aaplug2_approve_submission. AA Plug 2 never submits to any store itself: the user presses the submit button in Play Console / App Store Connect.
 6. When the user reports the review result, call aaplug2_report_review (submitted / rejected with the store's message / resubmitted / approved). When every chosen store is live, the job is done. In App Store Connect an "Information Needed" request also shows as Rejected; it asks for a reply, not always a new build. Never reply to Apple or Google yourself: draft the reply and let the user send it.
-7. Reported review results are learned automatically and locally: an unknown rejection becomes a generalized lesson (store, guideline/ITMS codes, short advice) saved only on this computer, and known ones are counted. Later reports, choices, submission guides and review notes for every app on this computer show the relevant lessons as warnings or pre-submit checks (field learned_lessons); show them to the user. Nothing is sent off the machine, raw store messages are not kept in the shared lessons file, and learned lessons never override the default checks (for example they never mean "add ATT because of ads"). aaplug2_status lists the lessons; aaplug2_forget_lesson removes one if the user asks.
+7. Reported review results are learned automatically: an unknown rejection becomes a generalized lesson (store, guideline/ITMS codes, short advice from a fixed table) saved on this computer, and known ones are counted. To improve checks for every user, each real (non-demo) learned result also sends an anonymized event to https://aaplug.com/api/lessons containing only the store, guideline/ITMS/Play policy codes and a fixed advice id (field lesson.shared shows the exact payload); the store message, app name, bundle/package id, project id, e-mail and any free text are never sent. The aggregated feed from other users is fetched and cached on this computer. Reports, choices, submission guides and review notes show relevant lessons as warnings or pre-submit checks (field learned_lessons): source "local" = from the user's own reviews, "shared" = from other AA Plug 2 users' reviews; tell the user which is which. Lessons never become must-fix items and never override the default checks (for example they never mean "add ATT because of ads"). If aaplug.com cannot be reached, everything still works locally. aaplug2_status lists the local lessons; aaplug2_forget_lesson removes one if the user asks.
 App Store review rules the analysis follows (explain them in plain words when they come up):
 - Tracking, ATT, PrivacyInfo.xcprivacy, the App Privacy form and real behavior must match from the first submit. Default for apps with ads: no ATT prompt or NSUserTrackingUsageDescription, NSPrivacyTracking=false with no tracking domains, every ad request non-personalized (npa=1), App Privacy "No, we do not track". Never suggest adding ATT just because the app shows ads. Keep an already fully aligned tracking setup, but never leave a mixed one.
 - Core features should work without login (5.1.1(v)); third-party login on iOS needs Sign in with Apple; accounts need in-app and web deletion; the Support URL must show a contact method; ads are mentioned only in the privacy policy; no "free" or other brands' names in subtitle/keywords; review notes for user-supplied API keys say there is no IAP and the developer does not sell keys, with a review-only key the user attaches (never put real keys anywhere).
@@ -44,19 +45,19 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
       lang
     },
     annotations: { ...W, openWorldHint: true }
-  }, wrap(async a => ok((await E.connect(a, { allowPath })).report)));
+  }, wrap(async a => { await ensureShared(); return ok((await E.connect(a, { allowPath })).report); }));
 
   server.registerTool('aaplug2_get_report', {
     title: 'Show the analysis report',
     description: 'Show the analysis of a connected app again: launch readiness, every issue that can block store review with a plain-language reason, and what AA Plug 2 can fix.',
-    inputSchema: { project_id: pid, lang }, annotations: RO
-  }, wrap(async a => ok(E.report(E.load(a.project_id, a.lang), a.lang))));
+    inputSchema: { project_id: pid, lang }, annotations: { ...RO, openWorldHint: true }
+  }, wrap(async a => { await ensureShared(); return ok(E.report(E.load(a.project_id, a.lang), a.lang)); }));
 
   server.registerTool('aaplug2_get_decisions', {
     title: 'List choices for the user',
     description: 'List what the user needs to decide, each with ready-made options and a recommended one: code fixes to apply or skip, which stores, store title, short description, tone, category, store languages, icon, feature graphic, screenshots, privacy policy, Data safety / App Privacy answers, content rating answers and release track. Present these to the user as simple choices; the user does not type metadata. Use only_open=true to see just the undecided ones.',
-    inputSchema: { project_id: pid, only_open: z.boolean().optional().describe('Only undecided items (default true)'), lang }, annotations: RO
-  }, wrap(async a => ok(E.decisions(E.load(a.project_id, a.lang), a.lang, a.only_open !== false))));
+    inputSchema: { project_id: pid, only_open: z.boolean().optional().describe('Only undecided items (default true)'), lang }, annotations: { ...RO, openWorldHint: true }
+  }, wrap(async a => { await ensureShared(); return ok(E.decisions(E.load(a.project_id, a.lang), a.lang, a.only_open !== false)); }));
 
   server.registerTool('aaplug2_decide', {
     title: 'Record the user\'s choices',
@@ -81,8 +82,9 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
   server.registerTool('aaplug2_generate_store_materials', {
     title: 'Make all store materials',
     description: 'After every decision is made, create the full launch kit: store listing text per chosen language (English by default; Korean, Thai, Simplified Chinese or Hindi if picked), privacy policy and account-deletion pages, Data safety CSV and App Privacy answers, content-rating answers, PrivacyInfo.xcprivacy, code-fix diff for the approved fixes, icon, feature graphic and screenshots. Saves a folder and a ZIP and returns the texts so you can show them.',
-    inputSchema: { project_id: pid, output_dir: z.string().optional().describe('Optional folder to save into (local stdio use only). Default: ~/.aaplug2/projects/<id>/store-materials'), lang }, annotations: W
+    inputSchema: { project_id: pid, output_dir: z.string().optional().describe('Optional folder to save into (local stdio use only). Default: ~/.aaplug2/projects/<id>/store-materials'), lang }, annotations: { ...W, openWorldHint: true }
   }, wrap(async a => {
+    await ensureShared();
     const r = await E.generate(E.load(a.project_id, a.lang), a, { allowPath });
     const extra = inlineZip ? [{ type: 'resource', resource: { uri: `aaplug2://${r.project_id}/store-materials.zip`, mimeType: 'application/zip', blob: r._zipBase64 } }] : [];
     return ok(r, extra);
@@ -91,8 +93,8 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
   server.registerTool('aaplug2_submission_guide', {
     title: 'Step-by-step console guide',
     description: 'Plain-language, step-by-step guide for Google Play Console (store=play) or App Store Connect (store=apple) with the exact value to paste into every field. The final submit step stays locked until the user approves with aaplug2_approve_submission.',
-    inputSchema: { project_id: pid, store, lang }, annotations: RO
-  }, wrap(async a => ok(E.guide(E.load(a.project_id, a.lang), a.store, a.lang))));
+    inputSchema: { project_id: pid, store, lang }, annotations: { ...RO, openWorldHint: true }
+  }, wrap(async a => { await ensureShared(); return ok(E.guide(E.load(a.project_id, a.lang), a.store, a.lang)); }));
 
   server.registerTool('aaplug2_approve_submission', {
     title: 'Record the user\'s approval to submit',
@@ -102,8 +104,8 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
 
   server.registerTool('aaplug2_report_review', {
     title: 'Report a store review result',
-    description: 'Record what happened at the store, as told by the user: event=submitted (user pressed submit), rejected (include the store\'s rejection message in rejection_text to get a fix plan and a reply to the reviewer), resubmitted (after the user approved the fix and resubmitted), approved (the app is live). A rejection is learned automatically on this computer: a known reason returns the built-in fix plan, an unknown one is saved as a generalized lesson (no raw message stored in the shared lessons file) and returns a plan from it; an approval records that the learned checks were part of a later approval. Nothing is sent anywhere and AA Plug 2 never replies to the store. When every chosen store is live, AA Plug 2\'s job is finished.',
-    inputSchema: { project_id: pid, store, event: z.enum(['submitted', 'rejected', 'resubmitted', 'approved']), rejection_text: z.string().optional(), lang }, annotations: W
+    description: 'Record what happened at the store, as told by the user: event=submitted (user pressed submit), rejected (include the store\'s rejection message in rejection_text to get a fix plan and a reply to the reviewer), resubmitted (after the user approved the fix and resubmitted), approved (the app is live). A rejection is learned automatically on this computer: a known reason returns the built-in fix plan, an unknown one is saved as a generalized lesson (no raw message stored in the lessons file) and returns a plan from it; an approval records that the learned checks were part of a later approval. For real (non-demo) projects an anonymized event (store, guideline/ITMS/policy codes, fixed advice id; never the message, app name or ids) is sent to aaplug.com in the background so every user gets better checks (lesson.shared shows it); a network failure never affects the result. AA Plug 2 never replies to the store. When every chosen store is live, AA Plug 2\'s job is finished.',
+    inputSchema: { project_id: pid, store, event: z.enum(['submitted', 'rejected', 'resubmitted', 'approved']), rejection_text: z.string().optional(), lang }, annotations: { ...W, openWorldHint: true }
   }, wrap(async a => ok(E.review(E.load(a.project_id, a.lang), a, a.lang))));
 
   server.registerTool('aaplug2_status', {

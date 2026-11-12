@@ -4,9 +4,9 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as E from './engine.mjs';
 import { CFG } from './runtime.mjs';
 
-export const VERSION = '0.1.0';
+export const VERSION = '0.1.1';
 
-export const INSTRUCTIONS = `AA Plug 2 (by ${CFG.operator}) helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
+export const INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
 How to use it:
 1. When the user says their app is finished or asks for help publishing, call aaplug2_connect_app ONCE with a public GitHub URL, a local folder/ZIP path, or source=sample for a demo. Never ask the user for tokens, passwords or store metadata forms.
 2. Show the analysis in plain words, then call aaplug2_get_decisions and present each decision's options to the user. The user only picks, approves or rejects. Show the recommended option first.
@@ -14,9 +14,9 @@ How to use it:
 4. Call aaplug2_generate_store_materials, then aaplug2_submission_guide for each store and walk the user through the console steps.
 5. The final submit step stays locked until the user explicitly approves; then call aaplug2_approve_submission. AA Plug 2 never submits to any store itself: the user presses the submit button in Play Console / App Store Connect.
 6. When the user reports the review result, call aaplug2_report_review (submitted / rejected with the store's message / resubmitted / approved). When every chosen store is live, the job is done.
-Reply to the user in their language. Tool texts come in ko (default), en or th via the lang argument. Free to use; feedback: ${CFG.feedbackEmail}.`;
+Reply to the user in their language. Tool texts come in five languages via the lang argument: en (English, the default), ko (Korean), th (Thai), zh (Simplified Chinese) and hi (Hindi). Pass the user's language as lang; when lang is omitted, texts are in English. Store listings for the user's app default to English (the recommended choice); Korean, Thai, Chinese and Hindi listings can be added if the user picks them. Free to use; feedback: ${CFG.feedbackUrl}.`;
 
-const lang = z.enum(['ko', 'en', 'th']).optional().describe('Language for texts in the result: ko (default), en, th. Use the user\'s language.');
+const lang = z.enum(['en', 'ko', 'th', 'zh', 'hi']).optional().describe('Language for texts in the result: en (default), ko, th, zh (Simplified Chinese), hi (Hindi). Pass the user\'s language.');
 const pid = z.string().describe('project_id returned by aaplug2_connect_app');
 const store = z.enum(['play', 'apple']).describe('play = Google Play, apple = App Store');
 
@@ -59,7 +59,7 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
     description: 'Record choices the user made. Pass each as {key, value} using the key and an option value from aaplug2_get_decisions. Only send what the user actually picked or approved. Set accept_all_recommended=true only when the user explicitly said to accept all recommendations; it fills every undecided item with the recommended option. Changing a decision clears earlier submission approvals and generated files.',
     inputSchema: {
       project_id: pid,
-      choices: z.array(z.object({ key: z.string(), value: z.union([z.string(), z.number(), z.array(z.string())]) })).optional().describe('e.g. [{"key":"title","value":1},{"key":"fix:targetSdk","value":"apply"},{"key":"langs","value":["ko","en"]}]'),
+      choices: z.array(z.object({ key: z.string(), value: z.union([z.string(), z.number(), z.array(z.string())]) })).optional().describe('e.g. [{"key":"title","value":1},{"key":"fix:targetSdk","value":"apply"},{"key":"langs","value":["en","ko"]}]'),
       accept_all_recommended: z.boolean().optional(),
       lang
     }, annotations: W
@@ -76,7 +76,7 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
 
   server.registerTool('aaplug2_generate_store_materials', {
     title: 'Make all store materials',
-    description: 'After every decision is made, create the full launch kit: store listing text per chosen language (KO/EN/TH), privacy policy and account-deletion pages, Data safety CSV and App Privacy answers, content-rating answers, PrivacyInfo.xcprivacy, code-fix diff for the approved fixes, icon, feature graphic and screenshots. Saves a folder and a ZIP and returns the texts so you can show them.',
+    description: 'After every decision is made, create the full launch kit: store listing text per chosen language (English by default; Korean, Thai, Simplified Chinese or Hindi if picked), privacy policy and account-deletion pages, Data safety CSV and App Privacy answers, content-rating answers, PrivacyInfo.xcprivacy, code-fix diff for the approved fixes, icon, feature graphic and screenshots. Saves a folder and a ZIP and returns the texts so you can show them.',
     inputSchema: { project_id: pid, output_dir: z.string().optional().describe('Optional folder to save into (local stdio use only). Default: ~/.aaplug2/projects/<id>/store-materials'), lang }, annotations: W
   }, wrap(async a => {
     const r = await E.generate(E.load(a.project_id, a.lang), a, { allowPath });

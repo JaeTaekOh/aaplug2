@@ -1,6 +1,7 @@
-# AA Plug 2 MCP 서버
+# AA Plug 2 MCP server
 
-- 실행: `npm start` (stdio) · `npm run http` (http://127.0.0.1:5181/mcp) · `npm test`
-- 한 파일 번들: `npm run bundle` → `dist/aaplug2-mcp.mjs`
-- 연결 방법: `../PLUGIN.md` · 빌드 보고서: `../PLUGIN-BUILD.md`
-- 분석·생성 로직은 웹 앱의 `../js/*.js` 를 그대로 불러 씁니다 (`lib/runtime.mjs`).
+- Run: `npm start` (stdio) · `npm run http` (http://127.0.0.1:5181/mcp) · `npm test`
+- Single-file bundle: `npm run bundle` → `dist/aaplug2-mcp.mjs`
+- How to connect: `../PLUGIN.md`
+- The analysis and generation logic loads the web app's `../js/*.js` as-is (`lib/runtime.mjs`).
+- Languages: the optional `lang` argument accepts `en` (default), `ko`, `th`, `zh` (Simplified Chinese) and `hi` (Hindi). Omitted → English. Store listings default to English; ko/th/zh/hi listings are optional.

@@ -69,7 +69,7 @@ if (canvasLib) {
   g.document = { createElement() { throw new Error('graphics unavailable'); }, fonts: { load: async () => [] } };
 }
 
-const ORDER = ['config.js', 'i18n-ko.js', 'i18n-en.js', 'i18n-th.js', 'i18n.js', 'zip.js', 'sample-data.js', 'sources.js', 'analyzer.js', 'generator.js', 'graphics.js', 'flow.js'];
+const ORDER = ['config.js', 'i18n-en.js', 'i18n-ko.js', 'i18n-th.js', 'i18n-zh.js', 'i18n-hi.js', 'i18n.js', 'zip.js', 'sample-data.js', 'sources.js', 'analyzer.js', 'generator.js', 'graphics.js', 'flow.js'];
 for (const f of ORDER) {
   const file = path.join(JS, f);
   vm.runInThisContext(fs.readFileSync(file, 'utf8'), { filename: file });

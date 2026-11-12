@@ -5,13 +5,14 @@ description: Publish an app the user already built (Android and/or iOS) to Googl
 
 # Launch an app with AA Plug 2
 
-AA Plug 2 (by MOTOR AA) takes an app the user already built and gets it to "launched" on Google Play and/or the App Store. It stops at launch. It is free and never needs API keys, tokens, or passwords.
+AA Plug 2 takes an app the user already built and gets it to "launched" on Google Play and/or the App Store. It stops at launch. It is free and never needs API keys, tokens, or passwords.
 
 ## Rules
 - The user does not fill forms. Connect the app once, then only show choices. The user picks, approves, or rejects.
 - Call `aaplug2_decide` only with options the user actually chose. Use `accept_all_recommended` only when the user says to accept all recommendations.
 - Never say the app was submitted. AA Plug 2 never submits. The user presses the submit button in Play Console or App Store Connect after approving with `aaplug2_approve_submission`.
-- Reply in the user's language. Pass `lang` as `ko`, `en`, or `th`.
+- Tool texts come in five languages: `en` (English, the default), `ko` (Korean), `th` (Thai), `zh` (Simplified Chinese) and `hi` (Hindi). Pass the user's language as `lang` on every call; if you leave it out, texts are in English. Reply to the user in their language.
+- Store listings default to English (`langs: ["en"]`, the recommended choice). Korean (`ko`), Thai (`th`), Simplified Chinese (`zh`) or Hindi (`hi`) listings for the user's app can be added when the user picks them.
 
 ## Flow
 1. `aaplug2_connect_app`: use a public GitHub URL (`source: "github"`), a folder or .zip on the computer running the server (`source: "path"`), or the demo (`source: "sample"`). Keep the returned `project_id`.

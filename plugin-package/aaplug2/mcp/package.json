@@ -1,8 +1,9 @@
 {
   "name": "aaplug2-mcp-runtime",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Optional: run 'npm install' here to turn on store graphics (icon, feature graphic, screenshots).",
+  "license": "MIT",
   "optionalDependencies": { "@napi-rs/canvas": "^1.1.0" }
 }

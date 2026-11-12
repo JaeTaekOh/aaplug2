@@ -17,10 +17,13 @@
 }
 html[lang="en"] { --font: "IBM Plex Sans", "Pretendard Variable", system-ui, sans-serif; }
 html[lang="th"] { --font: "IBM Plex Sans Thai", "IBM Plex Sans", "Pretendard Variable", system-ui, sans-serif; }
+html[lang="zh"] { --font: "IBM Plex Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif; }
+html[lang="hi"] { --font: "IBM Plex Sans", "Noto Sans Devanagari", "Nirmala UI", "Kohinoor Devanagari", "Mangal", system-ui, sans-serif; }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-padding-top: 90px; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--font); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; }
 html[lang="th"] body { line-height: 1.7; }
+html[lang="hi"] body { line-height: 1.75; }
 h1, h2, h3 { line-height: 1.25; margin: 0 0 .4em; letter-spacing: -.01em; }
 h1 { font-size: clamp(26px, 4.2vw, 38px); font-weight: 700; }
 h2 { font-size: 20px; font-weight: 650; }

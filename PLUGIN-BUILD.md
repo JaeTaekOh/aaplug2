@@ -1,5 +1,7 @@
 # AA Plug 2 — MCP 서버·플러그인 빌드 보고서
 
+> **Update 0.1.1 (2026-11-12):** Default language is now English, and AA Plug 2 supports five languages: English (`en`, default), Korean (`ko`), Thai (`th`), Simplified Chinese (`zh`) and Hindi (`hi`). The web app opens in English (no browser/device-language detection); the header globe button switches language on every screen and the manual pick is saved (`localStorage` key `aaplug2.uiLang`). New `js/i18n-zh.js` and `js/i18n-hi.js` (436 keys each, same as en/ko/th); zh/hi MCP messages and zh/hi store-listing, policy, rating and guide text in `generator.js` / `flow.js`. MCP `lang` accepts `en|ko|th|zh|hi`, default `en`; `normLang` maps `zh-TW`/`zh-CN`/`zh-Hans`/`zh-Hant` → `zh` and anything unknown → `en`. Store-listing languages default to and recommend `["en"]`; ko/th/zh/hi listings stay optional. zh/hi UI text uses system fonts (PingFang SC / Microsoft YaHei / Noto Sans CJK SC; Noto Sans Devanagari / Nirmala UI); no new font files are bundled. Statements below about Korean being the default, device-language detection or KO/EN/TH only describe 0.1.0 and no longer apply.
+
 작성: 2026-11-12 (Asia/Bangkok, UTC+7)
 위치: `/workspace/aaplug2` (이 컴퓨터에만 있음)
 하지 않은 일: npm 공개, GitHub 공개, 마켓플레이스 제출, motoraa.com 변경
@@ -14,7 +16,7 @@
 | `mcp/lib/runtime.mjs` | 웹 앱의 `js/*.js`(분석기·생성기·그래픽·흐름)를 Node에서 그대로 불러오는 얇은 실행 환경. linkedom이 DOMParser, @napi-rs/canvas가 canvas 역할 |
 | `mcp/lib/engine.mjs` | 흐름 엔진: 연결 → 보고 → 결정 → 그래픽 → 자료 → 안내 → 승인 → 심사 → 출시 완료. 상태는 `~/.aaplug2/projects/<id>/state.json` |
 | `mcp/lib/tools.mjs` | 도구 10개, 프롬프트 1개, 서버 instructions |
-| `mcp/lib/messages.mjs` | MCP용 안내 문구 ko/en/th |
+| `mcp/lib/messages.mjs` | MCP용 안내 문구 en(기본)/ko/th/zh/hi |
 | `mcp/test/run.mjs` | 자동 테스트 |
 | `mcp/fonts/` | 그래픽용 Pretendard OTF(OFL). 웹 폰트는 잘게 나뉜 파일이라 서버에서는 한글이 깨져서 따로 둠 |
 | `mcp/dist/aaplug2-mcp.mjs` | 의존성을 한 파일로 묶은 서버(`npm run bundle`). canvas만 선택 의존성 |
@@ -102,12 +104,12 @@ cd .. && npm run plugin:build  # plugin-package/ 다시 만들기
 3. **실행 방식:** 카탈로그의 Firebase 플러그인은 `npx -y firebase-tools@latest mcp` 명령형이고, 이 Grok Bot에서 동작 중입니다.
    - 우리도 npm에 `aaplug2-mcp`를 공개하고 `mcp.json`을 `{"command":"npx","args":["-y","aaplug2-mcp"]}`로 바꾸는 방식이 가장 확실합니다.
    - 지금 `mcp.json`은 `${CURSOR_PLUGIN_ROOT}/mcp/dist/aaplug2-mcp.mjs`를 씁니다. 이 변수를 Cursor는 펼쳐 주지만, Grok Bot이 펼쳐 주는지는 문서로 확인하지 못했습니다.
-4. **제출 전에 Jae Taek 님이 정할 것:**
+4. **제출 전에 정할 것:**
    - npm 계정으로 `aaplug2-mcp` 공개(무료)
-   - 공개 GitHub 저장소(MOTOR AA 조직)
+   - 공개 GitHub 저장소 (현재: https://github.com/JaeTaekOh/aaplug2)
    - 라이선스(예: MIT. Claude 플러그인 디렉터리는 필수)
    - 조직 핸들
-   - 연락 이메일
+   - 연락처 (현재: https://aaplug.com, 이메일 없음)
    - Grok Bot 앱 안에서 1-1 방식으로 직접 테스트(양식의 필수 확인란)
 5. **모르는 것:** 검토 기준과 기간, 양식의 전체 칸, `${CURSOR_PLUGIN_ROOT}` 지원 여부, 원격 HTTPS 서버만 받는지 여부(명령형인 Firebase가 있으니 명령형도 되는 것으로 보이지만 제3자 플러그인 기준은 미확인).
 
@@ -132,7 +134,7 @@ cd .. && npm run plugin:build  # plugin-package/ 다시 만들기
 - 비공개 GitHub 저장소는 지원하지 않습니다(토큰을 받지 않는 원칙). 로컬 폴더나 ZIP으로 연결하면 됩니다.
 - GitHub 비로그인 API 한도는 시간당 60회입니다.
 
-## 6. 남은 일 (Jae Taek 님 결정 대기)
+## 6. 남은 일 (소유자 결정 대기)
 
 - npm 공개 → `mcp.json`을 npx 방식으로 바꾸기 → 공개 GitHub 저장소 → Grok Bot 앱 안에서 테스트 → 마켓플레이스 제출(한 창구로 한 번만)
 - 라이선스와 조직 핸들 정하기

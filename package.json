@@ -1,8 +1,8 @@
 {
   "name": "aa-plug-2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
-  "description": "AA Plug 2 — 앱 출시 완료까지 결정만 하면 되는 무료 웹 도구 (MOTOR AA)",
+  "description": "AA Plug 2 — a free web tool that takes your app to launch; you just decide",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",

@@ -1,13 +1,13 @@
 # AA Plug 2
 
 **From "my app is done" to "launched" on Google Play and the App Store. You only pick and approve.**
-By MOTOR AA · free · no API keys · feedback: motoraathailand@gmail.com
+Free · no API keys · English (default) + 한국어 · ภาษาไทย · 中文 · हिन्दी · feedback: https://aaplug.com
 
 AA Plug 2 is an MCP server (plus a skill) for people who built an Android and/or iOS app with AI. Connect the app once, and your AI assistant can:
 
 - find what blocks store review (target SDK, permissions, missing privacy policy, account deletion, iOS privacy manifest, empty permission texts, ads ID, closed-test rule…)
 - prepare code fixes as a diff, so you choose to apply or skip each one
-- write store listings in Korean, English and Thai (title, short and full description, App Store subtitle, keywords, promo text)
+- write store listings (title, short and full description, App Store subtitle, keywords, promo text) in English by default; Korean, Thai, Simplified Chinese or Hindi listings for your app can be added if you pick them
 - write a privacy policy and an account-deletion page that match what the app really uses
 - answer Google Play Data safety, Apple App Privacy and the IARC content-rating questionnaire
 - make store graphics: 512×512 icon, 1024×500 feature graphic, 1080×1920 screenshots
@@ -42,4 +42,6 @@ Ask your assistant: *"Use AA Plug 2 with the sample app."* or *"My app is finish
 - Progress is saved in `~/.aaplug2` (change it with `AAPLUG2_HOME`).
 - Graphics need the optional `@napi-rs/canvas` package. Run `npm install` in `mcp/` to turn graphics on. Without it, everything else still works.
 
-See PRIVACY.md.
+- Languages: tool texts come in English (default), Korean, Thai, Simplified Chinese and Hindi (`lang`: `en`, `ko`, `th`, `zh`, `hi`); without `lang` they are in English. Store listings default to English.
+
+See PRIVACY.md. Source: https://github.com/JaeTaekOh/aaplug2 · MIT License (see LICENSE).

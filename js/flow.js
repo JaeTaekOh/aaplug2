@@ -3,7 +3,9 @@
 (function () {
   'use strict';
   const G = window.AAPGen;
-  const LANGS = ['ko', 'en', 'th'];
+  /* Store-listing languages for the user's app: all five are available; English is the default and the recommendation. */
+  const LANGS = ['en', 'ko', 'th', 'zh', 'hi'];
+  const DEFAULT_LANGS = ['en'];
 
   const issueKey = i => 'fix:' + i.id + (i.vars && i.vars.key ? ':' + i.vars.key : '');
   function decisions(A) {
@@ -20,7 +22,7 @@
   }
   function recValue(d) {
     if (d.opts) return d.opts[d.rec];
-    if (d.key === 'langs') return ['ko', 'en', 'th'];
+    if (d.key === 'langs') return DEFAULT_LANGS.slice();
     if (['shots', 'privacy', 'safety', 'rating'].includes(d.key)) return 'ok';
     return d.rec;
   }
@@ -31,7 +33,7 @@
   function chosen(A, dec) {
     const d = dec || {}, tone = d.tone || 'friendly', cache = {};
     const li = l => (cache[l] = cache[l] || G.listing(A, l, tone));
-    const langs = (d.langs && d.langs.length ? d.langs : LANGS.slice());
+    const langs = (d.langs && d.langs.length ? d.langs : DEFAULT_LANGS.slice());
     return {
       langs, listing: li,
       title: l => { const x = li(l).titles; return x[Math.min(d.title || 0, x.length - 1)]; },
@@ -47,17 +49,17 @@
     const closed = dec.track !== 'production';
     if (store === 'play') return [
       { id: 'p-account', fields: [] },
-      { id: 'p-create', fields: [[t('f.name'), C.title(l0)], [t('f.defaultLang'), { ko: '한국어 – ko-KR', en: 'English (United States) – en-US', th: 'ภาษาไทย – th' }[l0]], [t('f.appOrGame'), A.categories[0] === 'games' ? t('f.game') : t('f.app')], [t('f.freePaid'), t('f.free')]] },
+      { id: 'p-create', fields: [[t('f.name'), C.title(l0)], [t('f.defaultLang'), { ko: '한국어 – ko-KR', en: 'English (United States) – en-US', th: 'ภาษาไทย – th', zh: '中文（简体）– zh-CN', hi: 'हिन्दी – hi-IN' }[l0]], [t('f.appOrGame'), A.categories[0] === 'games' ? t('f.game') : t('f.app')], [t('f.freePaid'), t('f.free')]] },
       { id: 'p-content', fields: [[t('f.privacyUrl'), 'https://<your-site>/privacy-policy-' + l0 + '.html'], [t('f.ads'), A.sdk.ads ? t('yes') : t('no')], [t('f.access'), A.sdk.auth ? t('f.accessOptional') : t('f.accessAll')], [t('f.audience'), '18+'], [t('f.rating'), G.rating(A, L).result.play], [t('f.dataSafety'), 'data-safety.csv'], ...(A.sdk.auth ? [[t('f.deletionUrl'), 'https://<your-site>/account-deletion-' + l0 + '.html']] : []), ...(A.sdk.ads ? [[t('f.adId'), t('f.adIdYes')]] : []), ...(A.categories[0] === 'finance' ? [[t('f.finance'), t('f.financeNone')]] : [])] },
       { id: 'p-listing', fields: C.langs.flatMap(l => [[`${t('f.title')} (${l})`, C.title(l)], [`${t('f.short')} (${l})`, C.short(l)], [`${t('f.full')} (${l})`, C.full(l)]]).concat([[t('f.category'), C.cat.play], [t('f.email'), A.developer.email || '']]) },
       { id: 'p-build', fields: [['applicationId', A.pkg || ''], ['versionName / versionCode', `${A.version} / ${(A.android && A.android.versionCode) || 1}`], ['targetSdk', '36']] },
       closed ? { id: 'p-closed', fields: [[t('f.testers'), '12+'], [t('f.days'), '14']] } : null,
-      { id: 'p-submit', final: true, fields: [[t('f.releaseNotes') + ` (${l0})`, { ko: '첫 출시입니다. 잘 부탁드려요!', en: 'First release. Thanks for trying it!', th: 'เปิดตัวครั้งแรก ขอบคุณที่ลองใช้!' }[l0]], [t('f.countries'), t('f.allCountries')]] }
+      { id: 'p-submit', final: true, fields: [[t('f.releaseNotes') + ` (${l0})`, { ko: '첫 출시입니다. 잘 부탁드려요!', en: 'First release. Thanks for trying it!', th: 'เปิดตัวครั้งแรก ขอบคุณที่ลองใช้!', zh: '首次发布，感谢试用！', hi: 'पहली रिलीज़। आज़माने के लिए धन्यवाद!' }[l0]], [t('f.countries'), t('f.allCountries')]] }
     ].filter(Boolean);
     const ios = C.ios(l0);
     return [
       { id: 'a-account', fields: [] },
-      { id: 'a-create', fields: [[t('f.name'), C.title(l0)], [t('f.primaryLang'), { ko: 'Korean', en: 'English (U.S.)', th: 'Thai' }[l0]], ['Bundle ID', (A.ios && A.ios.bundleId) || A.pkg || ''], ['SKU', (A.pkg || 'app').replace(/\./g, '-') + '-001']] },
+      { id: 'a-create', fields: [[t('f.name'), C.title(l0)], [t('f.primaryLang'), { ko: 'Korean', en: 'English (U.S.)', th: 'Thai', zh: 'Simplified Chinese', hi: 'Hindi' }[l0]], ['Bundle ID', (A.ios && A.ios.bundleId) || A.pkg || ''], ['SKU', (A.pkg || 'app').replace(/\./g, '-') + '-001']] },
       { id: 'a-info', fields: [[t('f.category'), C.cat.apple], [t('f.ageRating'), '4+'], [t('f.price'), t('f.free')], [t('f.privacyUrl'), 'https://<your-site>/privacy-policy-' + l0 + '.html']] },
       { id: 'a-privacy', fields: G.dataSafety(A, L).rows.map(r => [r.appleType, `${r.purposes} · ${r.linked ? t('ds.linked') : t('ds.notLinked')}${r.tracking ? '' : ''}`]).concat([[t('f.tracking'), dec['fix:att'] === 'att' ? t('yes') : t('no')]]) },
       { id: 'a-version', fields: [[t('f.subtitle'), ios.subtitle], [t('f.promo'), ios.promo], [t('f.keywords'), ios.keywords], [t('f.desc'), C.full(l0)], [t('f.supportUrl'), 'https://<your-site>/'], [t('f.shots'), '6.9" iPhone · 1290×2796']] },
@@ -92,5 +94,5 @@
   }
   const slugOf = A => (A.pkg || A.appName).replace(/[^\w.-]+/g, '-');
 
-  window.AAPFlow = { LANGS, issueKey, decisions, recValue, defaultStores, stores, chosen, guide, ratingTxt, appliedFixes, patchText, textFiles, slugOf };
+  window.AAPFlow = { LANGS, DEFAULT_LANGS, issueKey, decisions, recValue, defaultStores, stores, chosen, guide, ratingTxt, appliedFixes, patchText, textFiles, slugOf };
 })();

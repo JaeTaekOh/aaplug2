@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* AA Plug 2 MCP 서버 (by MOTOR AA)
+/* AA Plug 2 MCP 서버
    stdio (기본):   node server.mjs
    HTTP (로컬):    node server.mjs --http [--port 5181] [--host 127.0.0.1]   →  http://127.0.0.1:5181/mcp  (Streamable HTTP)
    stdout 에는 MCP 메시지만 쓴다. 로그는 stderr. */
@@ -36,7 +36,7 @@ if (!argv.includes('--http')) {
     if (allowedHosts.length && !allowedHosts.includes(req.headers.host)) return send(res, 403, { error: 'host not allowed' });
     const origin = req.headers.origin;
     if (origin && !allowedOrigins.includes(origin)) return send(res, 403, { jsonrpc: '2.0', error: { code: -32000, message: 'origin not allowed' }, id: null });
-    if (url.pathname === '/' && req.method === 'GET') return send(res, 200, { name: 'AA Plug 2 MCP', by: 'MOTOR AA', version: VERSION, endpoint: '/mcp', transport: 'streamable-http' });
+    if (url.pathname === '/' && req.method === 'GET') return send(res, 200, { name: 'AA Plug 2 MCP', version: VERSION, endpoint: '/mcp', transport: 'streamable-http' });
     if (url.pathname !== '/mcp') return send(res, 404, { error: 'not found' });
     if (req.method !== 'POST') return send(res, 405, { jsonrpc: '2.0', error: { code: -32000, message: 'Method not allowed (stateless server: POST only)' }, id: null });
     let body = ''; for await (const c of req) { body += c; if (body.length > 2e6) return send(res, 413, { error: 'too large' }); }

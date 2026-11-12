@@ -1,5 +1,7 @@
 # AA Plug 2 — 1차 빌드 보고서
 
+> **Update 0.1.1 (2026-11-12):** Default language is now English, and AA Plug 2 supports five languages: English (`en`, default), Korean (`ko`), Thai (`th`), Simplified Chinese (`zh`) and Hindi (`hi`). The web app opens in English (no browser/device-language detection); the header globe button switches language on every screen and the manual pick is saved (`localStorage` key `aaplug2.uiLang`). New `js/i18n-zh.js` and `js/i18n-hi.js` (436 keys each, same as en/ko/th); zh/hi MCP messages and zh/hi store-listing, policy, rating and guide text in `generator.js` / `flow.js`. MCP `lang` accepts `en|ko|th|zh|hi`, default `en`; `normLang` maps `zh-TW`/`zh-CN`/`zh-Hans`/`zh-Hant` → `zh` and anything unknown → `en`. Store-listing languages default to and recommend `["en"]`; ko/th/zh/hi listings stay optional. zh/hi UI text uses system fonts (PingFang SC / Microsoft YaHei / Noto Sans CJK SC; Noto Sans Devanagari / Nirmala UI); no new font files are bundled. Statements below about Korean being the default, device-language detection or KO/EN/TH only describe 0.1.0 and no longer apply.
+
 작성: 2026-11-12 (Asia/Bangkok, UTC+7)
 위치: `/workspace/aaplug2` (이 컴퓨터에만 있음. motoraa.com·GitHub에 배포하지 않았고, 기존 motoraa.com 사이트는 건드리지 않음)
 
@@ -23,7 +25,7 @@ AI로 앱을 만든 사람이 **앱 연결 한 번 → 고르기·승인·거절
   - 전부 한 번에 받는 ZIP(샘플 기준 22개 파일, 예시: `sample-output/aaplug2-com.sample.snapledger-ko.zip`)
 - **승인 게이트**: 제출 직전 승인 창. 승인 전에는 마지막 단계가 잠겨 있음. 자동 제출 없음.
 - **언어**: 한국어 우선, KO/EN/TH 전환. 기기 언어 자동 감지, 사용자가 고른 언어가 우선. 지원하지 않는 기기 언어면 한국어.
-- **운영 표시**: "MOTOR AA"만 표시, 의견 메일 motoraathailand@gmail.com.
+- **운영 표시**: 0.1.1부터 화면·패키지에 운영자 이름을 표시하지 않음. 의견·문의는 https://aaplug.com.
 - **광고**: 실제 광고 네트워크 없음. "광고 자리" 라벨이 붙은 자리 표시만 있음(`js/config.js`의 `showAdSlotPlaceholder`로 끄기 가능).
 - **디자인**: 잉크(#15171a) + 시그널 라임(#c8f03c), 셀프 호스팅 폰트(Pretendard, IBM Plex Sans/Thai), 모든 버튼에 아이콘, AA 공통 모션, 모바일 대응(하단 고정 진행 버튼).
 
@@ -76,7 +78,7 @@ npm start
 
 ## 6. AA 공통 규칙과 맞춘 점 / 다른 점
 
-- 공통 테마 토큰·모션·셀프 호스팅 폰트·버튼 아이콘·운영자 "MOTOR AA" 표기·기기 언어 감지 규칙을 따름. 브랜드 색(시그널 라임)은 이 도구용으로 새로 정함. theme-base.md 색 표는 수정하지 않음.
+- 공통 테마 토큰·모션·셀프 호스팅 폰트·버튼 아이콘·기기 언어 감지 규칙을 따름. 브랜드 색(시그널 라임)은 이 도구용으로 새로 정함. theme-base.md 색 표는 수정하지 않음.
 - 공통 규칙은 5개 언어(th/en/ko/zh/hi)를 권하지만 이번 요청대로 KO/EN/TH 3개만. zh/hi는 나중에.
 - 공통 규칙의 "허브/소개/가입/테스터 페이지에 광고 언급 금지"는 이 도구 화면에 해당하지 않는다고 보고 광고 자리 표시를 넣음. 문제가 되면 `showAdSlotPlaceholder: false`로 바로 숨길 수 있음.
 - AA-common-rules.md는 수정하지 않음.

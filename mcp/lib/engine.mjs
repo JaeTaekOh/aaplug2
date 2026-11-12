@@ -7,11 +7,12 @@ import crypto from 'node:crypto';
 import { Analyzer, Gen, Gfx, Flow, Sources, Zip, CFG, tr, hasGraphics } from './runtime.mjs';
 import { msg } from './messages.mjs';
 
-export const LANGS = ['ko', 'en', 'th'];
+/* Texts come in five languages; English is the default whenever lang is omitted or unknown. */
+export const LANGS = ['en', 'ko', 'th', 'zh', 'hi'];
 export const HOME = process.env.AAPLUG2_HOME || path.join(os.homedir(), '.aaplug2');
 const PROJ = path.join(HOME, 'projects');
-const envLang = LANGS.includes(process.env.AAPLUG2_LANG) ? process.env.AAPLUG2_LANG : 'ko';
-export const normLang = l => (LANGS.includes(l) ? l : envLang);
+/* 'ko' → ko, 'zh-TW' / 'zh-CN' / 'zh-Hans' / 'zh-Hant' → zh, 'th_TH' → th; anything else → en */
+export const normLang = l => { const p = String(l || '').trim().toLowerCase().split(/[-_]/)[0]; return LANGS.includes(p) ? p : 'en'; };
 const STORE_NAME = { play: 'Google Play', apple: 'App Store' };
 const SKIP_DIRS = new Set(['node_modules', '.git', 'build', '.gradle', 'Pods', 'DerivedData', '.dart_tool', '.idea', 'intermediates', 'generated', '.expo', '.next', 'dist', '.cxx']);
 
@@ -108,7 +109,8 @@ function optionList(st, d, L) {
     case 'short': return C.listing(L).shorts.map((v, k) => ({ value: k, label: v, detail: `${v.length}/80` }));
     case 'tone': return ['friendly', 'pro'].map(o => ({ value: o, label: t('tone.' + o), detail: Gen.listing(A, L, o).full.split('\n')[0].slice(0, 120) }));
     case 'category': return A.categories.map((c, k) => ({ value: k, label: Gen.CAT[c][L][1], detail: `Play: ${Gen.CAT[c].play} · Apple: ${Gen.CAT[c].apple}` }));
-    case 'langs': return [{ value: ['ko', 'en', 'th'], label: t('dec.langs.rec') }, { value: ['ko'], label: '한국어' }, { value: ['en'], label: 'English' }, { value: ['th'], label: 'ภาษาไทย' }, { value: ['ko', 'en'], label: '한국어 + English' }];
+    case 'langs': { const nm = v => v.map(l => t('lang.' + l)).join(' + ');
+      return [{ value: Flow.DEFAULT_LANGS.slice(), label: t('dec.langs.rec') }, ...['ko', 'th', 'zh', 'hi'].map(l => ({ value: ['en', l], label: nm(['en', l]) })), { value: LANGS.slice(), label: nm(LANGS) }]; }
     case 'icon': return STYLE.icon.map((s, k) => ({ value: k, label: t('icon.' + s), detail: '512×512 · aaplug2_preview_graphics kind=icons' }));
     case 'feature': return STYLE.feature.map((s, k) => ({ value: k, label: t('feat.' + s), detail: '1024×500 · aaplug2_preview_graphics kind=feature' }));
     case 'shots': return [{ value: 'ok', label: t('opt.useThese'), detail: A.screenshots.length ? t('dec.shots.d', { n: A.screenshots.length }) : t('dec.shots.none') }];
@@ -203,7 +205,7 @@ export async function generate(st, { output_dir, lang }, { allowPath }) {
     files.push({ path: 'graphics/feature-graphic-1024x500.png', data: Buffer.from(b64(g.features[st.dec.feature || 0]), 'base64') });
     g.shots.forEach((s, k) => files.push({ path: `graphics/screenshot-${k + 1}-1080x1920-${L}.png`, data: Buffer.from(b64(s), 'base64') }));
   }
-  files.push({ path: 'README.txt', data: `AA Plug 2 — ${A.appName} (${A.pkg || ''})\n${new Date().toISOString().slice(0, 10)}\n\n${t('zip.readme')}\n\nby ${CFG.operator} · ${CFG.feedbackEmail}\n` });
+  files.push({ path: 'README.txt', data: `AA Plug 2 — ${A.appName} (${A.pkg || ''})\n${new Date().toISOString().slice(0, 10)}\n\n${t('zip.readme')}\n\nFeedback: ${CFG.feedbackUrl}\n` });
   const base = output_dir && allowPath ? path.resolve(String(output_dir).replace(/^~(?=$|\/)/, os.homedir())) : path.join(dirOf(st.id), 'store-materials');
   const slug = Flow.slugOf(A), folder = path.join(base, 'aaplug2-' + slug);
   fs.rmSync(folder, { recursive: true, force: true });
@@ -282,7 +284,7 @@ export function review(st, { store, event, rejection_text }, lang) {
     const chosen = Object.entries(Flow.stores(st.A, st.dec)).filter(([, v]) => v).map(([k]) => k);
     const allLive = chosen.every(k => st.review[k] && st.review[k].status === 'live');
     if (allLive) st.done = new Date().toISOString();
-    out = { ...out, status: 'live', message: allLive ? msg(L, 'allLive', { email: CFG.feedbackEmail }) : msg(L, 'live', { store: S }), all_launched: allLive,
+    out = { ...out, status: 'live', message: allLive ? msg(L, 'allLive', { url: CFG.feedbackUrl }) : msg(L, 'live', { store: S }), all_launched: allLive,
       remaining_stores: chosen.filter(k => !(st.review[k] && st.review[k].status === 'live')).map(k => STORE_NAME[k]) };
   } else throw new UserError('event must be submitted | rejected | resubmitted | approved', 'badEvent');
   save(st);

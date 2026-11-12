@@ -1,6 +1,6 @@
 # AA Plug 2: Privacy
 
-Operator: MOTOR AA · Contact: motoraathailand@gmail.com
+Contact: https://aaplug.com
 
 - **What is read:** project files of the app you connect, such as the manifest, build files, Info.plist, string files, README, icons and screenshots. They are read only on the computer running the AA Plug 2 server.
 - **Network:** only when you connect a public GitHub repository. The server then reads that repository through `api.github.com` and `raw.githubusercontent.com`. AA Plug 2 runs no servers of its own and has no analytics, ads, accounts or telemetry.

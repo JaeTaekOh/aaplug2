@@ -1,7 +1,7 @@
 /* AA Plug 2 — 스토어 그래픽 생성 (canvas): 아이콘 512, 대표 그래픽 1024×500, 스크린샷 프레임 */
 (function () {
   'use strict';
-  const FONT = { ko: '"Pretendard Variable", "IBM Plex Sans", sans-serif', en: '"IBM Plex Sans", "Pretendard Variable", sans-serif', th: '"IBM Plex Sans Thai", "IBM Plex Sans", sans-serif' };
+  const FONT = { ko: '"Pretendard Variable", "IBM Plex Sans", sans-serif', en: '"IBM Plex Sans", "Pretendard Variable", sans-serif', th: '"IBM Plex Sans Thai", "IBM Plex Sans", sans-serif', zh: '"IBM Plex Sans", "Noto Sans CJK SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK JP", sans-serif', hi: '"IBM Plex Sans", "Noto Sans Devanagari", "Nirmala UI", "Kohinoor Devanagari", sans-serif' };
   const cache = new Map();
   function img(src) {
     if (!src) return Promise.resolve(null);
@@ -10,7 +10,7 @@
     cache.set(src, p); return p;
   }
   async function fontsReady(lang) {
-    try { await Promise.all([600, 700, 400].map(w => document.fonts.load(`${w} 40px ${FONT[lang]}`, lang === 'th' ? 'ก' : lang === 'ko' ? '가' : 'A'))); } catch (e) { }
+    try { await Promise.all([600, 700, 400].map(w => document.fonts.load(`${w} 40px ${FONT[lang]}`, ({ th: 'ก', ko: '가', zh: '中', hi: 'क' }[lang] || 'A')))); } catch (e) { }
   }
   const hex = h => { h = h.replace('#', ''); return [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)); };
   const toHex = rgb => '#' + rgb.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
@@ -98,7 +98,7 @@
       x.save(); x.shadowColor = 'rgba(0,0,0,.35)'; x.shadowBlur = 60; x.shadowOffsetY = 24; rr(x, px, py, pw, ph, pw * .12); x.fillStyle = '#0c0d10'; x.fill(); x.restore();
       const b = pw * .035; x.save(); rr(x, px + b, py + b, pw - 2 * b, ph - 2 * b, pw * .095); x.clip();
       if (s) { const sw = pw - 2 * b; x.drawImage(s, px + b, py + b, sw, sw * s.height / s.width); }
-      else { x.fillStyle = '#f4f3ee'; x.fillRect(px, py, pw, ph); x.fillStyle = '#9a9ca3'; x.font = `500 ${fs * .45}px ${FONT[lang]}`; x.fillText({ ko: '실제 앱 화면이 들어갈 자리', en: 'Your real app screen goes here', th: 'ใส่ภาพหน้าจอจริงของแอป' }[lang], W / 2, py + ph / 2); }
+      else { x.fillStyle = '#f4f3ee'; x.fillRect(px, py, pw, ph); x.fillStyle = '#9a9ca3'; x.font = `500 ${fs * .45}px ${FONT[lang]}`; x.fillText({ ko: '실제 앱 화면이 들어갈 자리', en: 'Your real app screen goes here', th: 'ใส่ภาพหน้าจอจริงของแอป', zh: '这里将放入你的真实应用界面', hi: 'यहाँ आपके ऐप की असली स्क्रीन आएगी' }[lang], W / 2, py + ph / 2); }
       x.restore();
       out.push(c.toDataURL('image/png'));
     }

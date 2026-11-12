@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const G = window.AAPGen, X = window.AAPGfx, F = window.AAPFlow, CFG = window.AAP_CONFIG;
+  const I18N = window.AAPi18n, UI_LANG_KEY = 'aaplug2.uiLang';   // UI language list + saved manual pick
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = G.esc;
   const STEPS = ['home', 'analyze', 'decide', 'assets', 'submit', 'review', 'done'];
@@ -12,10 +13,11 @@
   let genToken = 0;
 
   function fresh() { return { lang: detectLang(), step: 'home', A: null, brand: null, dec: {}, done: {}, review: { status: 'none' }, approved: false, sample: false }; }
+  /* UI language: English by default (no browser/device detection). Only a pick made in the globe menu is saved (UI_LANG_KEY)
+     and wins on later visits. The old 'aaplug2.lang' key and the lang saved inside old sessions are ignored. */
   function detectLang() {
-    try { const saved = localStorage.getItem('aaplug2.lang'); if (saved) return saved; } catch (e) { }
-    const n = (navigator.languages || [navigator.language || 'ko']).map(l => l.toLowerCase().slice(0, 2));
-    return n.find(l => ['ko', 'en', 'th'].includes(l)) || 'ko';
+    try { const saved = localStorage.getItem(UI_LANG_KEY); if (I18N.LANGS.includes(saved)) return saved; } catch (e) { }
+    return I18N.DEFAULT;
   }
   function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.A) { s.lang = detectLang(); return s; } } catch (e) { } return null; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { try { const c = JSON.parse(JSON.stringify(S)); if (c.A) c.A.screenshots = []; localStorage.setItem(KEY, JSON.stringify(c)); } catch (e2) { } } }
@@ -64,7 +66,7 @@
         <div class="lang">
           <button class="btn icon lang-btn" id="langBtn" aria-haspopup="menu" aria-expanded="false" aria-label="${esc(t('language'))}" data-press>${ic('globe')}<span>${S.lang.toUpperCase()}</span></button>
           <div class="lang-menu" id="langMenu" role="menu" hidden>
-            ${[['ko', '한국어'], ['en', 'English'], ['th', 'ภาษาไทย']].map(([c, n]) => `<button role="menuitemradio" aria-checked="${S.lang === c}" data-lang="${c}">${n}${S.lang === c ? ic('check') : ''}</button>`).join('')}
+            ${I18N.LANGS.map(c => `<button role="menuitemradio" aria-checked="${S.lang === c}" data-lang="${c}" lang="${c}">${I18N.NATIVE[c]}${S.lang === c ? ic('check') : ''}</button>`).join('')}
           </div>
         </div>
       </div>`;
@@ -74,10 +76,10 @@
       <div class="foot-in">
         <div class="foot-brand"><b>AA Plug 2</b><span>${esc(t('foot.tag'))}</span></div>
         <div class="foot-links">
-          <a class="btn ghost sm" href="mailto:${CFG.feedbackEmail}?subject=AA%20Plug%202%20feedback">${ic('mail')}<span>${t('feedback')}</span></a>
+          <a class="btn ghost sm" href="${CFG.feedbackUrl}" target="_blank" rel="noopener">${ic('mail')}<span>${t('feedback')}</span></a>
           <a class="btn ghost sm" href="privacy.html" target="_blank" rel="noopener">${ic('shield')}<span>${t('foot.privacy')}</span></a>
         </div>
-        <p class="foot-small">${t('foot.provider')} <b>MOTOR AA</b> · ${esc(t('foot.free'))}<br>${esc(t('foot.tm'))}</p>
+        <p class="foot-small">${esc(t('foot.free'))}<br>${esc(t('foot.tm'))}</p>
       </div>`;
   }
 
@@ -246,7 +248,7 @@
   /* ===== 생성 자료 ===== */
   async function ensureGen() {
     const A = S.A; const my = ++genToken;
-    const langs = ['ko', 'en', 'th'];
+    const langs = F.LANGS;   /* all five, so the copy shown in the current UI language is always ready */
     const tone = S.dec.tone || 'friendly';
     const listing = {}; langs.forEach(l => listing[l] = G.listing(A, l, tone));
     const brand = S.brand || '#2f6f5e';
@@ -255,7 +257,7 @@
     const L = S.lang;
     const titleIdx = S.dec.title || 0, shortIdx = S.dec.short || 0;
     const nm = l => listing[l].titles[Math.min(titleIdx, listing[l].titles.length - 1)].split(/ [-–:] /)[0];
-    const tg = l => listing[l].shorts[Math.min(shortIdx, listing[l].shorts.length - 1)].replace(/[.。]$/, '');
+    const tg = l => listing[l].shorts[Math.min(shortIdx, listing[l].shorts.length - 1)].replace(/[.。।]$/, '');
     const features = await Promise.all(['split', 'shot', 'minimal'].map(st => X.feature(A, L, st, brand, iconUrl, nm(L), tg(L))));
     if (my !== genToken) return GEN;
     GEN = { listing, icons, features, iconUrl, nm, tg, brand };
@@ -331,8 +333,8 @@
         body = `<div class="opts three">${A.categories.map((c, k) => optTile(d, k, esc(G.CAT[c][L][1]), `Play: ${G.CAT[c].play} · Apple: ${G.CAT[c].apple}`)).join('')}</div>`; break;
       case 'langs': { title = t('dec.langs'); why = t('dec.langs.d');
         const cur = S.dec.langs || [];
-        body = `<div class="opts three">${[['ko', '한국어'], ['en', 'English'], ['th', 'ภาษาไทย']].map(([c, n]) => `<button class="opt ${cur.includes(c) ? 'on' : ''}" data-lang-toggle="${c}" aria-pressed="${cur.includes(c)}" data-press><span class="opt-t">${n}</span><span class="opt-s">${A.locales.includes(c) || (c === 'en') ? esc(t('dec.langs.inApp')) : esc(t('dec.langs.store'))}</span>${cur.includes(c) ? `<span class="tick">${ic('check')}</span>` : ''}</button>`).join('')}</div>
-          <div class="row"><button class="btn ghost sm" data-dec="langs" data-val='["ko","en","th"]' data-press>${ic('sparkle')}<span>${esc(t('dec.langs.rec'))}</span></button></div>`; break; }
+        body = `<div class="opts three">${F.LANGS.map(c => [c, t('lang.' + c)]).map(([c, n]) => `<button class="opt ${cur.includes(c) ? 'on' : ''}" data-lang-toggle="${c}" aria-pressed="${cur.includes(c)}" data-press><span class="opt-t">${esc(n)}</span><span class="opt-s">${A.locales.includes(c) || (c === 'en') ? esc(t('dec.langs.inApp')) : esc(t('dec.langs.store'))}</span>${cur.includes(c) ? `<span class="tick">${ic('check')}</span>` : ''}</button>`).join('')}</div>
+          <div class="row"><button class="btn ghost sm" data-dec="langs" data-val='${JSON.stringify(F.DEFAULT_LANGS)}' data-press>${ic('sparkle')}<span>${esc(t('dec.langs.rec'))}</span></button></div>`; break; }
       case 'icon': title = t('dec.icon'); why = t('dec.icon.d');
         body = GEN ? `<div class="opts three img">${GEN.icons.map((v, k) => optTile(d, k, esc(t('icon.' + v.style)), '512×512', `<img src="${v.dataUrl}" alt="" class="opt-icon">`)).join('')}</div>` : skel(); break;
       case 'feature': title = t('dec.feature'); why = t('dec.feature.d');
@@ -585,7 +587,7 @@
   /* ===== 7. 출시 완료 ===== */
   function vDone() {
     const A = S.A, st = stores(), C = GEN ? chosen() : null;
-    const n = { docs: 2 + (A.sdk.auth ? 1 : 0) + (st.apple && A.ios && !A.ios.privacyManifest ? 1 : 0), langs: C ? C.langs.length : 3, fixes: Object.entries(S.dec).filter(([k, v]) => k.startsWith('fix:') && v !== 'later').length, gfx: 2 + ((GEN && GEN.shots) || []).length };
+    const n = { docs: 2 + (A.sdk.auth ? 1 : 0) + (st.apple && A.ios && !A.ios.privacyManifest ? 1 : 0), langs: C ? C.langs.length : 1, fixes: Object.entries(S.dec).filter(([k, v]) => k.startsWith('fix:') && v !== 'later').length, gfx: 2 + ((GEN && GEN.shots) || []).length };
     return `
     <section class="done m-rise">
       <div class="confetti" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--i:${i}"></i>`).join('')}</div>
@@ -604,7 +606,7 @@
     <section class="card end-note">
       <h2 class="h-ic">${ic('flag')}${esc(t('done.end'))}</h2>
       <p class="muted">${esc(t('done.end.d'))}</p>
-      <div class="row wrap"><button class="btn primary" id="newApp" data-press data-ripple>${ic('refresh')}<span>${esc(t('done.new'))}</span></button><a class="btn ghost" href="mailto:${CFG.feedbackEmail}?subject=AA%20Plug%202%20feedback">${ic('mail')}<span>${esc(t('feedback'))}</span></a></div>
+      <div class="row wrap"><button class="btn primary" id="newApp" data-press data-ripple>${ic('refresh')}<span>${esc(t('done.new'))}</span></button><a class="btn ghost" href="${CFG.feedbackUrl}" target="_blank" rel="noopener">${ic('mail')}<span>${esc(t('feedback'))}</span></a></div>
     </section>
     ${adSlot()}`;
   }
@@ -616,7 +618,7 @@
     const c = e.target.closest('[data-copy]'); if (c) { copy(c.dataset.copy); return; }
     const lb = e.target.closest('#langBtn'); const menu = $('#langMenu');
     if (lb) { const open = menu.hidden; menu.hidden = !open; lb.setAttribute('aria-expanded', String(open)); if (open) menu.classList.add('m-scale-in'); return; }
-    const l = e.target.closest('[data-lang]'); if (l) { S.lang = l.dataset.lang; try { localStorage.setItem('aaplug2.lang', S.lang); } catch (er) { } save(); if (GEN) { GEN.shots = null; ensureGen().then(() => ensureShots()).then(() => render('none')); } render('none'); $('#main').classList.add('m-lang'); setTimeout(() => $('#main').classList.remove('m-lang'), 400); return; }
+    const l = e.target.closest('[data-lang]'); if (l) { S.lang = l.dataset.lang; try { localStorage.setItem(UI_LANG_KEY, S.lang); } catch (er) { } save(); if (GEN) { GEN.shots = null; ensureGen().then(() => ensureShots()).then(() => render('none')); } render('none'); $('#main').classList.add('m-lang'); setTimeout(() => $('#main').classList.remove('m-lang'), 400); return; }
     if (menu && !menu.hidden && !e.target.closest('.lang')) { menu.hidden = true; }
   });
   window.addEventListener('DOMContentLoaded', () => {

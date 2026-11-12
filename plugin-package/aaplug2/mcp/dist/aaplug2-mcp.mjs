@@ -58704,7 +58704,7 @@ if (canvasLib) {
     throw new Error("graphics unavailable");
   }, fonts: { load: async () => [] } };
 }
-var ORDER = ["config.js", "i18n-ko.js", "i18n-en.js", "i18n-th.js", "i18n.js", "zip.js", "sample-data.js", "sources.js", "analyzer.js", "generator.js", "graphics.js", "flow.js"];
+var ORDER = ["config.js", "i18n-en.js", "i18n-ko.js", "i18n-th.js", "i18n-zh.js", "i18n-hi.js", "i18n.js", "zip.js", "sample-data.js", "sources.js", "analyzer.js", "generator.js", "graphics.js", "flow.js"];
 for (const f of ORDER) {
   const file2 = path.join(JS, f);
   vm.runInThisContext(fs.readFileSync(file2, "utf8"), { filename: file2 });
@@ -58737,7 +58737,7 @@ var M = {
     pasteRejection: "\uC2A4\uD1A0\uC5B4\uAC00 \uBCF4\uB0B8 \uBC18\uB824 \uBA54\uC2DC\uC9C0\uB97C \uC0AC\uC6A9\uC790\uC5D0\uAC8C \uBC1B\uC544\uC11C rejection_text \uB85C \uB2E4\uC2DC \uBD88\uB7EC \uC8FC\uC138\uC694.",
     unknownRejection: "\uC774 \uBC18\uB824 \uC0AC\uC720\uB294 \uC544\uC9C1 \uC790\uB3D9 \uBD84\uC11D \uBAA9\uB85D\uC5D0 \uC5C6\uC5B4\uC694. \uBA54\uC2DC\uC9C0\uC758 \uAC00\uC774\uB4DC\uB77C\uC778 \uBC88\uD638\uC640 \uC694\uAD6C \uC0AC\uD56D\uC744 \uC0AC\uC6A9\uC790\uC640 \uD568\uAED8 \uD558\uB098\uC529 \uD655\uC778\uD574 \uC8FC\uC138\uC694.",
     live: "{store} \uCD9C\uC2DC \uC644\uB8CC!",
-    allLive: "\uCD9C\uC2DC \uC644\uB8CC! AA Plug 2\uC758 \uC5ED\uD560\uC740 \uC5EC\uAE30\uAE4C\uC9C0\uC608\uC694. \uC758\uACAC\uC740 {email} \uB85C \uBCF4\uB0B4 \uC8FC\uC138\uC694.",
+    allLive: "\uCD9C\uC2DC \uC644\uB8CC! AA Plug 2\uC758 \uC5ED\uD560\uC740 \uC5EC\uAE30\uAE4C\uC9C0\uC608\uC694. \uC758\uACAC\uC740 {url} \uC5D0 \uB0A8\uACA8 \uC8FC\uC138\uC694.",
     noProject: "\uD504\uB85C\uC81D\uD2B8\uB97C \uCC3E\uC9C0 \uBABB\uD588\uC5B4\uC694: {id}. aaplug2_status \uB85C \uBAA9\uB85D\uC744 \uD655\uC778\uD558\uC138\uC694.",
     pathDisabled: "\uC774 \uC11C\uBC84\uC5D0\uC11C\uB294 \uB85C\uCEEC \uACBD\uB85C \uC5F0\uACB0\uC774 \uAEBC\uC838 \uC788\uC5B4\uC694. \uACF5\uAC1C GitHub \uC8FC\uC18C\uB97C \uC4F0\uAC70\uB098, \uC11C\uBC84\uB97C \uC790\uAE30 \uCEF4\uD4E8\uD130\uC5D0\uC11C stdio \uB85C \uC2E4\uD589\uD558\uC138\uC694.",
     noGraphics: "\uC774 \uD658\uACBD\uC5D0\uB294 \uADF8\uB798\uD53D \uBAA8\uB4C8(@napi-rs/canvas)\uC774 \uC5C6\uC5B4 \uADF8\uB9BC\uC740 \uAC74\uB108\uB6F0\uC5C8\uC5B4\uC694.",
@@ -58766,7 +58766,7 @@ var M = {
     pasteRejection: "Get the rejection message the store sent from the user and call again with rejection_text.",
     unknownRejection: "This rejection reason is not in the automatic list yet. Go through the guideline number and requirements in the message with the user.",
     live: "{store} is live!",
-    allLive: "Launched! This is where AA Plug 2\u2019s job ends. Feedback: {email}",
+    allLive: "Launched! This is where AA Plug 2\u2019s job ends. Feedback: {url}",
     noProject: "Project not found: {id}. Use aaplug2_status to list projects.",
     pathDisabled: "Local path connection is disabled on this server. Use a public GitHub URL, or run the server on your own computer over stdio.",
     noGraphics: "Graphics module (@napi-rs/canvas) is not available here, so images were skipped.",
@@ -58795,7 +58795,7 @@ var M = {
     pasteRejection: "\u0E02\u0E2D\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E41\u0E08\u0E49\u0E07\u0E1B\u0E0F\u0E34\u0E40\u0E2A\u0E18\u0E08\u0E32\u0E01\u0E2A\u0E42\u0E15\u0E23\u0E4C\u0E08\u0E32\u0E01\u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49 \u0E41\u0E25\u0E49\u0E27\u0E40\u0E23\u0E35\u0E22\u0E01\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07\u0E1E\u0E23\u0E49\u0E2D\u0E21 rejection_text",
     unknownRejection: "\u0E40\u0E2B\u0E15\u0E38\u0E1C\u0E25\u0E19\u0E35\u0E49\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E21\u0E35\u0E43\u0E19\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23\u0E27\u0E34\u0E40\u0E04\u0E23\u0E32\u0E30\u0E2B\u0E4C\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34 \u0E43\u0E2B\u0E49\u0E44\u0E25\u0E48\u0E14\u0E39\u0E2B\u0E21\u0E32\u0E22\u0E40\u0E25\u0E02\u0E41\u0E19\u0E27\u0E17\u0E32\u0E07\u0E41\u0E25\u0E30\u0E02\u0E49\u0E2D\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E43\u0E19\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E01\u0E31\u0E1A\u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49\u0E17\u0E35\u0E25\u0E30\u0E02\u0E49\u0E2D",
     live: "{store} \u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E41\u0E25\u0E49\u0E27!",
-    allLive: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08! \u0E2B\u0E19\u0E49\u0E32\u0E17\u0E35\u0E48\u0E02\u0E2D\u0E07 AA Plug 2 \u0E08\u0E1A\u0E15\u0E23\u0E07\u0E19\u0E35\u0E49 \u0E2A\u0E48\u0E07\u0E04\u0E27\u0E32\u0E21\u0E40\u0E2B\u0E47\u0E19\u0E44\u0E14\u0E49\u0E17\u0E35\u0E48 {email}",
+    allLive: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08! \u0E2B\u0E19\u0E49\u0E32\u0E17\u0E35\u0E48\u0E02\u0E2D\u0E07 AA Plug 2 \u0E08\u0E1A\u0E15\u0E23\u0E07\u0E19\u0E35\u0E49 \u0E2A\u0E48\u0E07\u0E04\u0E27\u0E32\u0E21\u0E40\u0E2B\u0E47\u0E19\u0E44\u0E14\u0E49\u0E17\u0E35\u0E48 {url}",
     noProject: "\u0E44\u0E21\u0E48\u0E1E\u0E1A\u0E42\u0E1B\u0E23\u0E40\u0E08\u0E01\u0E15\u0E4C: {id} \u0E43\u0E0A\u0E49 aaplug2_status \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E14\u0E39\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23",
     pathDisabled: "\u0E40\u0E0B\u0E34\u0E23\u0E4C\u0E1F\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E19\u0E35\u0E49\u0E1B\u0E34\u0E14\u0E01\u0E32\u0E23\u0E40\u0E0A\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D\u0E14\u0E49\u0E27\u0E22\u0E1E\u0E32\u0E18\u0E43\u0E19\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07 \u0E43\u0E0A\u0E49\u0E25\u0E34\u0E07\u0E01\u0E4C GitHub \u0E2A\u0E32\u0E18\u0E32\u0E23\u0E13\u0E30 \u0E2B\u0E23\u0E37\u0E2D\u0E23\u0E31\u0E19\u0E40\u0E0B\u0E34\u0E23\u0E4C\u0E1F\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E1A\u0E19\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07\u0E15\u0E31\u0E27\u0E40\u0E2D\u0E07\u0E1C\u0E48\u0E32\u0E19 stdio",
     noGraphics: "\u0E44\u0E21\u0E48\u0E21\u0E35\u0E42\u0E21\u0E14\u0E39\u0E25\u0E01\u0E23\u0E32\u0E1F\u0E34\u0E01 (@napi-rs/canvas) \u0E08\u0E36\u0E07\u0E02\u0E49\u0E32\u0E21\u0E23\u0E39\u0E1B\u0E20\u0E32\u0E1E",
@@ -58806,6 +58806,64 @@ var M = {
     stepSubmit: "\u0E04\u0E39\u0E48\u0E21\u0E37\u0E2D\u0E01\u0E32\u0E23\u0E2A\u0E48\u0E07\u0E41\u0E25\u0E30\u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34",
     stepReview: "\u0E15\u0E23\u0E27\u0E08\u0E2A\u0E2D\u0E1A",
     stepDone: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E41\u0E25\u0E49\u0E27"
+  },
+  zh: {
+    connected: "\u5DF2\u8FDE\u63A5\u5E76\u5206\u6790 {name}\u3002\u4E0A\u67B6\u51C6\u5907\u5EA6 {ready}%\u3002",
+    counts: "\u5FC5\u987B\u4FEE\u6539 {block} \u9879 \xB7 \u5EFA\u8BAE\u68C0\u67E5 {warn} \u9879 \xB7 \u503C\u5F97\u4E86\u89E3 {tip} \u9879",
+    nextDecide: "\u4E0B\u4E00\u6B65\uFF1A\u8C03\u7528 aaplug2_get_decisions\uFF0C\u5411\u7528\u6237\u5C55\u793A {n} \u4E2A\u9009\u9879\u3002\u7528\u6237\u53EA\u9700\u9009\u62E9\u3001\u6279\u51C6\u6216\u62D2\u7EDD\u3002",
+    openLeft: "\u8FD8\u6709 {n} \u9879\u5C1A\u672A\u51B3\u5B9A\u3002",
+    allDecided: "\u5168\u90E8\u51B3\u5B9A\u5B8C\u6210\u3002\u4E0B\u4E00\u6B65\uFF1Aaaplug2_generate_store_materials",
+    needDecisions: "\u8BF7\u5148\u8BE2\u95EE\u7528\u6237\u5269\u4E0B\u7684 {n} \u9879\u51B3\u5B9A\uFF1A{keys}",
+    generated: "\u5DF2\u751F\u6210 {n} \u4E2A\u5546\u5E97\u7D20\u6750\u6587\u4EF6\u3002",
+    guideLocked: "\u6700\u540E\u4E00\u6B65\u53EA\u6709\u5728\u7528\u6237\u6279\u51C6\u63D0\u4EA4\u540E\u624D\u4F1A\u5F00\u653E\uFF08aaplug2_approve_submission\uFF09\u3002",
+    guideUnlocked: "\u7528\u6237\u5DF2\u6279\u51C6\u3002\u6700\u540E\u7684\u63D0\u4EA4\u6309\u94AE\u7531\u7528\u6237\u4EB2\u81EA\u70B9\u51FB\u3002AA Plug 2 \u7EDD\u4E0D\u4F1A\u81EA\u52A8\u63D0\u4EA4\u3002",
+    approved: "\u7528\u6237\u5DF2\u6279\u51C6\u63D0\u4EA4\u5230 {store}\u3002\u73B0\u5728\u7531\u7528\u6237\u5728\u63A7\u5236\u53F0\u4E2D\u4EB2\u81EA\u70B9\u51FB\u63D0\u4EA4\u6309\u94AE\u3002",
+    notChosenStore: "\u6B64\u5E94\u7528\u5DF2\u8BBE\u5B9A\u4E0D\u5728 {store} \u4E0A\u67B6\u3002",
+    needApproval: "\u9700\u8981\u5148\u83B7\u5F97\u7528\u6237\u7684\u63D0\u4EA4\u6279\u51C6\uFF08aaplug2_approve_submission\uFF09\u3002",
+    inReview: "{store} \u6B63\u5728\u5BA1\u6838\u4E2D\u3002\u8BF7\u8BA9\u7528\u6237\u5728\u6536\u5230\u7ED3\u679C\u540E\u544A\u8BC9\u4F60\u3002",
+    pasteRejection: "\u8BF7\u5411\u7528\u6237\u7D22\u53D6\u5546\u5E97\u53D1\u6765\u7684\u62D2\u7EDD\u6D88\u606F\uFF0C\u7136\u540E\u5E26\u4E0A rejection_text \u518D\u6B21\u8C03\u7528\u3002",
+    unknownRejection: "\u8FD9\u4E2A\u62D2\u7EDD\u539F\u56E0\u8FD8\u4E0D\u5728\u81EA\u52A8\u5206\u6790\u5217\u8868\u4E2D\u3002\u8BF7\u4E0E\u7528\u6237\u4E00\u8D77\u9010\u6761\u67E5\u770B\u6D88\u606F\u4E2D\u7684\u51C6\u5219\u7F16\u53F7\u548C\u8981\u6C42\u3002",
+    live: "{store} \u5DF2\u4E0A\u67B6\uFF01",
+    allLive: "\u5DF2\u4E0A\u67B6\uFF01AA Plug 2 \u7684\u4EFB\u52A1\u5230\u6B64\u7ED3\u675F\u3002\u53CD\u9988\u8BF7\u8BBF\u95EE {url}",
+    noProject: "\u627E\u4E0D\u5230\u9879\u76EE\uFF1A{id}\u3002\u8BF7\u7528 aaplug2_status \u67E5\u770B\u9879\u76EE\u5217\u8868\u3002",
+    pathDisabled: "\u6B64\u670D\u52A1\u5668\u5DF2\u5173\u95ED\u672C\u5730\u8DEF\u5F84\u8FDE\u63A5\u3002\u8BF7\u4F7F\u7528\u516C\u5F00\u7684 GitHub \u5730\u5740\uFF0C\u6216\u5728\u4F60\u81EA\u5DF1\u7684\u7535\u8111\u4E0A\u901A\u8FC7 stdio \u8FD0\u884C\u670D\u52A1\u5668\u3002",
+    noGraphics: "\u6B64\u73AF\u5883\u6CA1\u6709\u56FE\u5F62\u6A21\u5757\uFF08@napi-rs/canvas\uFF09\uFF0C\u56E0\u6B64\u8DF3\u8FC7\u4E86\u56FE\u7247\u3002",
+    badValue: "{key} \u4E0D\u5141\u8BB8\u4F7F\u7528\u6B64\u503C\uFF1A{val}",
+    unknownKey: "\u672A\u77E5\u7684\u51B3\u5B9A\u9879\uFF1A{key}",
+    stepDecide: "\u51B3\u5B9A",
+    stepGenerate: "\u751F\u6210\u7D20\u6750",
+    stepSubmit: "\u63D0\u4EA4\u6307\u5357\u4E0E\u6279\u51C6",
+    stepReview: "\u5BA1\u6838",
+    stepDone: "\u5DF2\u4E0A\u67B6"
+  },
+  hi: {
+    connected: "{name} \u0915\u0928\u0947\u0915\u094D\u091F \u0914\u0930 \u0935\u093F\u0936\u094D\u0932\u0947\u0937\u0923 \u0939\u094B \u0917\u092F\u093E\u0964 \u0932\u0949\u0928\u094D\u091A \u0915\u0940 \u0924\u0948\u092F\u093E\u0930\u0940 {ready}%\u0964",
+    counts: "{block} \u0920\u0940\u0915 \u0915\u0930\u0928\u093E \u091C\u093C\u0930\u0942\u0930\u0940 \xB7 {warn} \u091C\u093E\u0901\u091A\u0928\u093E \u092C\u0947\u0939\u0924\u0930 \xB7 {tip} \u091C\u093E\u0928\u0928\u0947 \u0932\u093E\u092F\u0915",
+    nextDecide: "\u0906\u0917\u0947: aaplug2_get_decisions \u0915\u0949\u0932 \u0915\u0930\u0947\u0902 \u0914\u0930 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0915\u094B {n} \u0935\u093F\u0915\u0932\u094D\u092A \u0926\u093F\u0916\u093E\u090F\u0901\u0964 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0915\u094B \u092C\u0938 \u091A\u0941\u0928\u0928\u093E, \u092E\u0902\u091C\u093C\u0942\u0930 \u092F\u093E \u0905\u0938\u094D\u0935\u0940\u0915\u093E\u0930 \u0915\u0930\u0928\u093E \u0939\u0948\u0964",
+    openLeft: "{n} \u0906\u0907\u091F\u092E \u0905\u092D\u0940 \u0924\u092F \u0928\u0939\u0940\u0902 \u0939\u0941\u090F \u0939\u0948\u0902\u0964",
+    allDecided: "\u0938\u092C \u0924\u092F \u0939\u094B \u0917\u092F\u093E\u0964 \u0906\u0917\u0947: aaplug2_generate_store_materials",
+    needDecisions: "\u092A\u0939\u0932\u0947 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0938\u0947 \u092C\u093E\u0915\u0940 {n} \u092B\u093C\u0948\u0938\u0932\u094B\u0902 \u0915\u0947 \u092C\u093E\u0930\u0947 \u092E\u0947\u0902 \u092A\u0942\u091B\u0947\u0902: {keys}",
+    generated: "{n} \u0938\u094D\u091F\u094B\u0930 \u0938\u093E\u092E\u0917\u094D\u0930\u0940 \u092B\u093C\u093E\u0907\u0932\u0947\u0902 \u092C\u0928\u093E\u0908 \u0917\u0908\u0902\u0964",
+    guideLocked: "\u0906\u0916\u093F\u0930\u0940 \u0915\u0926\u092E \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0915\u0947 \u0938\u092C\u092E\u093F\u0936\u0928 \u092E\u0902\u091C\u093C\u0942\u0930 \u0915\u0930\u0928\u0947 \u0915\u0947 \u092C\u093E\u0926 \u0939\u0940 \u0916\u0941\u0932\u0924\u093E \u0939\u0948 (aaplug2_approve_submission)\u0964",
+    guideUnlocked: "\u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0928\u0947 \u092E\u0902\u091C\u093C\u0942\u0930\u0940 \u0926\u0947 \u0926\u0940\u0964 \u0906\u0916\u093F\u0930\u0940 \u0938\u092C\u092E\u093F\u091F \u092C\u091F\u0928 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0916\u0941\u0926 \u0926\u092C\u093E\u0924\u0947 \u0939\u0948\u0902\u0964 AA Plug 2 \u0915\u092D\u0940 \u0905\u092A\u0928\u0947 \u0906\u092A \u0938\u092C\u092E\u093F\u091F \u0928\u0939\u0940\u0902 \u0915\u0930\u0924\u093E\u0964",
+    approved: "\u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0928\u0947 {store} \u092A\u0930 \u0938\u092C\u092E\u093F\u0936\u0928 \u092E\u0902\u091C\u093C\u0942\u0930 \u0915\u093F\u092F\u093E\u0964 \u0905\u092C \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0915\u0902\u0938\u094B\u0932 \u092E\u0947\u0902 \u0938\u092C\u092E\u093F\u091F \u092C\u091F\u0928 \u0916\u0941\u0926 \u0926\u092C\u093E\u090F\u0901\u0917\u0947\u0964",
+    notChosenStore: "\u0907\u0938 \u0910\u092A \u0915\u094B {store} \u092A\u0930 \u0932\u0949\u0928\u094D\u091A \u0928 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0938\u0947\u091F \u0915\u093F\u092F\u093E \u0917\u092F\u093E \u0939\u0948\u0964",
+    needApproval: "\u092A\u0939\u0932\u0947 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0915\u0940 \u0938\u092C\u092E\u093F\u0936\u0928 \u092E\u0902\u091C\u093C\u0942\u0930\u0940 \u091A\u093E\u0939\u093F\u090F (aaplug2_approve_submission)\u0964",
+    inReview: "{store} \u0915\u0940 \u0938\u092E\u0940\u0915\u094D\u0937\u093E \u091A\u0932 \u0930\u0939\u0940 \u0939\u0948\u0964 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0938\u0947 \u0915\u0939\u0947\u0902 \u0915\u093F \u0928\u0924\u0940\u091C\u093E \u0906\u0928\u0947 \u092A\u0930 \u0906\u092A\u0915\u094B \u092C\u0924\u093E\u090F\u0901\u0964",
+    pasteRejection: "\u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0938\u0947 \u0938\u094D\u091F\u094B\u0930 \u0915\u093E \u092D\u0947\u091C\u093E \u0930\u093F\u091C\u0947\u0915\u094D\u0936\u0928 \u0938\u0902\u0926\u0947\u0936 \u0932\u0947\u0902 \u0914\u0930 rejection_text \u0915\u0947 \u0938\u093E\u0925 \u092B\u093F\u0930 \u0938\u0947 \u0915\u0949\u0932 \u0915\u0930\u0947\u0902\u0964",
+    unknownRejection: "\u092F\u0939 \u0930\u093F\u091C\u0947\u0915\u094D\u0936\u0928 \u0915\u093E\u0930\u0923 \u0905\u092D\u0940 \u0905\u092A\u0928\u0947 \u0906\u092A \u092A\u0939\u091A\u093E\u0928\u0940 \u091C\u093E\u0928\u0947 \u0935\u093E\u0932\u0940 \u0938\u0942\u091A\u0940 \u092E\u0947\u0902 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u0938\u0902\u0926\u0947\u0936 \u092E\u0947\u0902 \u0926\u093F\u090F \u0917\u093E\u0907\u0921\u0932\u093E\u0907\u0928 \u0928\u0902\u092C\u0930 \u0914\u0930 \u091C\u093C\u0930\u0942\u0930\u0924\u094B\u0902 \u0915\u094B \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0915\u0947 \u0938\u093E\u0925 \u090F\u0915-\u090F\u0915 \u0915\u0930\u0915\u0947 \u0926\u0947\u0916\u0947\u0902\u0964",
+    live: "{store} \u092A\u0930 \u0932\u093E\u0907\u0935!",
+    allLive: "\u0932\u0949\u0928\u094D\u091A \u0939\u094B \u0917\u092F\u093E! \u092F\u0939\u0940\u0902 AA Plug 2 \u0915\u093E \u0915\u093E\u092E \u092A\u0942\u0930\u093E \u0939\u094B\u0924\u093E \u0939\u0948\u0964 \u0938\u0941\u091D\u093E\u0935: {url}",
+    noProject: "\u092A\u094D\u0930\u094B\u091C\u0947\u0915\u094D\u091F \u0928\u0939\u0940\u0902 \u092E\u093F\u0932\u093E: {id}. \u092A\u094D\u0930\u094B\u091C\u0947\u0915\u094D\u091F \u0915\u0940 \u0938\u0942\u091A\u0940 \u0915\u0947 \u0932\u093F\u090F aaplug2_status \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0915\u0930\u0947\u0902\u0964",
+    pathDisabled: "\u0907\u0938 \u0938\u0930\u094D\u0935\u0930 \u092A\u0930 \u0932\u094B\u0915\u0932 \u092A\u093E\u0925 \u0915\u0928\u0947\u0915\u094D\u0936\u0928 \u092C\u0902\u0926 \u0939\u0948\u0964 \u0938\u093E\u0930\u094D\u0935\u091C\u0928\u093F\u0915 GitHub URL \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0915\u0930\u0947\u0902, \u092F\u093E \u0938\u0930\u094D\u0935\u0930 \u0915\u094B \u0905\u092A\u0928\u0947 \u0915\u0902\u092A\u094D\u092F\u0942\u091F\u0930 \u092A\u0930 stdio \u0938\u0947 \u091A\u0932\u093E\u090F\u0901\u0964",
+    noGraphics: "\u092F\u0939\u093E\u0901 \u0917\u094D\u0930\u093E\u092B\u093C\u093F\u0915\u094D\u0938 \u092E\u0949\u0921\u094D\u092F\u0942\u0932 (@napi-rs/canvas) \u0909\u092A\u0932\u092C\u094D\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948, \u0907\u0938\u0932\u093F\u090F \u0907\u092E\u0947\u091C \u091B\u094B\u0921\u093C \u0926\u0940 \u0917\u0908\u0902\u0964",
+    badValue: "{key} \u0915\u0947 \u0932\u093F\u090F \u092F\u0939 \u0935\u0948\u0932\u094D\u092F\u0942 \u092E\u093E\u0928\u094D\u092F \u0928\u0939\u0940\u0902 \u0939\u0948: {val}",
+    unknownKey: "\u0905\u091C\u094D\u091E\u093E\u0924 \u092B\u093C\u0948\u0938\u0932\u093E \u0906\u0907\u091F\u092E: {key}",
+    stepDecide: "\u092B\u093C\u0948\u0938\u0932\u093E",
+    stepGenerate: "\u0938\u093E\u092E\u0917\u094D\u0930\u0940 \u092C\u0928\u093E\u0928\u093E",
+    stepSubmit: "\u0938\u092C\u092E\u093F\u091F \u0917\u093E\u0907\u0921 \u0914\u0930 \u092E\u0902\u091C\u093C\u0942\u0930\u0940",
+    stepReview: "\u0938\u092E\u0940\u0915\u094D\u0937\u093E",
+    stepDone: "\u0932\u0949\u0928\u094D\u091A \u0939\u094B \u0917\u092F\u093E"
   }
 };
 var msg = (lang2, k, v) => {
@@ -58815,11 +58873,13 @@ var msg = (lang2, k, v) => {
 };
 
 // lib/engine.mjs
-var LANGS = ["ko", "en", "th"];
+var LANGS = ["en", "ko", "th", "zh", "hi"];
 var HOME = process.env.AAPLUG2_HOME || path2.join(os.homedir(), ".aaplug2");
 var PROJ = path2.join(HOME, "projects");
-var envLang = LANGS.includes(process.env.AAPLUG2_LANG) ? process.env.AAPLUG2_LANG : "ko";
-var normLang = (l) => LANGS.includes(l) ? l : envLang;
+var normLang = (l) => {
+  const p = String(l || "").trim().toLowerCase().split(/[-_]/)[0];
+  return LANGS.includes(p) ? p : "en";
+};
 var STORE_NAME = { play: "Google Play", apple: "App Store" };
 var SKIP_DIRS = /* @__PURE__ */ new Set(["node_modules", ".git", "build", ".gradle", "Pods", "DerivedData", ".dart_tool", ".idea", "intermediates", "generated", ".expo", ".next", "dist", ".cxx"]);
 var UserError = class extends Error {
@@ -58958,8 +59018,10 @@ function optionList(st, d, L) {
       return ["friendly", "pro"].map((o) => ({ value: o, label: t("tone." + o), detail: Gen.listing(A, L, o).full.split("\n")[0].slice(0, 120) }));
     case "category":
       return A.categories.map((c, k) => ({ value: k, label: Gen.CAT[c][L][1], detail: `Play: ${Gen.CAT[c].play} \xB7 Apple: ${Gen.CAT[c].apple}` }));
-    case "langs":
-      return [{ value: ["ko", "en", "th"], label: t("dec.langs.rec") }, { value: ["ko"], label: "\uD55C\uAD6D\uC5B4" }, { value: ["en"], label: "English" }, { value: ["th"], label: "\u0E20\u0E32\u0E29\u0E32\u0E44\u0E17\u0E22" }, { value: ["ko", "en"], label: "\uD55C\uAD6D\uC5B4 + English" }];
+    case "langs": {
+      const nm = (v) => v.map((l) => t("lang." + l)).join(" + ");
+      return [{ value: Flow.DEFAULT_LANGS.slice(), label: t("dec.langs.rec") }, ...["ko", "th", "zh", "hi"].map((l) => ({ value: ["en", l], label: nm(["en", l]) })), { value: LANGS.slice(), label: nm(LANGS) }];
+    }
     case "icon":
       return STYLE2.icon.map((s, k) => ({ value: k, label: t("icon." + s), detail: "512\xD7512 \xB7 aaplug2_preview_graphics kind=icons" }));
     case "feature":
@@ -59108,7 +59170,7 @@ ${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}
 
 ${t("zip.readme")}
 
-by ${CFG.operator} \xB7 ${CFG.feedbackEmail}
+Feedback: ${CFG.feedbackUrl}
 ` });
   const base = output_dir && allowPath ? path2.resolve(String(output_dir).replace(/^~(?=$|\/)/, os.homedir())) : path2.join(dirOf(st.id), "store-materials");
   const slug = Flow.slugOf(A), folder = path2.join(base, "aaplug2-" + slug);
@@ -59233,7 +59295,7 @@ function review(st, { store: store2, event, rejection_text }, lang2) {
     out = {
       ...out,
       status: "live",
-      message: allLive ? msg(L, "allLive", { email: CFG.feedbackEmail }) : msg(L, "live", { store: S }),
+      message: allLive ? msg(L, "allLive", { url: CFG.feedbackUrl }) : msg(L, "live", { store: S }),
       all_launched: allLive,
       remaining_stores: chosen.filter((k) => !(st.review[k] && st.review[k].status === "live")).map((k) => STORE_NAME[k])
     };
@@ -59275,8 +59337,8 @@ function status(id, lang2) {
 }
 
 // lib/tools.mjs
-var VERSION = "0.1.0";
-var INSTRUCTIONS = `AA Plug 2 (by ${CFG.operator}) helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
+var VERSION = "0.1.1";
+var INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
 How to use it:
 1. When the user says their app is finished or asks for help publishing, call aaplug2_connect_app ONCE with a public GitHub URL, a local folder/ZIP path, or source=sample for a demo. Never ask the user for tokens, passwords or store metadata forms.
 2. Show the analysis in plain words, then call aaplug2_get_decisions and present each decision's options to the user. The user only picks, approves or rejects. Show the recommended option first.
@@ -59284,8 +59346,8 @@ How to use it:
 4. Call aaplug2_generate_store_materials, then aaplug2_submission_guide for each store and walk the user through the console steps.
 5. The final submit step stays locked until the user explicitly approves; then call aaplug2_approve_submission. AA Plug 2 never submits to any store itself: the user presses the submit button in Play Console / App Store Connect.
 6. When the user reports the review result, call aaplug2_report_review (submitted / rejected with the store's message / resubmitted / approved). When every chosen store is live, the job is done.
-Reply to the user in their language. Tool texts come in ko (default), en or th via the lang argument. Free to use; feedback: ${CFG.feedbackEmail}.`;
-var lang = external_exports.enum(["ko", "en", "th"]).optional().describe("Language for texts in the result: ko (default), en, th. Use the user's language.");
+Reply to the user in their language. Tool texts come in five languages via the lang argument: en (English, the default), ko (Korean), th (Thai), zh (Simplified Chinese) and hi (Hindi). Pass the user's language as lang; when lang is omitted, texts are in English. Store listings for the user's app default to English (the recommended choice); Korean, Thai, Chinese and Hindi listings can be added if the user picks them. Free to use; feedback: ${CFG.feedbackUrl}.`;
+var lang = external_exports.enum(["en", "ko", "th", "zh", "hi"]).optional().describe("Language for texts in the result: en (default), ko, th, zh (Simplified Chinese), hi (Hindi). Pass the user's language.");
 var pid = external_exports.string().describe("project_id returned by aaplug2_connect_app");
 var store = external_exports.enum(["play", "apple"]).describe("play = Google Play, apple = App Store");
 var json3 = (o) => JSON.stringify(o, (k, v) => k.startsWith("_") ? void 0 : v, 2);
@@ -59331,7 +59393,7 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
     description: "Record choices the user made. Pass each as {key, value} using the key and an option value from aaplug2_get_decisions. Only send what the user actually picked or approved. Set accept_all_recommended=true only when the user explicitly said to accept all recommendations; it fills every undecided item with the recommended option. Changing a decision clears earlier submission approvals and generated files.",
     inputSchema: {
       project_id: pid,
-      choices: external_exports.array(external_exports.object({ key: external_exports.string(), value: external_exports.union([external_exports.string(), external_exports.number(), external_exports.array(external_exports.string())]) })).optional().describe('e.g. [{"key":"title","value":1},{"key":"fix:targetSdk","value":"apply"},{"key":"langs","value":["ko","en"]}]'),
+      choices: external_exports.array(external_exports.object({ key: external_exports.string(), value: external_exports.union([external_exports.string(), external_exports.number(), external_exports.array(external_exports.string())]) })).optional().describe('e.g. [{"key":"title","value":1},{"key":"fix:targetSdk","value":"apply"},{"key":"langs","value":["en","ko"]}]'),
       accept_all_recommended: external_exports.boolean().optional(),
       lang
     },
@@ -59348,7 +59410,7 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
   }));
   server.registerTool("aaplug2_generate_store_materials", {
     title: "Make all store materials",
-    description: "After every decision is made, create the full launch kit: store listing text per chosen language (KO/EN/TH), privacy policy and account-deletion pages, Data safety CSV and App Privacy answers, content-rating answers, PrivacyInfo.xcprivacy, code-fix diff for the approved fixes, icon, feature graphic and screenshots. Saves a folder and a ZIP and returns the texts so you can show them.",
+    description: "After every decision is made, create the full launch kit: store listing text per chosen language (English by default; Korean, Thai, Simplified Chinese or Hindi if picked), privacy policy and account-deletion pages, Data safety CSV and App Privacy answers, content-rating answers, PrivacyInfo.xcprivacy, code-fix diff for the approved fixes, icon, feature graphic and screenshots. Saves a folder and a ZIP and returns the texts so you can show them.",
     inputSchema: { project_id: pid, output_dir: external_exports.string().optional().describe("Optional folder to save into (local stdio use only). Default: ~/.aaplug2/projects/<id>/store-materials"), lang },
     annotations: W
   }, wrap(async (a) => {
@@ -59419,7 +59481,7 @@ if (!argv.includes("--http")) {
     if (allowedHosts.length && !allowedHosts.includes(req.headers.host)) return send(res, 403, { error: "host not allowed" });
     const origin = req.headers.origin;
     if (origin && !allowedOrigins.includes(origin)) return send(res, 403, { jsonrpc: "2.0", error: { code: -32e3, message: "origin not allowed" }, id: null });
-    if (url2.pathname === "/" && req.method === "GET") return send(res, 200, { name: "AA Plug 2 MCP", by: "MOTOR AA", version: VERSION, endpoint: "/mcp", transport: "streamable-http" });
+    if (url2.pathname === "/" && req.method === "GET") return send(res, 200, { name: "AA Plug 2 MCP", version: VERSION, endpoint: "/mcp", transport: "streamable-http" });
     if (url2.pathname !== "/mcp") return send(res, 404, { error: "not found" });
     if (req.method !== "POST") return send(res, 405, { jsonrpc: "2.0", error: { code: -32e3, message: "Method not allowed (stateless server: POST only)" }, id: null });
     let body = "";

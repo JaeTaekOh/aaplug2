@@ -47,6 +47,20 @@
   }
   const appName = () => (S.A ? G.nameOf(S.A, S.lang) : '');
   const stores = () => F.stores(S.A, S.dec);
+  /* Review lessons learned on this device (localStorage only, never sent anywhere). Same schema and sanitizing as the MCP server. */
+  const LS = window.AAPLessons;
+  function lessonsDb() { try { return LS.normDb(JSON.parse(localStorage.getItem(LS.KEY))); } catch (e) { return LS.empty(); } }
+  function saveLessons(db) { try { localStorage.setItem(LS.KEY, JSON.stringify(LS.normDb(db))); } catch (e) { } }
+  const relLessons = only => (S.A ? LS.relevant(lessonsDb(), S.A, only || stores(), S.lang) : []);
+  function lessonsCard(rel) {
+    if (!rel.length) return '';
+    return `<section class="card">
+      <h2 class="h-ic">${ic('sparkle')}${esc(LS.tx(S.lang, 'step'))}</h2>
+      <p class="muted">${esc(LS.tx(S.lang, 'stepD'))}</p>
+      <ul class="issues">${rel.map(r => `<li class="issue"><div class="issue-top">${sevBadge(r.level === 'warning' ? 'warn' : 'tip')}${platChip(r.store === 'apple' ? 'ios' : 'android')}</div>
+        <b>${esc((r.codes.length ? r.codes.join(', ') + ' · ' : '') + (r.title || r.builtin))}</b><p>${esc(r.why)}</p>${r.check ? `<p class="ai-fix">${ic('check')}${esc(r.check)}</p>` : ''}${r.passed_note ? `<p class="small muted">${esc(r.passed_note)}</p>` : ''}</li>`).join('')}</ul>
+    </section>`;
+  }
 
   /* ---------------- 상단 ---------------- */
   function header() {
@@ -228,6 +242,7 @@
           ${i.fix && i.fix !== 'info' ? `<p class="ai-fix">${ic('wand')}${esc(t('iss.' + i.id + '.f', i.vars))}</p>` : ''}
         </li>`).join('')}</ul>
     </section>
+    ${lessonsCard(relLessons())}
     <section class="grid2">
       <div class="card">
         <h2 class="h-ic">${ic('target')}${esc(t('an.sdk'))}</h2>
@@ -484,7 +499,11 @@
 
   /* ===== 5. 제출 안내 ===== */
   let subTab = null;
-  const guide = store => F.guide(S.A, S.dec, S.lang, store, t);
+  const guide = store => {
+    const steps = F.guide(S.A, S.dec, S.lang, store, t), extra = LS.reviewNoteLines(relLessons({ [store]: true }));
+    const rv = steps.find(s => s.id === 'a-review'); if (rv && extra.length) rv.fields = rv.fields.map(([k, v], i) => (i === 0 ? [k, [v, ...extra].join('\n\n')] : [k, v]));
+    return steps;
+  };
   function vSubmit() {
     const st = stores(); const tabs = [st.play && 'play', st.apple && 'apple'].filter(Boolean); const tab = tabs.includes(subTab) ? subTab : tabs[0]; subTab = tab;
     const steps = guide(tab); const doneN = steps.filter(s => S.done[s.id]).length;
@@ -496,6 +515,7 @@
     </section>
     <div class="seg big" role="tablist">${tabs.map(s => `<button role="tab" aria-selected="${s === tab}" data-stab="${s}">${ic(s === 'play' ? 'android' : 'apple')}${s === 'play' ? 'Google Play Console' : 'App Store Connect'}</button>`).join('')}</div>
     <div class="bar thin"><i style="transform:scaleX(${doneN / steps.length})"></i></div>
+    ${lessonsCard(relLessons({ [tab]: true }).filter(r => r.store === tab))}
     <ol class="guide">${steps.map((s, k) => {
       const locked = s.final && !S.approved; const isDone = !!S.done[s.id];
       return `<li class="gstep card ${isDone ? 'is-done' : ''} ${locked ? 'locked' : ''} m-stagger" style="--i:${Math.min(k, 10)}">
@@ -552,6 +572,20 @@
         <textarea id="rejText" rows="6" spellcheck="false">${esc(R.text || sample)}</textarea>
         <div class="row end"><button class="btn primary" id="analyzeRej" data-press data-ripple>${ic('wand')}<span>${esc(t('rv.analyze'))}</span></button></div>
       </div>`;
+    } else if (R.status === 'fixing' && R.lesson) {
+      const L = LS.normDb({ lessons: [R.lesson] }).lessons[0], reply = LS.replyFor(L, appName());
+      body = `
+      <div class="card m-rise">
+        <div class="dc-badges">${sevBadge('block')}${platChip(L.store === 'apple' ? 'ios' : 'android')}</div>
+        <h2>${esc((L.codes.length ? L.codes.join(', ') + ' · ' : '') + L.title)}</h2>
+        <p class="muted">${esc(L.advice)}</p>
+        <h3 class="h-ic">${ic('list')}${esc(t('rv.plan'))}</h3>
+        <ol class="how">${LS.planFor(L, S.lang).map(x => `<li>${esc(x)}</li>`).join('')}</ol>
+        <h3 class="h-ic">${ic('message')}${esc(t('rv.reply'))}</h3>
+        <pre class="field-v">${esc(reply)}</pre>
+        <div class="row">${copyBtn(reply)}</div>
+        <div class="approve-box">${ic('thumb')}<div><b>${esc(t('rv.approveFix'))}</b><p>${esc(t('rv.approveFix.d'))}</p></div><button class="btn primary" id="resubmit" data-press data-ripple>${ic('send')}<span>${esc(t('rv.resubmit'))}</span></button></div>
+      </div>`;
     } else if (R.status === 'fixing') {
       const rj = G.REJECTIONS.find(r => r.id === R.rid) || G.REJECTIONS[0]; const reply = rj.reply(appName());
       body = `
@@ -577,15 +611,22 @@
     ${adSlot()}`;
   }
   after.review = () => {
-    const ok = $('#gotOk'); if (ok) ok.onclick = () => { S.review.status = 'approved'; S.review.doneAt = Date.now(); save(); go('done'); };
+    const ok = $('#gotOk'); if (ok) ok.onclick = () => {
+      if (!S.sample && (S.lessonIds || []).length) { saveLessons(LS.recordPass(lessonsDb(), S.lessonIds).db); S.lessonIds = []; }
+      S.review.status = 'approved'; S.review.doneAt = Date.now(); save(); go('done'); };
     const no = $('#gotNo'); if (no) no.onclick = () => { S.review.status = 'rejected'; save(); render('none'); };
     const an = $('#analyzeRej'); if (an) an.onclick = () => {
-      const text = $('#rejText').value; const rj = G.matchRejection(text, stores().apple ? null : 'play');
-      if (!rj) { toast(t('rv.unknown'), 'err'); return; }
+      const text = $('#rejText').value; const st = stores(); const rj = LS.matchKnown(text, st.apple ? null : 'play');
+      if (!String(text).trim()) { toast(t('rv.unknown'), 'err'); return; }
+      /* Learn on this device: known reasons are counted, unknown ones become a generalized lesson. The demo sample never writes. */
+      const store = rj ? rj.store : (!st.apple || (st.play && /google play|issue found|play console/i.test(text)) ? 'play' : 'apple');
+      const lr = LS.learn(S.sample ? LS.empty() : lessonsDb(), text, store, rj ? rj.id : null);
+      if (!S.sample) { saveLessons(lr.db); S.lessonIds = [...new Set([...(S.lessonIds || []), lr.lesson.id])]; }
+      if (!rj) { S.review = { ...S.review, status: 'fixing', text, lesson: lr.lesson }; save(); render('none'); if (!S.sample) toast(LS.tx(S.lang, 'saved')); return; }
       S.review = { ...S.review, status: 'fixing', text, rid: rj.id }; save(); render('none');
     };
     const dp = $('#dlRejPatch'); if (dp) dp.onclick = () => download('fix.diff', G.patches(S.A, S.lang)['patch-manifest-photo'].diff);
-    const rs = $('#resubmit'); if (rs) rs.onclick = () => modal({ icon: 'send', title: t('rv.modal.t'), body: `<p>${esc(t('rv.modal.d'))}</p>`, ok: t('rv.modal.ok'), cancel: t('cancel'), onOk: () => { S.review = { status: 'inReview', round: (S.review.round || 1) + 1, fixed: S.review.rid }; save(); render('none'); toast(t('rv.resubmitted')); } });
+    const rs = $('#resubmit'); if (rs) rs.onclick = () => modal({ icon: 'send', title: t('rv.modal.t'), body: `<p>${esc(t('rv.modal.d'))}</p>`, ok: t('rv.modal.ok'), cancel: t('cancel'), onOk: () => { S.review = { status: 'inReview', round: (S.review.round || 1) + 1, fixed: S.review.rid || (S.review.lesson && S.review.lesson.id) }; save(); render('none'); toast(t('rv.resubmitted')); } });
   };
 
   /* ===== 7. 출시 완료 ===== */

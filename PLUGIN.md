@@ -90,7 +90,7 @@ Project `.cursor/mcp.json` or `~/.cursor/mcp.json`:
   }
 }
 ```
-With the Cursor CLI, `mcp enable aaplug2` → `mcp list` shows `aaplug2: ready` and `mcp list-tools aaplug2` shows 10 tools. HTTP mode (`"url": "http://127.0.0.1:5181/mcp"`) is also ready.
+With the Cursor CLI, `mcp enable aaplug2` → `mcp list` shows `aaplug2: ready` and `mcp list-tools aaplug2` shows 11 tools. HTTP mode (`"url": "http://127.0.0.1:5181/mcp"`) is also ready.
 Cursor IDE asks you to approve the server the first time.
 
 ---

@@ -26,6 +26,11 @@ AA Plug 2 takes an app the user already built and gets it to "launched" on Googl
 
 Use `aaplug2_status` to resume in a new conversation.
 
+## Learning from review results
+- Every reported review result is learned on this computer automatically; there is no separate save step. A rejection the tools do not know becomes a generalized lesson and returns a fix plan (`matched: "learned"`); a known one returns the built-in plan and is counted. An approval records that the learned checks were part of a later approval.
+- Show `learned_lessons` from the report, decisions, guide and generated materials to the user: warnings when the app has related signals, otherwise checks to do before submitting. They add to the built-in checks and never replace them (for example, never suggest ATT because of ads).
+- Lessons stay on this computer and contain no original store message. Use `aaplug2_forget_lesson` only when the user asks to drop one. Still never reply to a store yourself.
+
 ## App Store review rules to explain (the tools already check them)
 - Tracking must tell one story from the first submit: ATT, `PrivacyInfo.xcprivacy`, the App Privacy form, and what the app really does. For apps with ads the default is no ATT prompt and no `NSUserTrackingUsageDescription`, `NSPrivacyTracking` false with no tracking domains, non-personalized ad requests (`npa=1`), and App Privacy "No, we do not track". Never tell the user to add ATT just because the app shows ads. A mixed setup leads to ITMS-91064 or a Guideline 2.1 rejection. If the app already has a fully aligned tracking setup, keep it aligned.
 - The App Privacy form is separate from the build. Remind the user to check it right before submitting.

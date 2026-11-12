@@ -31,10 +31,10 @@ async function stdioFlow() {
   const { tools } = await c.listTools();
   const names = tools.map(t => t.name).sort();
   console.log('  tools:', names.join(', '));
-  check(names.length === 10, '10 tools listed', names);
+  check(names.length === 11, '11 tools listed', names);
   check(tools.every(t => t.description && t.description.length > 60 && t.inputSchema && t.inputSchema.type === 'object'), 'every tool has a description and an input schema');
   const langProps = tools.map(t => t.inputSchema.properties && t.inputSchema.properties.lang).filter(Boolean);
-  check(langProps.length === 10 && langProps.every(p => JSON.stringify(p.enum) === JSON.stringify(LANGS)), 'every tool: lang accepts en, ko, th, zh, hi', langProps.map(p => p.enum));
+  check(langProps.length === tools.length && langProps.every(p => JSON.stringify(p.enum) === JSON.stringify(LANGS)), 'every tool: lang accepts en, ko, th, zh, hi', langProps.map(p => p.enum));
   const ins = c.getInstructions();
   check(!NON_EN.test(ins) && /en \(English, the default\)/.test(ins) && /zh \(Simplified Chinese\)/.test(ins) && /hi \(Hindi\)/.test(ins) && /Pass the user's language/.test(ins) && !/English only/i.test(ins), 'instructions: five languages, English default, pass the user\'s language');
   const { normLang } = await import('../lib/engine.mjs');
@@ -152,7 +152,7 @@ async function httpFlow() {
   try {
     const c = new Client({ name: 'aaplug2-test-http', version: '1.0.0' });
     await c.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${port}/mcp`)));
-    const { tools } = await c.listTools(); check(tools.length === 10, 'HTTP: 10 tools listed');
+    const { tools } = await c.listTools(); check(tools.length === 11, 'HTTP: 11 tools listed');
     let r = await c.callTool({ name: 'aaplug2_connect_app', arguments: { source: 'sample' } });
     const id = data(r).project_id; check(!!id && !NON_EN.test(data(r).summary), 'HTTP: connect sample (default en) → ' + data(r).summary);
     r = await c.callTool({ name: 'aaplug2_connect_app', arguments: { source: 'path', path: '/etc' } });

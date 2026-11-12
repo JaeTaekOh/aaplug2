@@ -1,7 +1,7 @@
 {
   "name": "aaplug2",
   "displayName": "AA Plug 2",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Get an app you already built with AI onto Google Play and the App Store: connect once, pick and approve, never auto-submitted. Free, no API keys.",
   "keywords": ["app-launch", "google-play", "app-store", "mcp"],
   "mcpServers": {

@@ -12,7 +12,7 @@ cp -r "$ROOT/plugin-src/." "$OUT/"
 I18N_LANGS="en ko th zh hi"
 for l in $I18N_LANGS; do test -f "$ROOT/js/i18n-$l.js" || { echo "ERROR: js/i18n-$l.js missing" >&2; exit 1; }; done
 test -f "$ROOT/plugin-src/LICENSE" || { echo "ERROR: plugin-src/LICENSE missing" >&2; exit 1; }
-for f in config i18n-en i18n-ko i18n-th i18n-zh i18n-hi i18n zip sample-data sources analyzer generator graphics flow; do cp "$ROOT/js/$f.js" "$OUT/js/"; done
+for f in config i18n-en i18n-ko i18n-th i18n-zh i18n-hi i18n zip sample-data sources analyzer generator graphics flow lessons; do cp "$ROOT/js/$f.js" "$OUT/js/"; done
 cp -r "$ROOT/fonts/plex-sans" "$ROOT/fonts/plex-thai" "$ROOT/fonts/LICENSES" "$OUT/fonts/"
 cp "$ROOT/mcp/dist/aaplug2-mcp.mjs" "$OUT/mcp/dist/"
 cp "$ROOT"/mcp/fonts/* "$OUT/mcp/fonts/"

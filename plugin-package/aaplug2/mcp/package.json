@@ -1,6 +1,6 @@
 {
   "name": "aaplug2-mcp-runtime",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
   "description": "Optional: run 'npm install' here to turn on store graphics (icon, feature graphic, screenshots).",

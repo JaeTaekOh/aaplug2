@@ -15,7 +15,7 @@
 | `mcp/server.mjs` | MCP 서버 진입점. 기본은 stdio, `--http`를 주면 Streamable HTTP(`/mcp`) |
 | `mcp/lib/runtime.mjs` | 웹 앱의 `js/*.js`(분석기·생성기·그래픽·흐름)를 Node에서 그대로 불러오는 얇은 실행 환경. linkedom이 DOMParser, @napi-rs/canvas가 canvas 역할 |
 | `mcp/lib/engine.mjs` | 흐름 엔진: 연결 → 보고 → 결정 → 그래픽 → 자료 → 안내 → 승인 → 심사 → 출시 완료. 상태는 `~/.aaplug2/projects/<id>/state.json` |
-| `mcp/lib/tools.mjs` | 도구 10개, 프롬프트 1개, 서버 instructions |
+| `mcp/lib/tools.mjs` | 도구 11개, 프롬프트 1개, 서버 instructions |
 | `mcp/lib/messages.mjs` | MCP용 안내 문구 en(기본)/ko/th/zh/hi |
 | `mcp/test/run.mjs` | 자동 테스트 |
 | `mcp/fonts/` | 그래픽용 Pretendard OTF(OFL). 웹 폰트는 잘게 나뉜 파일이라 서버에서는 한글이 깨져서 따로 둠 |
@@ -45,7 +45,9 @@
 | `aaplug2_submission_guide` | Play Console / App Store Connect 단계별 안내와 칸마다 넣을 값. 마지막 단계는 잠김 |
 | `aaplug2_approve_submission` | 사용자의 명시적 승인 기록(본인 말을 함께 저장). 마지막 단계만 열고 **제출하지 않음** |
 | `aaplug2_report_review` | submitted / rejected(메시지 → 수정 계획·답장) / resubmitted / approved. 고른 스토어가 모두 출시되면 끝 |
-| `aaplug2_status` | 현재 단계와 다음 할 일, 또는 프로젝트 목록 |
+| `aaplug2_status` | 현재 단계와 다음 할 일, 또는 프로젝트 목록, 이 컴퓨터에서 배운 심사 교훈 |
+| `aaplug2_forget_lesson` | 배운 심사 교훈 하나 지우기 (사용자가 요청할 때만) |
+| (공통) `mcp/lib/lessons.mjs`, `js/lessons.js` | 심사 결과 자동 학습: `~/.aaplug2/lessons.json` (원문 없음), `lessons-export.json` (익명) |
 
 - 프롬프트 `launch_my_app` 1개.
 - 서버 instructions에 규칙을 넣었습니다: 폼 금지, 사용자가 고른 값만 기록, 자동 제출 없음, 사용자 언어로 답하기.

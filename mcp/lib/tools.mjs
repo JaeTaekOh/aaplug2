@@ -4,7 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as E from './engine.mjs';
 import { CFG } from './runtime.mjs';
 
-export const VERSION = '0.1.2';
+export const VERSION = '0.1.3';
 
 export const INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
 How to use it:
@@ -14,6 +14,7 @@ How to use it:
 4. Call aaplug2_generate_store_materials, then aaplug2_submission_guide for each store and walk the user through the console steps.
 5. The final submit step stays locked until the user explicitly approves; then call aaplug2_approve_submission. AA Plug 2 never submits to any store itself: the user presses the submit button in Play Console / App Store Connect.
 6. When the user reports the review result, call aaplug2_report_review (submitted / rejected with the store's message / resubmitted / approved). When every chosen store is live, the job is done. In App Store Connect an "Information Needed" request also shows as Rejected; it asks for a reply, not always a new build. Never reply to Apple or Google yourself: draft the reply and let the user send it.
+7. Reported review results are learned automatically and locally: an unknown rejection becomes a generalized lesson (store, guideline/ITMS codes, short advice) saved only on this computer, and known ones are counted. Later reports, choices, submission guides and review notes for every app on this computer show the relevant lessons as warnings or pre-submit checks (field learned_lessons); show them to the user. Nothing is sent off the machine, raw store messages are not kept in the shared lessons file, and learned lessons never override the default checks (for example they never mean "add ATT because of ads"). aaplug2_status lists the lessons; aaplug2_forget_lesson removes one if the user asks.
 App Store review rules the analysis follows (explain them in plain words when they come up):
 - Tracking, ATT, PrivacyInfo.xcprivacy, the App Privacy form and real behavior must match from the first submit. Default for apps with ads: no ATT prompt or NSUserTrackingUsageDescription, NSPrivacyTracking=false with no tracking domains, every ad request non-personalized (npa=1), App Privacy "No, we do not track". Never suggest adding ATT just because the app shows ads. Keep an already fully aligned tracking setup, but never leave a mixed one.
 - Core features should work without login (5.1.1(v)); third-party login on iOS needs Sign in with Apple; accounts need in-app and web deletion; the Support URL must show a contact method; ads are mentioned only in the privacy policy; no "free" or other brands' names in subtitle/keywords; review notes for user-supplied API keys say there is no IAP and the developer does not sell keys, with a review-only key the user attaches (never put real keys anywhere).
@@ -101,15 +102,21 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
 
   server.registerTool('aaplug2_report_review', {
     title: 'Report a store review result',
-    description: 'Record what happened at the store, as told by the user: event=submitted (user pressed submit), rejected (include the store\'s rejection message in rejection_text to get a fix plan and a reply to the reviewer), resubmitted (after the user approved the fix and resubmitted), approved (the app is live). When every chosen store is live, AA Plug 2\'s job is finished.',
+    description: 'Record what happened at the store, as told by the user: event=submitted (user pressed submit), rejected (include the store\'s rejection message in rejection_text to get a fix plan and a reply to the reviewer), resubmitted (after the user approved the fix and resubmitted), approved (the app is live). A rejection is learned automatically on this computer: a known reason returns the built-in fix plan, an unknown one is saved as a generalized lesson (no raw message stored in the shared lessons file) and returns a plan from it; an approval records that the learned checks were part of a later approval. Nothing is sent anywhere and AA Plug 2 never replies to the store. When every chosen store is live, AA Plug 2\'s job is finished.',
     inputSchema: { project_id: pid, store, event: z.enum(['submitted', 'rejected', 'resubmitted', 'approved']), rejection_text: z.string().optional(), lang }, annotations: W
   }, wrap(async a => ok(E.review(E.load(a.project_id, a.lang), a, a.lang))));
 
   server.registerTool('aaplug2_status', {
     title: 'Where am I?',
-    description: 'Show the current step and the next action for a project, or list all AA Plug 2 projects when project_id is omitted. Use it to resume launch help in a new conversation.',
+    description: 'Show the current step and the next action for a project, or list all AA Plug 2 projects when project_id is omitted. Use it to resume launch help in a new conversation. Also lists the review lessons learned on this computer (lessons: id, store, codes, title, times_seen, times_passed_after).',
     inputSchema: { project_id: z.string().optional(), lang }, annotations: RO
   }, wrap(async a => ok(E.status(a.project_id, a.lang))));
+
+  server.registerTool('aaplug2_forget_lesson', {
+    title: 'Forget a learned review lesson',
+    description: 'Remove one review lesson that AA Plug 2 learned on this computer from earlier store results, only when the user asks to drop it. Pass lesson_id from the lessons list of aaplug2_status. Removes it from ~/.aaplug2/lessons.json and the anonymized export; projects are not changed.',
+    inputSchema: { lesson_id: z.string().min(1).describe('id from aaplug2_status lessons'), lang }, annotations: { ...W, destructiveHint: true, idempotentHint: true }
+  }, wrap(async a => ok(E.forgetLesson(a.lesson_id, a.lang))));
 
   server.registerPrompt('launch_my_app', {
     title: 'Launch my app with AA Plug 2',

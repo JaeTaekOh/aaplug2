@@ -4,8 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
-import { Analyzer, Gen, Gfx, Flow, Sources, Zip, CFG, tr, hasGraphics } from './runtime.mjs';
+import { Analyzer, Gen, Gfx, Flow, Sources, Zip, CFG, tr, hasGraphics, Lessons } from './runtime.mjs';
 import { msg } from './messages.mjs';
+import { withLessons, relevantLessons, listLessons } from './lessons.mjs';
 
 /* Texts come in five languages; English is the default whenever lang is omitted or unknown. */
 export const LANGS = ['en', 'ko', 'th', 'zh', 'hi'];
@@ -91,9 +92,16 @@ export function report(st, lang) {
     readiness: A.readiness, counts: c,
     issues: A.issues.map(i => ({ key: i.fix && i.fix !== 'info' ? Flow.issueKey(i) : null, severity: t('sev.' + i.sev), sev: i.sev, store: i.plat === 'android' ? 'Google Play' : i.plat === 'ios' ? 'App Store' : 'both',
       title: t('iss.' + i.id + '.t', i.vars), why: t('iss.' + i.id + '.w', i.vars), ai_fix: i.fix && i.fix !== 'info' ? t('iss.' + i.id + '.f', i.vars) : null })),
+    ...learned(st, L),
     next: msg(L, 'nextDecide', { n: Flow.decisions(A).length })
   };
 }
+/* Lessons learned on this machine from earlier store reviews (any project). Warnings or reminders only; built-in checks stay the default. */
+function learned(st, L) {
+  const rel = relevantLessons(st.A, Flow.stores(st.A, st.dec), L);
+  return rel.length ? { learned_lessons: rel, learned_note: msg(L, 'learnedNote', { n: rel.length }) } : {};
+}
+const withLearnedNotes = (notes, rel) => { const x = Lessons.reviewNoteLines(rel || []); return x.length ? [notes, ...x].filter(Boolean).join('\n\n') : notes; };
 
 /* ---------- 3. 결정 ---------- */
 const STYLE = { icon: ['original', 'brand', 'light'], feature: ['split', 'shot', 'minimal'] };
@@ -135,7 +143,7 @@ export function decisions(st, lang, onlyOpen) {
     return { key: d.key, group: d.group, ...decisionTitle(d, L), options: opts.map(o => ({ ...o, recommended: JSON.stringify(o.value) === JSON.stringify(rec) || undefined })), recommended: rec, decided: cur !== undefined, current: cur };
   });
   const open = out.filter(d => !d.decided);
-  return { project_id: st.id, open_count: open.length, total: out.length, decisions: onlyOpen ? open : out, next: open.length ? msg(L, 'openLeft', { n: open.length }) : msg(L, 'allDecided') };
+  return { project_id: st.id, open_count: open.length, total: out.length, decisions: onlyOpen ? open : out, ...learned(st, L), next: open.length ? msg(L, 'openLeft', { n: open.length }) : msg(L, 'allDecided') };
 }
 function validate(st, d, val, L) {
   const bad = () => { throw new UserError(msg(L, 'badValue', { key: d.key, val: JSON.stringify(val) }), 'badValue'); };
@@ -201,6 +209,8 @@ export async function generate(st, { output_dir, lang }, { allowPath }) {
   const L = normLang(lang || st.lang), t = T(L); requireDecided(st, L);
   const A = st.A, C = Flow.chosen(A, st.dec), stores = Flow.stores(A, st.dec);
   const files = Flow.textFiles(A, st.dec, L, t);
+  const rel = relevantLessons(A, stores, L);
+  const nf = files.find(f => f.path === 'forms/app-review-notes.txt'); if (nf) nf.data = withLearnedNotes(String(nf.data).trimEnd(), rel) + '\n';
   const g = await graphics(st, L, ['feature', 'screenshots']);
   if (g) {
     files.push({ path: 'graphics/icon-512.png', data: Buffer.from(b64(g.icons[st.dec.icon || 0]), 'base64') });
@@ -227,7 +237,8 @@ export async function generate(st, { output_dir, lang }, { allowPath }) {
     listing, data_safety: Gen.dataSafety(A, L, Flow.privacyOpts(A, st.dec)).rows.map(x => ({ play: x.playType, apple: x.appleType, collected: x.collected, shared: x.shared, optional: x.optional, linked: x.linked, tracking: x.tracking, purposes: x.purposes })),
     content_rating: { play: r.result.play, apple: r.result.apple, answers: r.qa.map(([q, a]) => ({ q, a })) },
     applied_code_fixes: Flow.appliedFixes(A, st.dec, L).map(([, v]) => v.file),
-    app_review_notes: stores.apple && A.ios ? Flow.reviewNotes(A, st.dec, C.langs[0]) : undefined,
+    app_review_notes: stores.apple && A.ios ? withLearnedNotes(Flow.reviewNotes(A, st.dec, C.langs[0]), rel) : undefined,
+    learned_lessons: rel.length ? rel : undefined,
     app_privacy_tracking: stores.apple && A.ios ? (Flow.trackingOn(A, st.dec) ? 'Yes, we track (ATT prompt + tracking domains must match)' : 'No, we do not track') : undefined,
     note_privacy_hosting: t('as.host'),
     next: 'aaplug2_submission_guide',
@@ -248,8 +259,16 @@ export function guide(st, store, lang) {
     return { n: k + 1, id: s.id, title: t('g.' + s.id + '.t'), what: t('g.' + s.id + '.d'), how: t('g.' + s.id + '.how').split('|').filter(x => x && !x.startsWith('g.')),
       final: !!s.final || undefined, locked: locked || undefined, fields: locked ? [] : s.fields.map(([label, value]) => ({ label, value: String(value) })) };
   });
+  const rel = relevantLessons(st.A, { [store]: true }, L).filter(r => r.store === store);
+  const rv = steps.find(s => s.id === 'a-review'); const nf = rv && rv.fields.find(f => f.label === t('f.reviewNotes')); if (nf) nf.value = withLearnedNotes(nf.value, rel);
+  if (rel.length) {
+    const fin = steps.findIndex(s => s.final); const at = fin < 0 ? steps.length : fin;
+    steps.splice(at, 0, { n: 0, id: 'learned-checks', title: Lessons.tx(L, 'step'), what: Lessons.tx(L, 'stepD'), how: [],
+      fields: rel.map(r => ({ label: `${r.codes.length ? r.codes.join(', ') + ' · ' : ''}${r.title || r.builtin}${r.times_seen ? ' (' + Lessons.tx(L, 'seen', { n: r.times_seen }) + ')' : ''}`, value: [r.check || r.why, r.passed_note].filter(Boolean).join(' ') })) });
+    steps.forEach((s, k) => { s.n = k + 1; });
+  }
   return { project_id: st.id, store: STORE_NAME[store], approved, materials: st.generated ? { folder: st.generated.folder, zip: st.generated.zip } : null,
-    note: approved ? msg(L, 'guideUnlocked') : msg(L, 'guideLocked'), steps };
+    note: approved ? msg(L, 'guideUnlocked') : msg(L, 'guideLocked'), steps, learned_lessons: rel.length ? rel : undefined };
 }
 export function approve(st, store, userWords, lang) {
   const L = normLang(lang || st.lang); requireDecided(st, L); storeCheck(st, store, L);
@@ -273,14 +292,25 @@ export function review(st, { store, event, rejection_text }, lang) {
       st.review[store] = { ...R, status: 'rejected' };
       out = { ...out, status: 'rejected', message: msg(L, 'pasteRejection'), sample_message_for_demo: sample };
     } else {
-      const rj = Gen.matchRejection(rejection_text, store);
+      const rj = Lessons.matchKnown(rejection_text, store);
       const infoNeeded = store === 'apple' && /information needed/i.test(rejection_text) ? msg(L, 'infoNeeded') : undefined;
-      if (!rj) { st.review[store] = { ...R, status: 'rejected', text: rejection_text }; out = { ...out, status: 'rejected', matched: false, information_needed: infoNeeded, message: msg(L, 'unknownRejection') }; }
+      /* Learn automatically: a known reason only counts an occurrence; an unknown one becomes a new generalized lesson on this machine. */
+      const learnFn = db => Lessons.learn(db, rejection_text, store, rj ? rj.id : null);
+      const lr = st.sample ? learnFn(Lessons.empty()) : withLessons(learnFn);   // the built-in demo never writes to the user's lessons
+      const les = lr && lr.lesson;
+      if (les && !st.sample) { st.lessonIds = st.lessonIds || {}; const a = st.lessonIds[store] || []; if (!a.includes(les.id)) a.push(les.id); st.lessonIds[store] = a; }
+      if (!rj && les) {
+        st.review[store] = { ...R, status: 'fixing', text: rejection_text, lesson: les.id };
+        out = { ...out, status: 'fixing', matched: 'learned', information_needed: infoNeeded, reason: les.title, why: les.advice, fix_plan: Lessons.planFor(les, L), auto_reply: false,
+          reply_to_reviewer: Lessons.replyFor(les, appName(st, 'en')), lesson: { ...Lessons.compact(les), created: lr.created, saved: !st.sample }, message: msg(L, 'learnedRejection'),
+          next: t('rv.approveFix.d') + ' → aaplug2_report_review event=resubmitted' };
+      } else if (!rj) { st.review[store] = { ...R, status: 'rejected', text: rejection_text }; out = { ...out, status: 'rejected', matched: false, information_needed: infoNeeded, message: msg(L, 'unknownRejection') }; }
       else {
         st.review[store] = { ...R, status: 'fixing', text: rejection_text, rid: rj.id };
         const p = rj.id === 'play-photo' ? Gen.patches(st.A, L)['patch-manifest-photo'] : null;
         out = { ...out, status: 'fixing', matched: true, information_needed: infoNeeded, reason: t('rj.' + rj.id + '.t'), why: t('rj.' + rj.id + '.w'), fix_plan: rj.plan[L] || rj.plan.en, auto_reply: false,
           reply_to_reviewer: rj.reply(appName(st, 'en')), code_fix: p ? { file: p.file, diff: p.diff } : undefined,
+          lesson: les ? { ...Lessons.compact(les), note: msg(L, 'builtinRecorded') } : undefined,
           next: t('rv.approveFix.d') + ' → aaplug2_report_review event=resubmitted' };
       }
     }
@@ -289,8 +319,13 @@ export function review(st, { store, event, rejection_text }, lang) {
     const chosen = Object.entries(Flow.stores(st.A, st.dec)).filter(([, v]) => v).map(([k]) => k);
     const allLive = chosen.every(k => st.review[k] && st.review[k].status === 'live');
     if (allLive) st.done = new Date().toISOString();
+    /* A lesson's checks were part of a later approval: count once per project and store. */
+    const pend = ((st.lessonIds || {})[store] || []).filter(id => !((st.lessonsPassed || {})[store] || []).includes(id));
+    const pr = pend.length ? withLessons(db => Lessons.recordPass(db, pend)) : null;
+    if (pr) { st.lessonsPassed = st.lessonsPassed || {}; st.lessonsPassed[store] = [...((st.lessonsPassed[store]) || []), ...pend]; }
     out = { ...out, status: 'live', message: allLive ? msg(L, 'allLive', { url: CFG.feedbackUrl }) : msg(L, 'live', { store: S }), all_launched: allLive,
-      remaining_stores: chosen.filter(k => !(st.review[k] && st.review[k].status === 'live')).map(k => STORE_NAME[k]) };
+      remaining_stores: chosen.filter(k => !(st.review[k] && st.review[k].status === 'live')).map(k => STORE_NAME[k]),
+      lessons_confirmed: pr && pr.lessons.length ? pr.lessons.map(Lessons.compact) : undefined, lessons_note: pr && pr.lessons.length ? msg(L, 'lessonsPassed') + ' ' + Lessons.tx(L, 'passed') : undefined };
   } else throw new UserError('event must be submitted | rejected | resubmitted | approved', 'badEvent');
   save(st);
   return out;
@@ -310,9 +345,17 @@ function stepOf(st, L) {
 }
 export function status(id, lang) {
   const L = normLang(lang);
-  if (id) { const st = load(id, L); return { project_id: st.id, app: appName(st, L), readiness: st.A.readiness, ...stepOf(st, L), materials: st.generated, approvals: st.approved, review: st.review }; }
+  if (id) { const st = load(id, L); return { project_id: st.id, app: appName(st, L), readiness: st.A.readiness, ...stepOf(st, L), materials: st.generated, approvals: st.approved, review: st.review, lessons: listLessons() }; }
   let ids = []; try { ids = fs.readdirSync(PROJ); } catch { }
   const list = ids.map(i => { try { const st = load(i, L); return { project_id: st.id, app: appName(st, L), updated: st.updatedAt, ...stepOf(st, L) }; } catch { return null; } }).filter(Boolean)
     .sort((a, b) => String(b.updated).localeCompare(String(a.updated)));
-  return { projects: list, data_dir: HOME };
+  return { projects: list, data_dir: HOME, lessons: listLessons() };
+}
+
+/* Remove one learned lesson from this machine (lessons.json and the export). Project state is not touched. */
+export function forgetLesson(id, lang) {
+  const L = normLang(lang);
+  const r = withLessons(db => Lessons.forget(db, String(id || '')));
+  if (!r || !r.removed) throw new UserError(msg(L, 'lessonNotFound', { id }), 'lessonNotFound');
+  return { removed: id, message: msg(L, 'lessonForgotten', { id }), lessons: listLessons() };
 }

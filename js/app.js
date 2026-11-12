@@ -40,6 +40,7 @@
   function dataUrlToBlob(u) { const [h, b] = u.split(','); const bin = atob(b); const a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Blob([a], { type: h.slice(5).split(';')[0] }); }
   const copyBtn = (text, label) => `<button class="btn ghost sm" data-copy="${esc(text)}" data-press>${ic('copy')}<span>${label || t('copy')}</span></button>`;
   function sevBadge(sev) { return `<span class="sev sev-${sev}">${ic(sev === 'block' ? 'stop' : sev === 'warn' ? 'alert' : 'info')}${t('sev.' + sev)}</span>`; }
+  const ix = v => (Number.isInteger(v) ? v : 0);   // 'keep' or unset → first option for previews
   function platChip(p) { return p === 'android' ? `<span class="chip">${ic('android')}Google Play</span>` : p === 'ios' ? `<span class="chip">${ic('apple')}App Store</span>` : `<span class="chip">${ic('store')}${t('bothStores')}</span>`; }
   function adSlot() {
     if (!CFG.showAdSlotPlaceholder) return '';
@@ -237,7 +238,7 @@
         <p class="muted">${esc(t('err.' + S.error))}</p>
         <div class="row center"><button class="btn primary" data-go="home" data-press>${ic('left')}<span>${esc(t('back'))}</span></button><button class="btn ghost" id="trySample" data-press>${ic('play')}<span>${esc(t('home.sample'))}</span></button></div>
       </section>`;
-    const A = S.A, c = { block: 0, warn: 0, tip: 0 }; A.issues.forEach(i => c[i.sev]++);
+    const A = S.A, ISS = F.issuesFor(A, S.dec), c = { block: 0, warn: 0, tip: 0 }; ISS.forEach(i => c[i.sev]++);
     const sdk = Object.entries(A.sdk).filter(([, v]) => v).map(([k]) => k);
     const ringC = 2 * Math.PI * 52;
     return `
@@ -264,7 +265,7 @@
     <section class="card">
       <h2 class="h-ic">${ic('list')}${esc(t('an.found'))}</h2>
       <p class="muted">${esc(t('an.found.d'))}</p>
-      <ul class="issues">${A.issues.map((i, k) => `
+      <ul class="issues">${ISS.map((i, k) => `
         <li class="issue m-stagger" style="--i:${Math.min(k, 10)}">
           <div class="issue-top">${sevBadge(i.sev)}${platChip(i.plat)}</div>
           <b>${esc(t('iss.' + i.id + '.t', i.vars))}</b>
@@ -294,13 +295,13 @@
   async function ensureGen() {
     const A = S.A; const my = ++genToken;
     const langs = F.LANGS;   /* all five, so the copy shown in the current UI language is always ready */
-    const tone = S.dec.tone || 'friendly';
+    const tone = S.dec.tone && S.dec.tone !== 'keep' ? S.dec.tone : 'friendly';
     const listing = {}; langs.forEach(l => listing[l] = G.listing(A, l, tone));
     const brand = S.brand || '#2f6f5e';
     const icons = await X.icons(A, brand);
-    const iconUrl = icons[S.dec.icon != null ? S.dec.icon : 0].dataUrl;
+    const iconUrl = icons[ix(S.dec.icon)].dataUrl;
     const L = S.lang;
-    const titleIdx = S.dec.title || 0, shortIdx = S.dec.short || 0;
+    const titleIdx = ix(S.dec.title), shortIdx = ix(S.dec.short);
     const nm = l => listing[l].titles[Math.min(titleIdx, listing[l].titles.length - 1)].split(/ [-–:] /)[0];
     const tg = l => listing[l].shorts[Math.min(shortIdx, listing[l].shorts.length - 1)].replace(/[.。।]$/, '');
     const features = await Promise.all(['split', 'shot', 'minimal'].map(st => X.feature(A, L, st, brand, iconUrl, nm(L), tg(L))));
@@ -316,12 +317,12 @@
   }
 
   /* ===== 3. 결정 ===== */
-  const decisions = () => F.decisions(S.A);
+  const decisions = () => F.decisions(S.A, S.dec);
   const decided = d => S.dec[d.key] !== undefined;
   const recValue = F.recValue;
   function vDecide() {
     const list = decisions(); const left = list.filter(d => !decided(d)).length;
-    const groups = [['fix', 'wand'], ['store', 'store'], ['policy', 'shield']];
+    const groups = [['stage', 'flag'], ['fix', 'wand'], ['store', 'store'], ['policy', 'shield']];
     return `
     <section class="dec-head">
       <div>
@@ -365,6 +366,14 @@
       body = preview + `<div class="opts two">${d.opts.map(o => optTile(d, o, esc(t('opt.' + o)), esc(sub(o)))).join('')}</div>`;
       return wrapCard(d, i, sevBadge(is.sev) + platChip(is.plat), title, why, body, done);
     }
+    if (d.group === 'stage') {
+      const bin = d.key.startsWith('binary:'), b = bin ? 'binary.' : 'stage.', h = d.hints || { evidence: [] };
+      const EVN = { 'play-url': 'Google Play link', 'apple-url': 'App Store link', 'fastlane-play': 'fastlane Play metadata', 'fastlane-apple': 'fastlane App Store metadata', 'fastlane-deliver': 'fastlane deliver', 'play-changelogs': 'Play release notes' };
+      title = bin ? `${d.store === 'play' ? 'Google Play' : 'App Store'}: ${t('dec.binary')}` : t('dec.stage.' + d.store);
+      why = bin ? t('dec.binary.d') : t('dec.stage.d') + (h.evidence.length ? ' ' + t('stage.hint', { ev: h.evidence.map(e => EVN[e] || e).join(', '), rec: t('stage.' + d.opts[d.rec]) }) : '') + (h.weak ? ' ' + t('stage.hintWeak', { weak: h.weak }) : '');
+      body = `<div class="opts two">${d.opts.map(o => optTile(d, o, esc(t(b + o)), esc(t(b + o + '.d')), bin ? '' : ic(o === 'live' ? 'party' : o === 'rejected' ? 'message' : o === 'in_review' ? 'clock' : 'send', 'opt-ic'))).join('')}</div>`;
+      return wrapCard(d, i, platChip(d.store === 'play' ? 'android' : 'ios'), title, why, body, done);
+    }
     switch (d.key) {
       case 'stores': title = t('dec.stores'); why = t('dec.stores.d');
         body = `<div class="opts three">${d.opts.map(o => optTile(d, o, esc(t('store.' + o)), '', ic(o === 'apple' ? 'apple' : o === 'play' ? 'android' : 'store', 'opt-ic'))).join('')}</div>`; break;
@@ -397,6 +406,8 @@
       case 'track': title = t('dec.track'); why = t('dec.track.d');
         body = `<div class="opts two">${d.opts.map(o => optTile(d, o, esc(t('track.' + o)), esc(t('track.' + o + '.d')))).join('')}</div>`; break;
     }
+    /* 0.1.5: an app already in a store keeps its live listing by default. */
+    if (d.keep) body = `<div class="opts two">${optTile(d, 'keep', esc(t('opt.keep')), esc(d.key === 'privacy' && A.developer && A.developer.privacyUrl ? A.developer.privacyUrl : t('opt.keep.d')))}</div>` + body;
     return wrapCard(d, i, '', title, why, body, done);
   }
   function wrapCard(d, i, badges, title, why, body, done) {
@@ -404,7 +415,7 @@
     let summary = '';
     if (done) {
       const L = S.lang, gl = GEN && GEN.listing[L];
-      summary = d.key === 'title' && gl ? gl.titles[cur] : d.key === 'short' && gl ? gl.shorts[cur] : d.key === 'langs' ? cur.map(x => x.toUpperCase()).join(' · ') : d.key === 'category' ? G.CAT[S.A.categories[cur]][L][1]
+      summary = cur === 'keep' ? t('opt.keep') : d.key.startsWith('stage:') ? t('stage.' + cur) : d.key.startsWith('binary:') ? t('binary.' + cur) : d.key === 'title' && gl ? gl.titles[cur] : d.key === 'short' && gl ? gl.shorts[cur] : d.key === 'langs' ? cur.map(x => x.toUpperCase()).join(' · ') : d.key === 'category' ? G.CAT[S.A.categories[cur]][L][1]
         : d.key === 'icon' ? t('icon.' + ['original', 'brand', 'light'][cur]) : d.key === 'feature' ? t('feat.' + ['split', 'shot', 'minimal'][cur]) : d.key === 'stores' ? t('store.' + cur) : d.key === 'tone' ? t('tone.' + cur) : d.key === 'track' ? t('track.' + cur) : d.key === 'access' || d.key === 'location' ? t(d.key + '.' + cur)
         : cur === 'ok' ? t('approved') : t('opt.' + cur);
     }
@@ -412,6 +423,7 @@
       <header><div class="dc-badges">${badges}</div>${done ? `<button class="btn ghost sm" data-undo="${d.key}" data-press>${ic('pencil')}<span>${esc(t('change'))}</span></button>` : ''}</header>
       <h3>${done ? ic('check', 'ok') : ''}${esc(title)}</h3>
       ${done ? `<p class="dc-sum">${esc(summary)}</p>` : `<p class="muted">${esc(why)}</p>${body}`}
+      ${done && d.key.startsWith('stage:') && (cur === 'rejected' || cur === 'in_review') ? `<div class="row"><button class="btn primary sm" data-stage-go="${cur}" data-press>${ic(cur === 'rejected' ? 'message' : 'clock')}<span>${esc(t(cur === 'rejected' ? 'stage.goPaste' : 'stage.goWait'))}</span></button></div>` : ''}
     </article>`;
   }
   /* 생성한 방침 HTML(우리가 만든 것)에서 본문만 꺼내 미리보기 */
@@ -431,7 +443,12 @@
   function bindDecide() {
     $$('[data-dec]').forEach(b => b.onclick = async () => {
       const key = b.dataset.dec, val = JSON.parse(b.dataset.val);
-      S.dec[key] = val; save();
+      S.dec[key] = val;
+      if (/^(stage|binary):/.test(key)) {   // a stage change: drop keep / binary values that no longer apply
+        const L2 = F.decisions(S.A, S.dec);
+        Object.keys(S.dec).forEach(k => { const d2 = L2.find(x => x.key === k); if ((S.dec[k] === 'keep' && !(d2 && d2.keep)) || (k.startsWith('binary:') && !d2)) delete S.dec[k]; });
+      }
+      save();
       if (['tone', 'icon', 'title', 'short'].includes(key)) { await ensureGen(); if (key === 'icon') { GEN.shots = null; await ensureShots(); } }
       const y = window.scrollY; render('none'); window.scrollTo(0, y);
       const next = decisions().find(d => !decided(d)); const el = next && $('#dc-' + next.key.replace(/[:]/g, '-'));
@@ -439,7 +456,14 @@
     });
     $$('[data-lang-toggle]').forEach(b => b.onclick = () => { const c = b.dataset.langToggle; const cur = new Set(S.dec._langsDraft || []); cur.has(c) ? cur.delete(c) : cur.add(c); S.dec._langsDraft = [...cur]; if (cur.size) S.dec.langs = [...cur]; else delete S.dec.langs; save(); const y = window.scrollY; render('none'); window.scrollTo(0, y); });
     $$('[data-undo]').forEach(b => b.onclick = () => { delete S.dec[b.dataset.undo]; if (b.dataset.undo === 'langs') S.dec._langsDraft = []; save(); const y = window.scrollY; render('none'); window.scrollTo(0, y); });
-    const all = $('#acceptAll'); if (all) all.onclick = async () => { decisions().forEach(d => { if (!decided(d)) S.dec[d.key] = recValue(d); }); save(); await ensureGen(); render('none'); toast(t('dec.allApplied')); };
+    $$('[data-stage-go]').forEach(b => b.onclick = () => { S.review = { status: b.dataset.stageGo === 'rejected' ? 'rejected' : 'inReview', round: 1, at: Date.now(), external: true }; save(); go('review'); });
+    /* Accept-all never picks a store stage when the project hints the app may already be in a store; nothing else is filled until stages are set. */
+    const all = $('#acceptAll'); if (all) all.onclick = async () => {
+      decisions().forEach(d => { if (d.group === 'stage' && !d.ask && !decided(d)) S.dec[d.key] = recValue(d); });
+      const ask = decisions().filter(d => d.group === 'stage' && !decided(d));
+      if (!ask.length) decisions().forEach(d => { if (!decided(d)) S.dec[d.key] = recValue(d); });
+      save(); await ensureGen(); render('none'); toast(ask.length ? t('stage.askFirst') : t('dec.allApplied'));
+    };
     const n = $('#toAssets'); if (n) n.onclick = () => go('assets');
   }
 
@@ -468,8 +492,8 @@
     <section class="card">
       <h2 class="h-ic">${ic('image')}${esc(t('as.graphics'))}</h2>
       <div class="gfx">
-        <figure><img src="${GEN.icons[S.dec.icon || 0].dataUrl}" alt="" class="g-icon"><figcaption>${esc(t('g.icon'))} · 512×512 <button class="btn ghost sm" data-dl="icon" data-press>${ic('download')}</button></figcaption></figure>
-        <figure class="g-wide"><img src="${GEN.features[S.dec.feature || 0]}" alt=""><figcaption>${esc(t('g.feature'))} · 1024×500 <button class="btn ghost sm" data-dl="feature" data-press>${ic('download')}</button></figcaption></figure>
+        <figure><img src="${GEN.icons[ix(S.dec.icon)].dataUrl}" alt="" class="g-icon"><figcaption>${esc(t('g.icon'))} · 512×512 <button class="btn ghost sm" data-dl="icon" data-press>${ic('download')}</button></figcaption></figure>
+        <figure class="g-wide"><img src="${GEN.features[ix(S.dec.feature)]}" alt=""><figcaption>${esc(t('g.feature'))} · 1024×500 <button class="btn ghost sm" data-dl="feature" data-press>${ic('download')}</button></figcaption></figure>
       </div>
       <div class="shots-row big">${(GEN.shots || []).map((s, k) => `<figure><img src="${s}" alt=""><figcaption>${k + 1} · 1080×1920 <button class="btn ghost sm" data-dl="shot${k}" data-press>${ic('download')}</button></figcaption></figure>`).join('')}</div>
       ${st.apple ? `<p class="small muted">${ic('apple')} ${esc(t('as.iosShots'))}</p>` : ''}
@@ -498,9 +522,9 @@
   }
   function bundleFiles() {
     const A = S.A, slug = F.slugOf(A), files = F.textFiles(A, S.dec, S.lang, t);
-    files.push({ path: 'graphics/icon-512.png', data: dataU8(GEN.icons[S.dec.icon || 0].dataUrl) });
-    files.push({ path: 'graphics/feature-graphic-1024x500.png', data: dataU8(GEN.features[S.dec.feature || 0]) });
-    (GEN.shots || []).forEach((s, k) => files.push({ path: `graphics/screenshot-${k + 1}-1080x1920-${S.lang}.png`, data: dataU8(s) }));
+    if (S.dec.icon !== 'keep') files.push({ path: 'graphics/icon-512.png', data: dataU8(GEN.icons[ix(S.dec.icon)].dataUrl) });
+    if (S.dec.feature !== 'keep') files.push({ path: 'graphics/feature-graphic-1024x500.png', data: dataU8(GEN.features[ix(S.dec.feature)]) });
+    if (S.dec.shots !== 'keep') (GEN.shots || []).forEach((s, k) => files.push({ path: `graphics/screenshot-${k + 1}-1080x1920-${S.lang}.png`, data: dataU8(s) }));
     files.push({ path: 'README.txt', data: `AA Plug 2 — ${A.appName} (${A.pkg || ''})\n${new Date().toISOString().slice(0, 10)}\n\n${t('zip.readme')}\n` });
     return { slug, files };
   }
@@ -514,8 +538,8 @@
     $('#zipAll').onclick = () => { const { slug, files } = bundleFiles(); download(`aaplug2-${slug}.zip`, window.AAPZip.writeZip(files)); toast(t('downloaded')); };
     $$('[data-dl]').forEach(b => b.onclick = () => {
       const k = b.dataset.dl, A = S.A;
-      if (k === 'icon') download('icon-512.png', GEN.icons[S.dec.icon || 0].dataUrl);
-      else if (k === 'feature') download('feature-graphic-1024x500.png', GEN.features[S.dec.feature || 0]);
+      if (k === 'icon') download('icon-512.png', GEN.icons[ix(S.dec.icon)].dataUrl);
+      else if (k === 'feature') download('feature-graphic-1024x500.png', GEN.features[ix(S.dec.feature)]);
       else if (k.startsWith('shot')) download(`screenshot-${+k.slice(4) + 1}.png`, GEN.shots[+k.slice(4)]);
       else if (k === 'privacy') download(`privacy-policy-${S.lang}.html`, G.privacyPolicy(A, S.lang, { photoRemoved: S.dec['fix:photoPerm'] === 'apply', nonPersonalized: !!A.sdk.ads && !F.trackingOn(A, S.dec) }), 'text/html;charset=utf-8');
       else if (k === 'support') download(`support-${S.lang}.html`, G.supportPage(A, S.lang), 'text/html;charset=utf-8');
@@ -667,7 +691,7 @@
     return `
     <section class="done m-rise">
       <div class="confetti" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--i:${i}"></i>`).join('')}</div>
-      <div class="done-ic">${GEN ? `<img src="${GEN.icons[S.dec.icon || 0].dataUrl}" alt="">` : ''}<span class="done-check">${ic('check')}</span></div>
+      <div class="done-ic">${GEN ? `<img src="${GEN.icons[ix(S.dec.icon)].dataUrl}" alt="">` : ''}<span class="done-check">${ic('check')}</span></div>
       <p class="kicker">${ic('party')}${esc(t('done.kicker'))}</p>
       <h1>${esc(t('done.h1', { app: appName() }))}</h1>
       <p class="lead">${esc(t('done.d'))}</p>

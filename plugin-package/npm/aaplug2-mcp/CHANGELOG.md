@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5
+- Any store stage, per store: `not_submitted` (first submit), `in_review`, `rejected` and `live` (update). The stage is the first, required decision (`stage:play` / `stage:apple`) or `store_stage` on `aaplug2_connect_app` (one value or `{ play, apple }`). Project hints (Google Play / App Store links, fastlane metadata, Deliverfile, Play changelogs, versionCode / build ≥ 2) recommend a stage and are shown in `store_stage`; `accept_all_recommended` never picks a stage when hints exist.
+- In review: no new app record or build as the next step; a `binary:<store>` choice (wait / new build) with a warning that replacing the build can withdraw or delay the review; guide = wait, do not replace, Information Needed reply draft, metadata-only fixes.
+- Rejected: `aaplug2_report_review` with the store's message is the next step after connecting; the guide is a fix plan + resubmit guide (no first-submit or closed-test steps) and shows the plan once it is pasted.
+- Live: update guide (new version, What's new, re-checks, listing kept, send update), production track, no closed-test advice. New `keep` option for title, short, tone, category, languages, icon, feature graphic, screenshots and privacy; existing fastlane copy and privacy / support URLs are used, nothing is invented.
+- Android: `targetSdkVersion rootProject.ext.x` / `ext.x` is resolved from `variables.gradle`, other Gradle files and `gradle.properties`; a target that cannot be read is a warning (`targetSdkUnread`), not a block.
+- New texts in all five languages; tests for every stage (`mcp/test/stage.mjs`).
+
 ## 0.1.4
 - Review lessons are now shared so every user gets better checks. After a real (non-demo) learned review result, AA Plug 2 sends one anonymized record to `https://aaplug.com/api/lessons` in the background: `store`, `codes` (guideline / ITMS / fixed Google Play policy ids), `advice_id` (a key of the fixed advice table) and `event` (`rejected` or `passed`). Never the store message, app name, bundle / package id, project id, e-mail, paths or any free text. The result shows the exact record in `lesson.shared`.
 - The aggregated feed of other users' lessons is fetched (5-second timeout, cached in `~/.aaplug2/shared-lessons.json` for 12 hours) by `aaplug2_connect_app`, `aaplug2_get_report`, `aaplug2_get_decisions`, `aaplug2_generate_store_materials` and `aaplug2_submission_guide`, and merged into `learned_lessons` with `source: "shared"` / `from: "From other reviews"` (local ones: `source: "local"`, "From your reviews"). Titles and advice come only from the fixed table; server text is ignored. Shared lessons are reminders or warnings, never must-fix, and never recommend ATT because of ads.

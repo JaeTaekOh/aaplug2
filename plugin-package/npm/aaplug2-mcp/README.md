@@ -1,6 +1,6 @@
 # AA Plug 2
 
-**From "my app is done" to "launched" on Google Play and the App Store. You only pick and approve.**
+**From "my app is done" to "launched" on Google Play and the App Store — first submit, waiting in review, rejected, or a live app update. You only pick and approve.**
 Free · no API keys · English (default) + 한국어 · ภาษาไทย · 中文 · हिन्दी · feedback: https://aaplug.com
 
 AA Plug 2 is an MCP server (plus a skill) for people who built an Android and/or iOS app with AI. Connect the app once, and your AI assistant can:
@@ -15,6 +15,14 @@ AA Plug 2 is an MCP server (plus a skill) for people who built an Android and/or
 - turn a rejection message into a fix plan and a reply to the reviewer
 
 **Nothing is submitted automatically.** The final step unlocks only after you approve, and you press the store's submit button yourself.
+
+## Any store stage (since 0.1.5)
+
+AA Plug 2 is for apps at every stage, per store: **not submitted yet** (first submit), **in review** (uploaded, waiting), **rejected**, and **live** (an update). The stage is the first, required choice for each store; hints in the project (Play / App Store links, fastlane metadata, version numbers) only recommend one and never force a first launch.
+
+- In review: nothing to submit and no new app record. Replacing the build can withdraw or delay the review, so a new build is offered only if you choose it. You get help to wait, a reply draft for "Information Needed" (you send it) and metadata-only fixes.
+- Rejected: paste the store's message first (`aaplug2_report_review`); you get a fix plan, a reply draft and a resubmit guide, using the local and shared review lessons.
+- Live: an update. No closed test; the live listing (name, descriptions, category, languages, graphics, privacy URL) is kept, and the guide covers the new version and "What's new". Technical checks still run.
 
 ## Tools
 

@@ -5,11 +5,12 @@ import * as E from './engine.mjs';
 import { CFG } from './runtime.mjs';
 import { ensureShared } from './shared.mjs';
 
-export const VERSION = '0.1.4';
+export const VERSION = '0.1.5';
 
-export const INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
+export const INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch. It works at every store stage: a first submit, an app already uploaded and waiting in review, a rejected app, and an update of an app that is already live.
 How to use it:
-1. When the user says their app is finished or asks for help publishing, call aaplug2_connect_app ONCE with a public GitHub URL, a local folder/ZIP path, or source=sample for a demo. Never ask the user for tokens, passwords or store metadata forms.
+1. When the user says their app is finished, is in review, was rejected or needs an update, call aaplug2_connect_app ONCE with a public GitHub URL, a local folder/ZIP path, or source=sample for a demo. Never ask the user for tokens, passwords or store metadata forms.
+1a. Store stage comes first and is required for each store: not_submitted (first submit), in_review (uploaded, waiting), rejected, or live (update). Pass store_stage on connect if the user already said it; otherwise ask, and record it with aaplug2_decide key stage:play / stage:apple. The report's store_stage shows hints (store links, fastlane metadata, version numbers) and a recommendation; hints are only hints, never assume a first launch. In review: nothing to submit, no new app record and no new build unless the user chooses binary:<store>=new_build (replacing a build can withdraw or delay the review); help them wait, prepare a reply draft for Information Needed and fix metadata. Rejected: the next step is pasting the store's message into aaplug2_report_review; then follow the fix plan and the resubmit guide. Live: an update, so no closed testing; keep the live listing (the "keep" option), and the guide covers the new version and "What's new".
 2. Show the analysis in plain words, then call aaplug2_get_decisions and present each decision's options to the user. The user only picks, approves or rejects. Show the recommended option first.
 3. Call aaplug2_decide ONLY with values the user actually chose in this conversation. Use accept_all_recommended=true only if the user explicitly says to accept all recommendations.
 4. Call aaplug2_generate_store_materials, then aaplug2_submission_guide for each store and walk the user through the console steps.
@@ -37,11 +38,13 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
 
   server.registerTool('aaplug2_connect_app', {
     title: 'Connect an app (start launch help)',
-    description: 'Start here when the user has finished building an Android or iOS app and wants to publish it, or asks for Play Store / App Store launch help. Connects the app project once and analyzes it (manifest, Gradle, Info.plist, strings, README, icons, screenshots) for store-review problems and launch readiness. No tokens or forms. source: "github" (public repo URL), "path" (a project folder or .zip on the machine running this server), or "sample" (built-in demo app SnapLedger). Returns project_id used by every other AA Plug 2 tool.',
+    description: 'Start here when the user has finished building an Android or iOS app and wants to publish it, or asks for Play Store / App Store help with an app that is waiting in review, was rejected, or is live and needs an update. Connects the app project once and analyzes it (manifest, Gradle, Info.plist, strings, README, icons, screenshots) for store-review problems and launch readiness. No tokens or forms. source: "github" (public repo URL), "path" (a project folder or .zip on the machine running this server), or "sample" (built-in demo app SnapLedger). Returns project_id used by every other AA Plug 2 tool.',
     inputSchema: {
       source: z.enum(['github', 'path', 'sample']).describe('Where the app comes from'),
       github_url: z.string().optional().describe('Public GitHub repo URL, e.g. https://github.com/owner/repo (optionally /tree/branch/subfolder). Required when source=github'),
       path: z.string().optional().describe('Absolute path to the project folder or a .zip of it, on the computer running this MCP server. Required when source=path'),
+      store_stage: z.union([z.enum(['not_submitted', 'in_review', 'rejected', 'live']), z.object({ play: z.enum(['not_submitted', 'in_review', 'rejected', 'live']).optional(), apple: z.enum(['not_submitted', 'in_review', 'rejected', 'live']).optional() })]).optional()
+        .describe('Where the app is now, only if the user said so: one stage for every store, or per store {play, apple}. not_submitted = first submit, in_review = uploaded and waiting, rejected = rejected, live = already published (this is an update). If omitted, ask the user (decision key stage:<store>).'),
       lang
     },
     annotations: { ...W, openWorldHint: true }
@@ -55,13 +58,13 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
 
   server.registerTool('aaplug2_get_decisions', {
     title: 'List choices for the user',
-    description: 'List what the user needs to decide, each with ready-made options and a recommended one: code fixes to apply or skip, which stores, store title, short description, tone, category, store languages, icon, feature graphic, screenshots, privacy policy, Data safety / App Privacy answers, content rating answers and release track. Present these to the user as simple choices; the user does not type metadata. Use only_open=true to see just the undecided ones.',
+    description: 'List what the user needs to decide, each with ready-made options and a recommended one: the store stage per store (stage:play / stage:apple, required, asked first; binary:<store> when in review), code fixes to apply or skip, which stores, store title, short description, tone, category, store languages, icon, feature graphic, screenshots, privacy policy, Data safety / App Privacy answers, content rating answers and release track. Present these to the user as simple choices; the user does not type metadata. Use only_open=true to see just the undecided ones.',
     inputSchema: { project_id: pid, only_open: z.boolean().optional().describe('Only undecided items (default true)'), lang }, annotations: { ...RO, openWorldHint: true }
   }, wrap(async a => { await ensureShared(); return ok(E.decisions(E.load(a.project_id, a.lang), a.lang, a.only_open !== false)); }));
 
   server.registerTool('aaplug2_decide', {
     title: 'Record the user\'s choices',
-    description: 'Record choices the user made. Pass each as {key, value} using the key and an option value from aaplug2_get_decisions. Only send what the user actually picked or approved. Set accept_all_recommended=true only when the user explicitly said to accept all recommendations; it fills every undecided item with the recommended option. Changing a decision clears earlier submission approvals and generated files.',
+    description: 'Record choices the user made. Pass each as {key, value} using the key and an option value from aaplug2_get_decisions. Only send what the user actually picked or approved. A stage with hints of an existing store listing is never filled by accept_all_recommended; ask the user. Value "keep" keeps a live listing value. Set accept_all_recommended=true only when the user explicitly said to accept all recommendations; it fills every undecided item with the recommended option. Changing a decision clears earlier submission approvals and generated files.',
     inputSchema: {
       project_id: pid,
       choices: z.array(z.object({ key: z.string(), value: z.union([z.string(), z.number(), z.array(z.string())]) })).optional().describe('e.g. [{"key":"title","value":1},{"key":"fix:targetSdk","value":"apply"},{"key":"langs","value":["en","ko"]}]'),
@@ -92,7 +95,7 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
 
   server.registerTool('aaplug2_submission_guide', {
     title: 'Step-by-step console guide',
-    description: 'Plain-language, step-by-step guide for Google Play Console (store=play) or App Store Connect (store=apple) with the exact value to paste into every field. The final submit step stays locked until the user approves with aaplug2_approve_submission.',
+    description: 'Plain-language, step-by-step guide for Google Play Console (store=play) or App Store Connect (store=apple) with the exact value to paste into every field. The guide follows the store stage: first submit, waiting in review (wait, Information Needed reply draft, metadata-only fixes, no new build unless chosen), rejected (fix plan and resubmit) or live (new version, What\'s new, listing kept). The final submit step stays locked until the user approves with aaplug2_approve_submission.',
     inputSchema: { project_id: pid, store, lang }, annotations: { ...RO, openWorldHint: true }
   }, wrap(async a => { await ensureShared(); return ok(E.guide(E.load(a.project_id, a.lang), a.store, a.lang)); }));
 
@@ -122,7 +125,7 @@ export function createServer({ allowPath = true, inlineZip = false } = {}) {
 
   server.registerPrompt('launch_my_app', {
     title: 'Launch my app with AA Plug 2',
-    description: 'Start the AA Plug 2 launch flow for an app the user already built.',
+    description: 'Start the AA Plug 2 flow for an app the user already built: first submit, waiting in review, rejected, or a live app update.',
     argsSchema: { app: z.string().optional().describe('Public GitHub URL or local path of the app (leave empty for the demo)') }
   }, ({ app }) => ({ messages: [{ role: 'user', content: { type: 'text', text: `Use AA Plug 2 to get my app ready for Google Play / App Store launch${app ? `: ${app}` : ' (use the built-in sample if I have nothing to connect yet)'}. I only want to pick and approve; do not submit anything without my approval.` } }] }));
 

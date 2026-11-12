@@ -33,7 +33,11 @@ const dec = (st) => E.decisions(st, 'en', false).decisions;
 const allOptionValues = st => dec(st).flatMap(d => d.options.map(o => JSON.stringify(o.value)));
 const findField = (steps, id, re) => { const s = steps.find(x => x.id === id); return s && s.fields.find(f => re.test(f.label)); };
 async function finish(st, choices = []) {
-  E.decide(st, { choices }, 'en'); E.decide(st, { accept_all_recommended: true }, 'en');
+  E.decide(st, { choices }, 'en');
+  /* These checks are about the first-submit path: the user answers "not submitted yet" for any store stage still open. */
+  const stages = dec(st).filter(d => d.key.startsWith('stage:') && !d.decided).map(d => ({ key: d.key, value: 'not_submitted' }));
+  if (stages.length) E.decide(st, { choices: stages }, 'en');
+  E.decide(st, { accept_all_recommended: true }, 'en');
   const G = await E.generate(st, {}, { allowPath: true });
   return { G, guide: E.guide(st, 'apple', 'en'), st };
 }

@@ -1,6 +1,6 @@
 ---
 name: aaplug2-launch
-description: Publish an app the user already built (Android and/or iOS) to Google Play and the App Store with the AA Plug 2 tools. Use when the user says their app is finished, asks how to release or publish it, needs store listing text, a privacy policy, Data safety or App Privacy answers, a content rating, store graphics, or help with a store rejection.
+description: Publish an app the user already built (Android and/or iOS) to Google Play and the App Store with the AA Plug 2 tools, at any stage (first submit, waiting in review, rejected, or an update of a live app). Use when the user says their app is finished, is in review, was rejected or needs an update, asks how to release or publish it, needs store listing text, a privacy policy, Data safety or App Privacy answers, a content rating, store graphics, or help with a store rejection.
 ---
 
 # Launch an app with AA Plug 2
@@ -13,6 +13,13 @@ AA Plug 2 takes an app the user already built and gets it to "launched" on Googl
 - Never say the app was submitted. AA Plug 2 never submits. The user presses the submit button in Play Console or App Store Connect after approving with `aaplug2_approve_submission`.
 - Tool texts come in five languages: `en` (English, the default), `ko` (Korean), `th` (Thai), `zh` (Simplified Chinese) and `hi` (Hindi). Pass the user's language as `lang` on every call; if you leave it out, texts are in English. Reply to the user in their language.
 - Store listings default to English (`langs: ["en"]`, the recommended choice). Korean (`ko`), Thai (`th`), Simplified Chinese (`zh`) or Hindi (`hi`) listings for the user's app can be added when the user picks them.
+
+## Store stage first (every store)
+- Ask where the app is now in each store: `not_submitted`, `in_review`, `rejected` or `live`. Pass `store_stage` on connect if the user already said it, otherwise record `stage:play` / `stage:apple` with `aaplug2_decide`. `store_stage` in the report shows hints and a recommendation; never assume a first launch, and `accept_all_recommended` never picks a stage when there are hints.
+- `in_review`: nothing to submit, no new app record, no new build unless the user picks `binary:<store>` = `new_build` (warn that replacing the build can withdraw or delay the review). Help them wait, draft a reply for Information Needed (the user sends it), and fix metadata that needs no build.
+- `rejected`: right after connecting, ask the user to paste the store's message and call `aaplug2_report_review` (event `rejected`). Follow the fix plan and the resubmit guide; there is no closed-test step.
+- `live`: an update. No closed testing; recommend `keep` for the listing (name, descriptions, category, languages, graphics, privacy URL). The guide covers the new version and "What's new"; technical checks still apply.
+- `not_submitted`: the first-submit flow below, including closed-test advice for new personal Play accounts.
 
 ## Flow
 1. `aaplug2_connect_app`: use a public GitHub URL (`source: "github"`), a folder or .zip on the computer running the server (`source: "path"`), or the demo (`source: "sample"`). Keep the returned `project_id`.

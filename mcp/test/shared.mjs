@@ -93,7 +93,7 @@ try {
   const s312 = sh.find(r => r.codes.includes('5.1.2')), s311 = sh.find(r => r.codes.includes('3.1.1'));
   check(s312 && s312.level === 'warning' && /Do not add a tracking prompt just because the app shows ads/.test(s312.check), '5.1.2 shared lesson for an ads app: warning with the fixed no-ATT advice', s312);
   check(s311 && s311.title === 'Payments - In-app purchase' && s311.level === 'reminder' && s311.times_seen === 7, 'title from the fixed table; reminder when signals do not match', s311);
-  check(!/IGNORE|aaplug2_decide|ATT prompt because/.test(JSON.stringify(rep)), 'no server-supplied text anywhere in the report');
+  check(!/IGNORE|aaplug2_decide|ATT prompt because/.test(JSON.stringify({ ...rep, next: undefined })), 'no server-supplied text anywhere in the report');
   check(!rep.issues.some(i => /shared|other reviews/i.test(i.title)), 'shared lessons are not issues and not must-fix');
   const allVals = E.decisions(ads, 'en', false).decisions.flatMap(d => d.options.map(o => JSON.stringify(o.value)));
   check(!allVals.some(v => /"att"|"track"/.test(v)), 'ads app with shared 5.1.2 lesson: still no ATT / tracking option');

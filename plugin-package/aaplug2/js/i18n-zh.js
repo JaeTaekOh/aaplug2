@@ -7,7 +7,7 @@ window.AAP_I18N.zh = {
   'foot.free': '所有功能均免费', 'foot.tm': 'Google Play 是 Google LLC 的商标。App Store 是 Apple Inc. 的商标。',
   'title.home': '应用上架助手', 'title.analyze': '分析中', 'title.decide': '决定', 'title.assets': '上架素材', 'title.submit': '提交指南', 'title.review': '审核', 'title.done': '已上架',
   'home.kicker': '应用做好了？从这里开始。', 'home.h1': '一路送到应用商店。<br>你只需<em>做决定</em>。',
-  'home.lead': '无论你用哪个 AI 做的应用，只需连接一次。AA Plug 2 会准备好审核检查、商店文案、隐私政策、图片素材和提交指南。无需输入任何内容。',
+  'home.lead': '无论你用哪个 AI 做的应用，只需连接一次。AA Plug 2 会准备好审核检查、商店文案、隐私政策、图片素材和提交指南。无需输入任何内容。首次提交、等待审核、被拒，或已上架应用的更新：每个阶段都能用。',
   'flow.connect': '连接', 'flow.connect.d': '仓库或文件，一次即可', 'flow.analyze': 'AI 分析', 'flow.analyze.d': '检查并起草', 'flow.decide': '决定', 'flow.decide.d': '选择并批准', 'flow.launch': '上架', 'flow.launch.d': '直到审核通过',
   'home.resume': '继续', 'home.connect': '连接你的应用所在位置', 'home.connect.d': '第一次使用？先用示例应用走一遍完整流程。',
   'home.sample': '从示例应用开始', 'home.sample.d': '用收据记账应用“SnapLedger”体验完整流程。', or: '或连接你的应用',

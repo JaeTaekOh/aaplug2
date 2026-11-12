@@ -9,7 +9,7 @@
     /(^|\/)Info\.plist$/i, /project\.pbxproj$/i, /PrivacyInfo\.xcprivacy$/i, /\.entitlements$/i, /(^|\/)Podfile$/i, /(^|\/)Package\.swift$/i,
     /(^|\/)pubspec\.yaml$/i, /(^|\/)package\.json$/i, /(^|\/)app\.json$/i, /(^|\/)app\.config\.(js|ts)$/i, /(^|\/)capacitor\.config\.(json|ts|js)$/i,
     /(^|\/)eas\.json$/i, /(^|\/)README(\.[a-z]+)?$/i, /(^|\/)LICENSE(\.[a-z]+)?$/i, /(^|\/)privacy[^/]*\.(md|html)$/i,
-    /fastlane\/metadata\/.*\.txt$/i, /AppIcon\.appiconset\/Contents\.json$/i, /(^|\/)lib\/l10n\/.*\.arb$/i,
+    /fastlane\/metadata\/.*\.txt$/i, /(^|\/)fastlane\/(Appfile|Deliverfile)$/i, /(^|\/)variables\.gradle$/i, /AppIcon\.appiconset\/Contents\.json$/i, /(^|\/)lib\/l10n\/.*\.arb$/i,
     /(^|\/)(support|contact)[^/]*\.(md|html?)$/i, /(^|\/)(support|contact)\/index\.(md|html?)$/i
   ];
   /* App source code: read a limited number of files so review checks can see runtime behavior
@@ -21,7 +21,7 @@
   const IMG_RE = [
     /ic_launcher(_round|_foreground)?\.(png|webp)$/i, /ic_launcher-playstore\.png$/i, /playstore[^/]*\.png$/i,
     /AppIcon\.appiconset\/.*\.png$/i, /(^|\/)(icon|app-icon|appicon|logo)\.png$/i,
-    /(^|\/)(screenshots?|fastlane\/metadata\/android\/[^/]+\/images\/phoneScreenshots|store)\/[^/]*\.(png|jpe?g|webp)$/i
+    /(^|\/)(screenshots?|fastlane\/metadata\/android\/[^/]+\/images\/phoneScreenshots|store)\/[^/]*\.(png|jpe?g|webp)$/i, /(^|\/)fastlane\/screenshots\/[^/]+\/[^/]*\.(png|jpe?g)$/i
   ];
   const SKIP_RE = /(^|\/)(node_modules|\.git|build|\.gradle|Pods|DerivedData|\.dart_tool|\.idea|intermediates|generated)\//;
   const MAX_TEXT = 400 * 1024, MAX_IMG = 4 * 1024 * 1024, MAX_FILES = 140;

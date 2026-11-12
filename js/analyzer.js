@@ -30,6 +30,50 @@
   function gradleVal(g, key) {
     const m = g.match(new RegExp('\\b' + key + '(?:Version)?\\s*(?:=|\\s)\\s*(?:Integer\\.parseInt\\()?["\']?([\\w.\\-]+)["\']?')); return m ? m[1] : null;
   }
+  /* 0.1.5: resolve SDK levels that point at a variable (rootProject.ext.targetSdkVersion, variables.gradle, gradle.properties).
+     Returns a number, or null when the value cannot actually be read (for example flutter.targetSdkVersion). */
+  function resolveSdk(raw, F, gradles) {
+    if (raw == null) return null;
+    if (/^\d+$/.test(raw)) return +raw;
+    if (/^flutter\./.test(raw)) return null;
+    const name = String(raw).replace(/^(rootProject\.ext\.|project\.ext\.|rootProject\.|project\.|ext\.)/, '').replace(/\.get$/, '');
+    if (!/^[A-Za-z_][\w]*$/.test(name)) return null;
+    const re = new RegExp('(?:^|[\\s{;.,(])' + name + '\\s*(?:=|:)?\\s*["\']?(\\d{2})\\b', 'm');
+    const texts = gradles.map(p => F[p].text).concat(find(F, /(^|\/)gradle\.properties$/).map(p => F[p].text));
+    for (const t of texts) { const m = t.match(re); if (m) return +m[1]; }
+    return null;
+  }
+  const LISTING_LANG = l => { const x = String(l).toLowerCase(); return x.startsWith('en') ? 'en' : x.startsWith('ko') ? 'ko' : x.startsWith('th') ? 'th' : x.startsWith('zh') ? 'zh' : x.startsWith('hi') ? 'hi' : null; };
+  /* 0.1.5: evidence that the app already has a store listing (store URLs, fastlane metadata, version history) and existing listing copy. */
+  function listingOf(F, A) {
+    const P = Object.keys(F), texts = P.filter(p => F[p].text != null && !F[p].code), all = texts.map(p => F[p].text).join('\n').slice(0, 800000);
+    const L = { play: { evidence: [], copy: {} }, apple: { evidence: [], copy: {} }, privacyUrl: null, supportUrl: null };
+    const pm = all.match(/play\.google\.com\/store\/apps\/details\?id=([\w.]+)/i);
+    if (pm) { L.play.evidence.push('play-url'); L.play.url = 'https://play.google.com/store/apps/details?id=' + pm[1]; }
+    const am = all.match(/(?:apps|itunes)\.apple\.com\/[^\s"'<>)]*?\/?id(\d{6,12})/i);
+    if (am) { L.apple.evidence.push('apple-url'); L.apple.appId = am[1]; L.apple.url = 'https://apps.apple.com/app/id' + am[1]; }
+    const rd = (p) => (F[p] && F[p].text || '').trim();
+    for (const p of texts) {
+      let m = p.match(/(?:^|\/)fastlane\/metadata\/android\/([^/]+)\/(title|short_description|full_description)\.txt$/i);
+      if (m) { const l = LISTING_LANG(m[1]); if (l && rd(p)) { (L.play.copy[l] = L.play.copy[l] || {})[{ title: 'title', short_description: 'short', full_description: 'full' }[m[2].toLowerCase()]] = rd(p); } continue; }
+      m = p.match(/(?:^|\/)fastlane\/metadata\/(?!android\/)([^/]+)\/(name|subtitle|description|keywords|privacy_url|support_url)\.txt$/i);
+      if (m) {
+        const k = m[2].toLowerCase(), v = rd(p);
+        if (k === 'privacy_url' && /^https?:\/\//.test(v)) { L.privacyUrl = L.privacyUrl || v; continue; }
+        if (k === 'support_url' && /^https?:\/\//.test(v)) { L.supportUrl = L.supportUrl || v; continue; }
+        const l = LISTING_LANG(m[1]); if (l && v) (L.apple.copy[l] = L.apple.copy[l] || {})[k] = v;
+      }
+    }
+    if (Object.keys(L.play.copy).length) L.play.evidence.push('fastlane-play');
+    if (Object.keys(L.apple.copy).length) L.apple.evidence.push('fastlane-apple');
+    if (P.some(p => /(^|\/)fastlane\/(Deliverfile|metadata\/review_information)/i.test(p))) L.apple.evidence.push('fastlane-deliver');
+    if (P.some(p => /(^|\/)fastlane\/metadata\/android\/[^/]+\/changelogs\//i.test(p))) L.play.evidence.push('play-changelogs');
+    const vc = A.android && +A.android.versionCode; if (vc >= 2) L.play.weak = 'versionCode ' + vc;
+    const bn = A.ios && +A.ios.build; if (bn >= 2) L.apple.weak = 'build ' + bn;
+    if (!L.privacyUrl) { const u = (all.match(/https?:\/\/[^\s"'<>)\]]*privacy[^\s"'<>)\]]*/gi) || []).find(x => !/(apple|google|firebase|android|admob|policies\.google)\.com|developer\.|example\.|<your-site>/i.test(x)); if (u) L.privacyUrl = u.replace(/[.,;]+$/, ''); }
+    L.play.langs = Object.keys(L.play.copy); L.apple.langs = Object.keys(L.apple.copy);
+    return L;
+  }
   function gradleDeps(g) {
     const out = []; const re = /(?:implementation|api|kapt|ksp)\s*\(?\s*(?:platform\()?\s*["']([^"']+)["']/g; let m;
     while ((m = re.exec(g))) out.push(m[1]);
@@ -105,7 +149,8 @@
       if (appGradle) {
         note(appGradle); const g = F[appGradle].text;
         an.pkg = gradleVal(g, 'applicationId'); an.namespace = gradleVal(g, 'namespace');
-        an.minSdk = +gradleVal(g, 'minSdk') || null; an.targetSdk = +gradleVal(g, 'targetSdk') || null; an.compileSdk = +gradleVal(g, 'compileSdk') || null;
+        an.targetSdkRaw = gradleVal(g, 'targetSdk');
+        an.minSdk = resolveSdk(gradleVal(g, 'minSdk'), F, gradles); an.targetSdk = resolveSdk(an.targetSdkRaw, F, gradles); an.compileSdk = resolveSdk(gradleVal(g, 'compileSdk'), F, gradles);
         an.versionCode = gradleVal(g, 'versionCode'); an.versionName = gradleVal(g, 'versionName'); an.deps = gradleDeps(g); an.gradlePath = appGradle;
         an.gradleKts = /\.kts$/.test(appGradle);
       }
@@ -183,7 +228,8 @@
     const holder = (lic.match(/Copyright\s*(?:\(c\)|©)?\s*\d{4}(?:-\d{4})?\s+(.+)/i) || [])[1];
     const allText = Object.values(F).filter(v => v.text && !v.code).map(v => v.text).join('\n').slice(0, 600000);
     const email = (allText.match(/[\w.+-]+@[\w-]+\.[\w.]+/g) || []).find(e => !/noreply|example\.com|users\.noreply|android\.com|apple\.com|googlegroups/.test(e));
-    A.developer = { name: (holder || (project.meta && project.meta.owner) || '').trim() || null, email: email || null, policyFound: !!find(F, /privacy[^/]*\.(md|html)$/i).length };
+    A.listing = listingOf(F, A);
+    A.developer = { name: (holder || (project.meta && project.meta.owner) || '').trim() || null, email: email || null, policyFound: !!find(F, /privacy[^/]*\.(md|html)$/i).length || !!A.listing.privacyUrl, privacyUrl: A.listing.privacyUrl || null };
 
     // ---------- SDK ----------
     const hay = [(A.android && A.android.deps.join(' ')) || '', deps.join(' '), txt(F, pubspec), txt(F, shortest(find(F, /Podfile$/))), txt(F, plistPath), (A.android && A.android.permissions.join(' ')) || '', JSON.stringify((A.ios && A.ios.usage) || {})].join(' ');
@@ -285,7 +331,9 @@
     const out = []; const add = (id, sev, plat, fix, vars) => out.push({ id, sev, plat, fix: fix || null, vars: vars || {} });
     const an = A.android, io = A.ios, s = A.sdk;
     if (an) {
-      if (!an.targetSdk || an.targetSdk < PLAY_TARGET) add('targetSdk', 'block', 'android', 'patch-gradle', { cur: an.targetSdk || '—', need: PLAY_TARGET });
+      /* Only a value that was actually read can block. An unread value ("—") is a warning to check, never a must-fix. */
+      if (an.targetSdk && an.targetSdk < PLAY_TARGET) add('targetSdk', 'block', 'android', 'patch-gradle', { cur: an.targetSdk, need: PLAY_TARGET });
+      else if (!an.targetSdk) add('targetSdkUnread', 'warn', 'android', 'info', { raw: an.targetSdkRaw || '—', need: PLAY_TARGET });
       if (an.debuggable) add('debuggable', 'block', 'android', 'patch-manifest-debug');
       if (an.cleartext) add('cleartext', 'warn', 'android', 'patch-manifest-cleartext');
       if (an.permissions.some(p => /READ_MEDIA_IMAGES|READ_MEDIA_VIDEO/.test(p))) add('photoPerm', 'warn', 'android', 'patch-manifest-photo');

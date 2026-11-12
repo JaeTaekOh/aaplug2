@@ -7,7 +7,7 @@ window.AAP_I18N.en = {
   'foot.free': 'Every feature is free', 'foot.tm': 'Google Play is a trademark of Google LLC. App Store is a trademark of Apple Inc.',
   'title.home': 'App launch helper', 'title.analyze': 'Analyzing', 'title.decide': 'Decide', 'title.assets': 'Launch assets', 'title.submit': 'Submit guide', 'title.review': 'Review', 'title.done': 'Live',
   'home.kicker': 'Finished building your app? Start here.', 'home.h1': 'All the way to the store.<br>You only <em>decide</em>.',
-  'home.lead': 'Whatever AI you built your app with, connect it once. AA Plug 2 prepares the review check, store copy, privacy policy, graphics and submission guide. Nothing to type.',
+  'home.lead': 'Whatever AI you built your app with, connect it once. AA Plug 2 prepares the review check, store copy, privacy policy, graphics and submission guide. Nothing to type. First submit, waiting in review, rejected, or an update of a live app: it works at every stage.',
   'flow.connect': 'Connect', 'flow.connect.d': 'Repo or files, once', 'flow.analyze': 'AI analysis', 'flow.analyze.d': 'Checks and drafts', 'flow.decide': 'Decide', 'flow.decide.d': 'Pick and approve', 'flow.launch': 'Launch', 'flow.launch.d': 'Until approval',
   'home.resume': 'Continue', 'home.connect': 'Connect where your app lives', 'home.connect.d': 'New here? Walk through the whole flow with a sample app first.',
   'home.sample': 'Start with a sample app', 'home.sample.d': 'Try the full journey with “SnapLedger”, a receipt budget app.', or: 'or connect your app',

@@ -58704,7 +58704,7 @@ if (canvasLib) {
     throw new Error("graphics unavailable");
   }, fonts: { load: async () => [] } };
 }
-var ORDER = ["config.js", "i18n-en.js", "i18n-ko.js", "i18n-th.js", "i18n-zh.js", "i18n-hi.js", "i18n.js", "zip.js", "sample-data.js", "sources.js", "analyzer.js", "generator.js", "graphics.js", "flow.js", "lessons.js"];
+var ORDER = ["config.js", "i18n-en.js", "i18n-ko.js", "i18n-th.js", "i18n-zh.js", "i18n-hi.js", "i18n-stage.js", "i18n.js", "zip.js", "sample-data.js", "sources.js", "analyzer.js", "generator.js", "graphics.js", "flow.js", "lessons.js"];
 for (const f of ORDER) {
   const file2 = path.join(JS, f);
   vm.runInThisContext(fs.readFileSync(file2, "utf8"), { filename: file2 });
@@ -58902,6 +58902,59 @@ var M = {
     stepDone: "\u0932\u0949\u0928\u094D\u091A \u0939\u094B \u0917\u092F\u093E"
   }
 };
+var STAGE_M = {
+  en: {
+    stageFirst: "First ask the user where the app is now in each store (required): aaplug2_decide with key {keys} = not_submitted | in_review | rejected | live. Recommended from the project: {rec}. Hints are only hints; never assume a first launch.",
+    stageAsk: "Store stage was not picked automatically because the project shows signs the app may already be in a store. Ask the user: {keys}.",
+    nextRejected: "Next: ask the user to paste the store\u2019s rejection message and call aaplug2_report_review with event=rejected and rejection_text ({store}). That gives the fix plan and the resubmit guide (not a first-submit guide).",
+    nextInReview: "Next: nothing to submit for {store}. Do not create a new app record or upload a new build. Show aaplug2_submission_guide (wait / Information Needed / metadata-only fixes) and report the result with aaplug2_report_review (approved or rejected) when it arrives.",
+    nextLive: "This is an update of a live app on {store}: no closed testing, and the current listing is kept. Next: aaplug2_get_decisions.",
+    stepStage: "Choose each store\u2019s stage",
+    stepRejected: "Paste the rejection",
+    stepInReview: "Waiting for review"
+  },
+  ko: {
+    stageFirst: "\uBA3C\uC800 \uC0AC\uC6A9\uC790\uC5D0\uAC8C \uC2A4\uD1A0\uC5B4\uBCC4\uB85C \uC571\uC774 \uC9C0\uAE08 \uC5B4\uB514\uCBE4\uC778\uC9C0 \uBB3C\uC5B4\uBCF4\uC138\uC694(\uD544\uC218): aaplug2_decide key {keys} = not_submitted | in_review | rejected | live. \uD504\uB85C\uC81D\uD2B8 \uAE30\uC900 \uCD94\uCC9C: {rec}. \uD78C\uD2B8\uB294 \uD78C\uD2B8\uC77C \uBFD0, \uCCAB \uCD9C\uC2DC\uB77C\uACE0 \uAC00\uC815\uD558\uC9C0 \uB9C8\uC138\uC694.",
+    stageAsk: "\uD504\uB85C\uC81D\uD2B8\uC5D0 \uC774\uBBF8 \uC2A4\uD1A0\uC5B4\uC5D0 \uC788\uC744 \uC218 \uC788\uB294 \uD754\uC801\uC774 \uC788\uC5B4\uC11C \uC2A4\uD1A0\uC5B4 \uB2E8\uACC4\uB294 \uC790\uB3D9\uC73C\uB85C \uACE0\uB974\uC9C0 \uC54A\uC558\uC5B4\uC694. \uC0AC\uC6A9\uC790\uC5D0\uAC8C \uBB3C\uC5B4\uBCF4\uC138\uC694: {keys}.",
+    nextRejected: "\uB2E4\uC74C: \uC0AC\uC6A9\uC790\uC5D0\uAC8C \uC2A4\uD1A0\uC5B4 \uBC18\uB824 \uBA54\uC2DC\uC9C0\uB97C \uBD99\uC5EC \uB2EC\uB77C\uACE0 \uD558\uACE0 aaplug2_report_review (event=rejected, rejection_text, {store})\uB97C \uBD80\uB974\uC138\uC694. \uC218\uC815 \uACC4\uD68D\uACFC \uC7AC\uC81C\uCD9C \uC548\uB0B4(\uCCAB \uC81C\uCD9C \uC548\uB0B4 \uC544\uB2D8)\uAC00 \uB098\uC640\uC694.",
+    nextInReview: "\uB2E4\uC74C: {store}\uC5D0\uB294 \uC9C0\uAE08 \uC81C\uCD9C\uD560 \uAC83\uC774 \uC5C6\uC5B4\uC694. \uC0C8 \uC571 \uB808\uCF54\uB4DC\uB97C \uB9CC\uB4E4\uAC70\uB098 \uC0C8 \uBE4C\uB4DC\uB97C \uC62C\uB9AC\uC9C0 \uB9C8\uC138\uC694. aaplug2_submission_guide (\uB300\uAE30 / \uC815\uBCF4 \uD544\uC694 / \uBE4C\uB4DC \uC5C6\uB294 \uBA54\uD0C0\uB370\uC774\uD130 \uC218\uC815)\uB97C \uBCF4\uC5EC \uC8FC\uACE0, \uACB0\uACFC\uAC00 \uC624\uBA74 aaplug2_report_review (approved \uB610\uB294 rejected)\uB85C \uC54C\uB824 \uC8FC\uC138\uC694.",
+    nextLive: "{store}\uC5D0 \uCD9C\uC2DC\uB41C \uC571\uC758 \uC5C5\uB370\uC774\uD2B8\uC608\uC694: \uBE44\uACF5\uAC1C \uD14C\uC2A4\uD2B8 \uC5C6\uC74C, \uD604\uC7AC \uC2A4\uD1A0\uC5B4 \uC815\uBCF4 \uC720\uC9C0. \uB2E4\uC74C: aaplug2_get_decisions.",
+    stepStage: "\uC2A4\uD1A0\uC5B4\uBCC4 \uB2E8\uACC4 \uACE0\uB974\uAE30",
+    stepRejected: "\uBC18\uB824 \uBA54\uC2DC\uC9C0 \uBD99\uC5EC \uB123\uAE30",
+    stepInReview: "\uC2EC\uC0AC \uB300\uAE30 \uC911"
+  },
+  th: {
+    stageFirst: "\u0E01\u0E48\u0E2D\u0E19\u0E2D\u0E37\u0E48\u0E19\u0E16\u0E32\u0E21\u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49\u0E27\u0E48\u0E32\u0E41\u0E2D\u0E1B\u0E2D\u0E22\u0E39\u0E48\u0E02\u0E31\u0E49\u0E19\u0E44\u0E2B\u0E19\u0E43\u0E19\u0E41\u0E15\u0E48\u0E25\u0E30\u0E2A\u0E42\u0E15\u0E23\u0E4C (\u0E08\u0E33\u0E40\u0E1B\u0E47\u0E19): aaplug2_decide key {keys} = not_submitted | in_review | rejected | live \u0E04\u0E33\u0E41\u0E19\u0E30\u0E19\u0E33\u0E08\u0E32\u0E01\u0E42\u0E1B\u0E23\u0E40\u0E08\u0E01\u0E15\u0E4C: {rec} \u0E04\u0E33\u0E43\u0E1A\u0E49\u0E40\u0E1B\u0E47\u0E19\u0E41\u0E04\u0E48\u0E04\u0E33\u0E43\u0E1A\u0E49 \u0E2D\u0E22\u0E48\u0E32\u0E16\u0E37\u0E2D\u0E27\u0E48\u0E32\u0E40\u0E1B\u0E47\u0E19\u0E01\u0E32\u0E23\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E04\u0E23\u0E31\u0E49\u0E07\u0E41\u0E23\u0E01",
+    stageAsk: "\u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E02\u0E31\u0E49\u0E19\u0E2A\u0E42\u0E15\u0E23\u0E4C\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34 \u0E40\u0E1E\u0E23\u0E32\u0E30\u0E42\u0E1B\u0E23\u0E40\u0E08\u0E01\u0E15\u0E4C\u0E21\u0E35\u0E23\u0E48\u0E2D\u0E07\u0E23\u0E2D\u0E22\u0E27\u0E48\u0E32\u0E41\u0E2D\u0E1B\u0E2D\u0E32\u0E08\u0E2D\u0E22\u0E39\u0E48\u0E43\u0E19\u0E2A\u0E42\u0E15\u0E23\u0E4C\u0E41\u0E25\u0E49\u0E27 \u0E16\u0E32\u0E21\u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49: {keys}",
+    nextRejected: "\u0E16\u0E31\u0E14\u0E44\u0E1B: \u0E02\u0E2D\u0E43\u0E2B\u0E49\u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49\u0E27\u0E32\u0E07\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E1B\u0E0F\u0E34\u0E40\u0E2A\u0E18\u0E08\u0E32\u0E01\u0E2A\u0E42\u0E15\u0E23\u0E4C \u0E41\u0E25\u0E49\u0E27\u0E40\u0E23\u0E35\u0E22\u0E01 aaplug2_report_review (event=rejected, rejection_text, {store}) \u0E08\u0E30\u0E44\u0E14\u0E49\u0E41\u0E1C\u0E19\u0E41\u0E01\u0E49\u0E44\u0E02\u0E41\u0E25\u0E30\u0E04\u0E33\u0E41\u0E19\u0E30\u0E19\u0E33\u0E01\u0E32\u0E23\u0E2A\u0E48\u0E07\u0E43\u0E2B\u0E21\u0E48 (\u0E44\u0E21\u0E48\u0E43\u0E0A\u0E48\u0E01\u0E32\u0E23\u0E2A\u0E48\u0E07\u0E04\u0E23\u0E31\u0E49\u0E07\u0E41\u0E23\u0E01)",
+    nextInReview: "\u0E16\u0E31\u0E14\u0E44\u0E1B: \u0E15\u0E2D\u0E19\u0E19\u0E35\u0E49\u0E44\u0E21\u0E48\u0E21\u0E35\u0E2D\u0E30\u0E44\u0E23\u0E15\u0E49\u0E2D\u0E07\u0E2A\u0E48\u0E07\u0E17\u0E35\u0E48 {store} \u0E2D\u0E22\u0E48\u0E32\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E41\u0E2D\u0E1B\u0E43\u0E2B\u0E21\u0E48\u0E2B\u0E23\u0E37\u0E2D\u0E2D\u0E31\u0E1B\u0E42\u0E2B\u0E25\u0E14\u0E1A\u0E34\u0E25\u0E14\u0E4C\u0E43\u0E2B\u0E21\u0E48 \u0E41\u0E2A\u0E14\u0E07 aaplug2_submission_guide (\u0E23\u0E2D / Information Needed / \u0E41\u0E01\u0E49\u0E40\u0E21\u0E17\u0E32\u0E14\u0E32\u0E17\u0E32) \u0E41\u0E25\u0E30\u0E41\u0E08\u0E49\u0E07\u0E1C\u0E25\u0E14\u0E49\u0E27\u0E22 aaplug2_report_review (approved \u0E2B\u0E23\u0E37\u0E2D rejected) \u0E40\u0E21\u0E37\u0E48\u0E2D\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A",
+    nextLive: "\u0E19\u0E35\u0E48\u0E04\u0E37\u0E2D\u0E2D\u0E31\u0E1B\u0E40\u0E14\u0E15\u0E02\u0E2D\u0E07\u0E41\u0E2D\u0E1B\u0E17\u0E35\u0E48\u0E40\u0E1C\u0E22\u0E41\u0E1E\u0E23\u0E48\u0E41\u0E25\u0E49\u0E27\u0E1A\u0E19 {store}: \u0E44\u0E21\u0E48\u0E21\u0E35\u0E01\u0E32\u0E23\u0E17\u0E14\u0E2A\u0E2D\u0E1A\u0E41\u0E1A\u0E1A\u0E1B\u0E34\u0E14 \u0E41\u0E25\u0E30\u0E04\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E42\u0E15\u0E23\u0E4C\u0E40\u0E14\u0E34\u0E21 \u0E16\u0E31\u0E14\u0E44\u0E1B: aaplug2_get_decisions",
+    stepStage: "\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E02\u0E31\u0E49\u0E19\u0E02\u0E2D\u0E07\u0E41\u0E15\u0E48\u0E25\u0E30\u0E2A\u0E42\u0E15\u0E23\u0E4C",
+    stepRejected: "\u0E27\u0E32\u0E07\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E1B\u0E0F\u0E34\u0E40\u0E2A\u0E18",
+    stepInReview: "\u0E23\u0E2D\u0E23\u0E35\u0E27\u0E34\u0E27"
+  },
+  zh: {
+    stageFirst: "\u5148\u95EE\u7528\u6237\u5E94\u7528\u5728\u6BCF\u4E2A\u5546\u5E97\u73B0\u5728\u5904\u4E8E\u54EA\u4E00\u6B65\uFF08\u5FC5\u586B\uFF09\uFF1Aaaplug2_decide key {keys} = not_submitted | in_review | rejected | live\u3002\u6839\u636E\u9879\u76EE\u63A8\u8350\uFF1A{rec}\u3002\u7EBF\u7D22\u53EA\u662F\u7EBF\u7D22\uFF0C\u4E0D\u8981\u5047\u8BBE\u662F\u9996\u6B21\u4E0A\u67B6\u3002",
+    stageAsk: "\u9879\u76EE\u663E\u793A\u5E94\u7528\u53EF\u80FD\u5DF2\u5728\u5546\u5E97\u4E2D\uFF0C\u56E0\u6B64\u6CA1\u6709\u81EA\u52A8\u9009\u62E9\u5546\u5E97\u9636\u6BB5\u3002\u8BF7\u8BE2\u95EE\u7528\u6237\uFF1A{keys}\u3002",
+    nextRejected: "\u4E0B\u4E00\u6B65\uFF1A\u8BF7\u7528\u6237\u7C98\u8D34\u5546\u5E97\u7684\u62D2\u7EDD\u6D88\u606F\uFF0C\u5E76\u8C03\u7528 aaplug2_report_review\uFF08event=rejected\uFF0Crejection_text\uFF0C{store}\uFF09\u3002\u4F1A\u5F97\u5230\u4FEE\u6B63\u8BA1\u5212\u548C\u91CD\u65B0\u63D0\u4EA4\u6307\u5357\uFF08\u4E0D\u662F\u9996\u6B21\u63D0\u4EA4\u6307\u5357\uFF09\u3002",
+    nextInReview: "\u4E0B\u4E00\u6B65\uFF1A{store} \u73B0\u5728\u65E0\u9700\u63D0\u4EA4\u3002\u4E0D\u8981\u521B\u5EFA\u65B0\u7684\u5E94\u7528\u8BB0\u5F55\u6216\u4E0A\u4F20\u65B0\u6784\u5EFA\u3002\u5C55\u793A aaplug2_submission_guide\uFF08\u7B49\u5F85 / Information Needed / \u65E0\u9700\u6784\u5EFA\u7684\u5143\u6570\u636E\u4FEE\u6B63\uFF09\uFF0C\u7ED3\u679C\u5230\u8FBE\u540E\u7528 aaplug2_report_review\uFF08approved \u6216 rejected\uFF09\u62A5\u544A\u3002",
+    nextLive: "\u8FD9\u662F {store} \u4E0A\u5DF2\u4E0A\u67B6\u5E94\u7528\u7684\u66F4\u65B0\uFF1A\u65E0\u5C01\u95ED\u6D4B\u8BD5\uFF0C\u4FDD\u7559\u5F53\u524D\u5546\u5E97\u4FE1\u606F\u3002\u4E0B\u4E00\u6B65\uFF1Aaaplug2_get_decisions\u3002",
+    stepStage: "\u9009\u62E9\u6BCF\u4E2A\u5546\u5E97\u7684\u9636\u6BB5",
+    stepRejected: "\u7C98\u8D34\u62D2\u7EDD\u6D88\u606F",
+    stepInReview: "\u7B49\u5F85\u5BA1\u6838"
+  },
+  hi: {
+    stageFirst: "\u092A\u0939\u0932\u0947 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0938\u0947 \u092A\u0942\u091B\u0947\u0902 \u0915\u093F \u0939\u0930 \u0938\u094D\u091F\u094B\u0930 \u092E\u0947\u0902 \u0910\u092A \u0905\u092D\u0940 \u0915\u0939\u093E\u0901 \u0939\u0948 (\u091C\u093C\u0930\u0942\u0930\u0940): aaplug2_decide key {keys} = not_submitted | in_review | rejected | live\u0964 \u092A\u094D\u0930\u094B\u091C\u0947\u0915\u094D\u091F \u0938\u0947 \u0938\u0941\u091D\u093E\u0935: {rec}\u0964 \u0938\u0902\u0915\u0947\u0924 \u0938\u093F\u0930\u094D\u092B\u093C \u0938\u0902\u0915\u0947\u0924 \u0939\u0948\u0902; \u092A\u0939\u0932\u093E \u0932\u0949\u0928\u094D\u091A \u092E\u093E\u0928\u0915\u0930 \u0928 \u091A\u0932\u0947\u0902\u0964",
+    stageAsk: "\u092A\u094D\u0930\u094B\u091C\u0947\u0915\u094D\u091F \u092E\u0947\u0902 \u0938\u0902\u0915\u0947\u0924 \u0939\u0948\u0902 \u0915\u093F \u0910\u092A \u0936\u093E\u092F\u0926 \u092A\u0939\u0932\u0947 \u0938\u0947 \u0938\u094D\u091F\u094B\u0930 \u092E\u0947\u0902 \u0939\u0948, \u0907\u0938\u0932\u093F\u090F \u0938\u094D\u091F\u094B\u0930 \u091A\u0930\u0923 \u0905\u092A\u0928\u0947-\u0906\u092A \u0928\u0939\u0940\u0902 \u091A\u0941\u0928\u093E \u0917\u092F\u093E\u0964 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0938\u0947 \u092A\u0942\u091B\u0947\u0902: {keys}\u0964",
+    nextRejected: "\u0906\u0917\u0947: \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0938\u0947 \u0938\u094D\u091F\u094B\u0930 \u0915\u093E \u0905\u0938\u094D\u0935\u0940\u0915\u0943\u0924\u093F \u0938\u0902\u0926\u0947\u0936 \u092A\u0947\u0938\u094D\u091F \u0915\u0930\u0935\u093E\u090F\u0901 \u0914\u0930 aaplug2_report_review (event=rejected, rejection_text, {store}) \u0915\u0949\u0932 \u0915\u0930\u0947\u0902\u0964 \u0907\u0938\u0938\u0947 \u0938\u0941\u0927\u093E\u0930 \u092F\u094B\u091C\u0928\u093E \u0914\u0930 \u0926\u094B\u092C\u093E\u0930\u093E \u0938\u092C\u092E\u093F\u091F \u0917\u093E\u0907\u0921 \u092E\u093F\u0932\u0947\u0917\u0940 (\u092A\u0939\u0932\u093E \u0938\u092C\u092E\u093F\u091F \u0917\u093E\u0907\u0921 \u0928\u0939\u0940\u0902)\u0964",
+    nextInReview: "\u0906\u0917\u0947: {store} \u092A\u0930 \u0905\u092D\u0940 \u0915\u0941\u091B \u0938\u092C\u092E\u093F\u091F \u0928\u0939\u0940\u0902 \u0915\u0930\u0928\u093E\u0964 \u0928\u092F\u093E \u0910\u092A \u0930\u093F\u0915\u0949\u0930\u094D\u0921 \u0928 \u092C\u0928\u093E\u090F\u0901, \u0928\u092F\u093E \u092C\u093F\u0932\u094D\u0921 \u0905\u092A\u0932\u094B\u0921 \u0928 \u0915\u0930\u0947\u0902\u0964 aaplug2_submission_guide (\u0907\u0902\u0924\u091C\u093C\u093E\u0930 / Information Needed / \u092C\u093F\u0928\u093E \u092C\u093F\u0932\u094D\u0921 \u092E\u0947\u091F\u093E\u0921\u0947\u091F\u093E \u0938\u0941\u0927\u093E\u0930) \u0926\u093F\u0916\u093E\u090F\u0901 \u0914\u0930 \u0928\u0924\u0940\u091C\u093E \u0906\u0928\u0947 \u092A\u0930 aaplug2_report_review (approved \u092F\u093E rejected) \u0938\u0947 \u092C\u0924\u093E\u090F\u0901\u0964",
+    nextLive: "\u092F\u0939 {store} \u092A\u0930 \u0932\u093E\u0907\u0935 \u0910\u092A \u0915\u093E \u0905\u092A\u0921\u0947\u091F \u0939\u0948: \u0915\u094B\u0908 \u0915\u094D\u0932\u094B\u091C\u093C\u094D\u0921 \u091F\u0947\u0938\u094D\u091F \u0928\u0939\u0940\u0902, \u092E\u094C\u091C\u0942\u0926\u093E \u0932\u093F\u0938\u094D\u091F\u093F\u0902\u0917 \u0935\u0948\u0938\u0940 \u0939\u0940\u0964 \u0906\u0917\u0947: aaplug2_get_decisions\u0964",
+    stepStage: "\u0939\u0930 \u0938\u094D\u091F\u094B\u0930 \u0915\u093E \u091A\u0930\u0923 \u091A\u0941\u0928\u0947\u0902",
+    stepRejected: "\u0905\u0938\u094D\u0935\u0940\u0915\u0943\u0924\u093F \u0938\u0902\u0926\u0947\u0936 \u092A\u0947\u0938\u094D\u091F \u0915\u0930\u0947\u0902",
+    stepInReview: "\u0938\u092E\u0940\u0915\u094D\u0937\u093E \u0915\u093E \u0907\u0902\u0924\u091C\u093C\u093E\u0930"
+  }
+};
+for (const l of Object.keys(STAGE_M)) Object.assign(M[l], STAGE_M[l]);
 var msg = (lang2, k, v) => {
   let s = M[lang2] && M[lang2][k] || M.en[k] || k;
   if (v) s = s.replace(/\{(\w+)\}/g, (m, x) => v[x] != null ? v[x] : m);
@@ -59120,7 +59173,7 @@ async function walkDir(root) {
   await walk(path4.resolve(root), "");
   return out;
 }
-async function connect({ source, github_url, path: p, lang: lang2 }, { allowPath }) {
+async function connect({ source, github_url, path: p, lang: lang2, store_stage }, { allowPath }) {
   const L = normLang(lang2);
   const t = T(L);
   let project;
@@ -59147,13 +59200,79 @@ async function connect({ source, github_url, path: p, lang: lang2 }, { allowPath
   A.brandColor = A.brandColor || (hasGraphics ? await Gfx.avgColor(A.icon && A.icon.dataUrl) : "#2f6f5e");
   const id = Flow.slugOf(A).toLowerCase().replace(/[^a-z0-9.-]+/g, "-").slice(0, 40).replace(/^[^a-z0-9]+/, "app") + "-" + crypto2.randomBytes(5).toString("hex");
   const st = { id, v: 1, createdAt: (/* @__PURE__ */ new Date()).toISOString(), lang: L, sample: source === "sample", source: project.source, A, dec: {}, approved: {}, review: {}, generated: null };
+  if (store_stage) {
+    for (const k of Flow.storesOf(A)) {
+      const v = typeof store_stage === "string" ? store_stage : store_stage[k];
+      if (v == null) continue;
+      if (!Flow.STAGES.includes(v)) throw new UserError(msg(L, "badValue", { key: "store_stage." + k, val: JSON.stringify(v) }), "badValue");
+      st.dec["stage:" + k] = v;
+      syncStage(st, k);
+    }
+  }
   save(st);
   return { st, report: report(st, L) };
 }
+function syncStage(st, k) {
+  const s = st.dec["stage:" + k], R = st.review[k];
+  if (R && !R.external && R.status !== "none") return;
+  if (s === "in_review") st.review[k] = { status: "in_review", round: 1, external: true };
+  else if (s === "rejected") st.review[k] = { status: "rejected", round: 1, external: true };
+  else delete st.review[k];
+}
+function dropStaleKeep(st) {
+  const list = Flow.decisions(st.A, st.dec);
+  for (const [k, v] of Object.entries(st.dec)) if (v === "keep") {
+    const d = list.find((x) => x.key === k);
+    if (!d || !d.keep) delete st.dec[k];
+  }
+  for (const k of Object.keys(st.dec)) if (k.startsWith("binary:") && !list.find((x) => x.key === k)) delete st.dec[k];
+}
+function refreshAuto(st) {
+  const list = Flow.decisions(st.A, st.dec);
+  for (const k of st.auto || []) {
+    const d = list.find((x) => x.key === k);
+    if (!d) {
+      delete st.dec[k];
+      continue;
+    }
+    st.dec[k] = Flow.recValue(d);
+  }
+  st.auto = (st.auto || []).filter((k) => st.dec[k] !== void 0);
+}
+var EV = { "play-url": "Google Play link", "apple-url": "App Store link", "fastlane-play": "fastlane Play metadata", "fastlane-apple": "fastlane App Store metadata", "fastlane-deliver": "fastlane deliver", "play-changelogs": "Play release notes" };
+function stageInfo(st, L) {
+  const t = T(L), o = {};
+  for (const k of Flow.storesOf(st.A)) {
+    const h = Flow.stageHints(st.A, k), rec = Flow.stageRec(st.A, k), cur = Flow.stageOf(st.dec, k);
+    o[STORE_NAME[k]] = {
+      key: "stage:" + k,
+      current: cur,
+      current_label: cur ? t("stage." + cur) : null,
+      recommended: rec,
+      evidence: h.evidence.map((e) => EV[e] || e),
+      earlier_upload_hint: h.weak || void 0,
+      store_url: h.url || void 0
+    };
+  }
+  return o;
+}
+var undecidedStages = (st) => Flow.storesOf(st.A).filter((k) => !Flow.stageOf(st.dec, k));
+function stageNext(st, L) {
+  const u = undecidedStages(st);
+  if (u.length) return msg(L, "stageFirst", { keys: u.map((k) => "stage:" + k).join(", "), rec: u.map((k) => `${STORE_NAME[k]} = ${Flow.stageRec(st.A, k)}`).join(", ") });
+  const ks = Flow.storesOf(st.A);
+  const rj = ks.filter((k) => st.review[k] && st.review[k].status === "rejected" && !st.review[k].text);
+  if (rj.length) return msg(L, "nextRejected", { store: rj.map((k) => "store=" + k).join(", ") });
+  const ir = ks.filter((k) => st.review[k] && st.review[k].external && st.review[k].status === "in_review");
+  if (ir.length) return msg(L, "nextInReview", { store: ir.map((k) => STORE_NAME[k]).join(", ") });
+  const lv = ks.filter((k) => Flow.stageOf(st.dec, k) === "live");
+  if (lv.length) return msg(L, "nextLive", { store: lv.map((k) => STORE_NAME[k]).join(", ") });
+  return null;
+}
 function report(st, lang2) {
-  const L = normLang(lang2 || st.lang), t = T(L), A = st.A;
+  const L = normLang(lang2 || st.lang), t = T(L), A = st.A, issues = Flow.issuesFor(A, st.dec);
   const c = { block: 0, warn: 0, tip: 0 };
-  A.issues.forEach((i) => c[i.sev]++);
+  issues.forEach((i) => c[i.sev]++);
   return {
     project_id: st.id,
     summary: msg(L, "connected", { name: appName(st, L), ready: A.readiness }) + " " + msg(L, "counts", c),
@@ -59169,11 +59288,13 @@ function report(st, lang2) {
       languages_in_app: A.locales,
       icon_found: !!A.icon,
       screenshots_found: A.screenshots.length,
-      source: st.source
+      source: st.source,
+      privacy_url_found: A.developer && A.developer.privacyUrl || null
     },
+    store_stage: stageInfo(st, L),
     readiness: A.readiness,
     counts: c,
-    issues: A.issues.map((i) => ({
+    issues: issues.map((i) => ({
       key: i.fix && i.fix !== "info" ? Flow.issueKey(i) : null,
       severity: t("sev." + i.sev),
       sev: i.sev,
@@ -59183,7 +59304,7 @@ function report(st, lang2) {
       ai_fix: i.fix && i.fix !== "info" ? t("iss." + i.id + ".f", i.vars) : null
     })),
     ...learned(st, L),
-    next: msg(L, "nextDecide", { n: Flow.decisions(A).length })
+    next: stageNext(st, L) || msg(L, "nextDecide", { n: Flow.decisions(A, st.dec).length })
   };
 }
 function learned(st, L) {
@@ -59197,6 +59318,17 @@ var withLearnedNotes = (notes, rel) => {
 var STYLE2 = { icon: ["original", "brand", "light"], feature: ["split", "shot", "minimal"] };
 function optionList(st, d, L) {
   const A = st.A, t = T(L), C = Flow.chosen(A, st.dec);
+  if (d.group === "stage") {
+    const b = d.key.startsWith("binary:") ? "binary." : "stage.";
+    return d.opts.map((o) => ({ value: o, label: t(b + o), detail: t(b + o + ".d") }));
+  }
+  const base = optionBase(st, d, L, A, t, C);
+  if (!d.keep) return base;
+  const cur = d.key === "privacy" ? A.developer && A.developer.privacyUrl || t("opt.keep.d") : t("opt.keep.d");
+  const k = { value: "keep", label: t("opt.keep"), detail: cur };
+  return d.keepRec === false ? [...base, k] : [k, ...base];
+}
+function optionBase(st, d, L, A, t, C) {
   if (d.group === "fix") {
     const is3 = d.issue, p = Gen.patches(A, L)[is3.fix];
     return d.opts.map((o) => ({ value: o, label: t("opt." + o), detail: o === "apply" ? t("iss." + is3.id + ".f", is3.vars) + (p ? ` \u2192 ${p.file}` : "") : o === "later" ? t("opt.later.d") : t("opt." + o + ".d") }));
@@ -59243,22 +59375,41 @@ function optionList(st, d, L) {
 function decisionTitle(d, L) {
   const t = T(L);
   if (d.group === "fix") return { title: t("iss." + d.issue.id + ".t", d.issue.vars), why: t("iss." + d.issue.id + ".w", d.issue.vars), severity: t("sev." + d.issue.sev) };
+  if (d.key.startsWith("stage:")) {
+    const h = d.hints || { evidence: [] };
+    const hint = h.evidence.length ? " " + t("stage.hint", { ev: h.evidence.map((e) => EV[e] || e).join(", "), rec: t("stage." + d.opts[d.rec]) }) : "";
+    return { title: t("dec.stage." + d.store), why: t("dec.stage.d") + hint + (h.weak ? " " + t("stage.hintWeak", { weak: h.weak }) : ""), required: true, ask_user: d.ask || void 0 };
+  }
+  if (d.key.startsWith("binary:")) return { title: `${STORE_NAME[d.store]}: ${t("dec.binary")}`, why: t("dec.binary.d") };
   return { title: t("dec." + d.key), why: d.key === "shots" ? "" : t("dec." + d.key + ".d") };
 }
 function decisions(st, lang2, onlyOpen) {
   const L = normLang(lang2 || st.lang);
-  const list = Flow.decisions(st.A);
+  const list = Flow.decisions(st.A, st.dec);
   const out = list.map((d) => {
     const opts = optionList(st, d, L), rec = Flow.recValue(d), cur = st.dec[d.key];
     return { key: d.key, group: d.group, ...decisionTitle(d, L), options: opts.map((o) => ({ ...o, recommended: JSON.stringify(o.value) === JSON.stringify(rec) || void 0 })), recommended: rec, decided: cur !== void 0, current: cur };
   });
   const open2 = out.filter((d) => !d.decided);
-  return { project_id: st.id, open_count: open2.length, total: out.length, decisions: onlyOpen ? open2 : out, ...learned(st, L), next: open2.length ? msg(L, "openLeft", { n: open2.length }) : msg(L, "allDecided") };
+  const sn = stageNext(st, L);
+  return {
+    project_id: st.id,
+    store_stage: stageInfo(st, L),
+    open_count: open2.length,
+    total: out.length,
+    decisions: onlyOpen ? open2 : out,
+    ...learned(st, L),
+    next: undecidedStages(st).length ? sn : open2.length ? msg(L, "openLeft", { n: open2.length }) : sn && !/aaplug2_get_decisions/.test(sn) ? sn : msg(L, "allDecided")
+  };
 }
 function validate2(st, d, val, L) {
   const bad = () => {
     throw new UserError(msg(L, "badValue", { key: d.key, val: JSON.stringify(val) }), "badValue");
   };
+  if (val === "keep") {
+    if (!d.keep) bad();
+    return "keep";
+  }
   if (d.opts) {
     if (!d.opts.includes(val)) bad();
     return val;
@@ -59295,30 +59446,58 @@ function validate2(st, d, val, L) {
 }
 function decide(st, { choices, accept_all_recommended }, lang2) {
   const L = normLang(lang2 || st.lang);
-  const list = Flow.decisions(st.A);
   const applied = [];
-  for (const c of choices || []) {
+  let list = Flow.decisions(st.A, st.dec);
+  const cs = [...choices || []].sort((a, b) => (/^stage:/.test(b.key) ? 1 : 0) - (/^stage:/.test(a.key) ? 1 : 0));
+  for (const c of cs) {
     const d = list.find((x) => x.key === c.key);
     if (!d) throw new UserError(msg(L, "unknownKey", { key: c.key }), "unknownKey");
     st.dec[d.key] = validate2(st, d, c.value, L);
     applied.push({ key: d.key, value: st.dec[d.key] });
+    st.auto = (st.auto || []).filter((k) => k !== d.key);
+    if (d.group === "stage") {
+      if (d.key.startsWith("stage:")) syncStage(st, d.store);
+      dropStaleKeep(st);
+      refreshAuto(st);
+      list = Flow.decisions(st.A, st.dec);
+    }
   }
-  if (accept_all_recommended) list.forEach((d) => {
-    if (st.dec[d.key] === void 0) {
+  let skipped = [];
+  if (accept_all_recommended) {
+    skipped = list.filter((d) => d.group === "stage" && d.ask && st.dec[d.key] === void 0).map((d) => d.key);
+    for (const d of list) if (d.group === "stage" && !d.ask && st.dec[d.key] === void 0) {
       st.dec[d.key] = Flow.recValue(d);
       applied.push({ key: d.key, value: st.dec[d.key], recommended: true });
+      if (d.key.startsWith("stage:")) syncStage(st, d.store);
     }
-  });
+    list = Flow.decisions(st.A, st.dec);
+    if (!undecidedStages(st).length) list.forEach((d) => {
+      if (st.dec[d.key] === void 0) {
+        st.dec[d.key] = Flow.recValue(d);
+        st.auto = [.../* @__PURE__ */ new Set([...st.auto || [], d.key])];
+        applied.push({ key: d.key, value: st.dec[d.key], recommended: true });
+      }
+    });
+  }
+  list = Flow.decisions(st.A, st.dec);
   if (applied.length) {
     st.approved = {};
     st.generated = null;
   }
   save(st);
   const left = list.filter((d) => st.dec[d.key] === void 0).map((d) => d.key);
-  return { project_id: st.id, applied, open_count: left.length, open_keys: left, next: left.length ? msg(L, "openLeft", { n: left.length }) : msg(L, "allDecided") };
+  const sn = stageNext(st, L);
+  return {
+    project_id: st.id,
+    applied,
+    open_count: left.length,
+    open_keys: left,
+    stage_not_picked: skipped.length ? msg(L, "stageAsk", { keys: skipped.join(", ") }) : void 0,
+    next: undecidedStages(st).length ? sn : left.length ? msg(L, "openLeft", { n: left.length }) : sn && !/aaplug2_get_decisions/.test(sn) ? sn : msg(L, "allDecided")
+  };
 }
 function requireDecided(st, L) {
-  const left = Flow.decisions(st.A).filter((d) => st.dec[d.key] === void 0).map((d) => d.key);
+  const left = Flow.decisions(st.A, st.dec).filter((d) => st.dec[d.key] === void 0).map((d) => d.key);
   if (left.length) throw new UserError(msg(L, "needDecisions", { n: left.length, keys: left.join(", ") }), "needDecisions");
 }
 var b64 = (u) => u.split(",")[1];
@@ -59327,7 +59506,7 @@ async function graphics(st, L, kinds) {
   const A = st.A, brand = A.brandColor || "#2f6f5e", C = Flow.chosen(A, st.dec), out = {};
   const icons = await Gfx.icons(A, brand);
   out.icons = icons.map((i) => i.dataUrl);
-  const iconUrl = out.icons[st.dec.icon != null ? st.dec.icon : 0];
+  const iconUrl = out.icons[Number.isInteger(st.dec.icon) ? st.dec.icon : 0];
   if (kinds.includes("feature")) {
     const nm = C.title(L).split(/ [-–:] /)[0], tg = C.short(L).replace(/[.。]$/, "");
     out.features = await Promise.all(STYLE2.feature.map((s) => Gfx.feature(A, L, s, brand, iconUrl, nm, tg)));
@@ -59363,9 +59542,9 @@ async function generate2(st, { output_dir, lang: lang2 }, { allowPath }) {
   if (nf) nf.data = withLearnedNotes(String(nf.data).trimEnd(), rel) + "\n";
   const g2 = await graphics(st, L, ["feature", "screenshots"]);
   if (g2) {
-    files.push({ path: "graphics/icon-512.png", data: Buffer.from(b64(g2.icons[st.dec.icon || 0]), "base64") });
-    files.push({ path: "graphics/feature-graphic-1024x500.png", data: Buffer.from(b64(g2.features[st.dec.feature || 0]), "base64") });
-    g2.shots.forEach((s, k) => files.push({ path: `graphics/screenshot-${k + 1}-1080x1920-${L}.png`, data: Buffer.from(b64(s), "base64") }));
+    if (st.dec.icon !== "keep") files.push({ path: "graphics/icon-512.png", data: Buffer.from(b64(g2.icons[Number.isInteger(st.dec.icon) ? st.dec.icon : 0]), "base64") });
+    if (st.dec.feature !== "keep") files.push({ path: "graphics/feature-graphic-1024x500.png", data: Buffer.from(b64(g2.features[Number.isInteger(st.dec.feature) ? st.dec.feature : 0]), "base64") });
+    if (st.dec.shots !== "keep") g2.shots.forEach((s, k) => files.push({ path: `graphics/screenshot-${k + 1}-1080x1920-${L}.png`, data: Buffer.from(b64(s), "base64") }));
   }
   files.push({ path: "README.txt", data: `AA Plug 2 \u2014 ${A.appName} (${A.pkg || ""})
 ${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}
@@ -59388,8 +59567,9 @@ Feedback: ${CFG.feedbackUrl}
   fs4.writeFileSync(zipPath, zipBuf);
   st.generated = { at: (/* @__PURE__ */ new Date()).toISOString(), folder, zip: zipPath, lang: L };
   save(st);
-  const listing = {};
-  for (const l of C.langs) {
+  const listing = {}, keepListing = C.keep.title || C.keep.short;
+  if (keepListing) listing.keep_current_listing = true;
+  else for (const l of C.langs) {
     listing[l] = {
       google_play: stores.play ? { title: C.title(l), short_description: C.short(l), full_description: C.full(l), category: C.cat.play } : void 0,
       app_store: stores.apple ? { name: C.title(l), subtitle: C.ios(l).subtitle, promotional_text: C.ios(l).promo, keywords: C.ios(l).keywords, description: C.full(l), category: C.cat.apple } : void 0
@@ -59399,6 +59579,8 @@ Feedback: ${CFG.feedbackUrl}
   return {
     project_id: st.id,
     summary: msg(L, "generated", { n: files.length }) + (g2 ? "" : " " + msg(L, "noGraphics")),
+    store_stage: Object.fromEntries(Flow.storesOf(A).map((k) => [STORE_NAME[k], Flow.stageOf(st.dec, k)])),
+    whats_new: Flow.hasListing(A, st.dec) ? Object.fromEntries(C.langs.map((l) => [l, Flow.WHATS_NEW[l] || Flow.WHATS_NEW.en])) : void 0,
     folder,
     zip: zipPath,
     zip_bytes: zipBuf.length,
@@ -59422,10 +59604,23 @@ function storeCheck(st, store2, L) {
 }
 function guide(st, store2, lang2) {
   const L = normLang(lang2 || st.lang), t = T(L);
-  requireDecided(st, L);
-  storeCheck(st, store2, L);
-  const approved = !!st.approved[store2];
-  const steps = Flow.guide(st.A, st.dec, L, store2, t).map((s, k) => {
+  const stage = Flow.stageOf(st.dec, store2);
+  let dec = st.dec;
+  if (stage === "in_review" || stage === "rejected") {
+    storeCheck(st, store2, L);
+    dec = { ...st.dec };
+    Flow.decisions(st.A, dec).forEach((d) => {
+      if (dec[d.key] === void 0) dec[d.key] = Flow.recValue(d);
+    });
+  } else {
+    requireDecided(st, L);
+    storeCheck(st, store2, L);
+  }
+  const approved = !!st.approved[store2], R = st.review[store2] || {};
+  const raw = Flow.guide(st.A, dec, L, store2, t);
+  const msgStep = raw.find((s) => s.id === "r-message");
+  if (msgStep) msgStep.fields = R.plan ? [[t("f.reason"), R.plan.reason], ...R.plan.fix_plan.map((x, k) => [`${k + 1}`, x]), ...R.plan.reply ? [[t("g.r-reply.t"), R.plan.reply]] : []] : [["aaplug2_report_review", "event=rejected \xB7 store=" + store2 + " \xB7 rejection_text"]];
+  const steps = raw.map((s, k) => {
     const locked = s.final && !approved;
     return {
       n: k + 1,
@@ -59505,7 +59700,7 @@ function review(st, { store: store2, event, rejection_text }, lang2) {
       }
       const sharedPayload = les && !st.sample ? shareLesson(les, "rejected") : null;
       if (!rj && les) {
-        st.review[store2] = { ...R, status: "fixing", text: rejection_text, lesson: les.id };
+        st.review[store2] = { ...R, status: "fixing", text: rejection_text, lesson: les.id, plan: { reason: les.title, fix_plan: [].concat(Lessons.planFor(les, L) || []), reply: Lessons.replyFor(les, appName(st, "en")) } };
         out = {
           ...out,
           status: "fixing",
@@ -59524,7 +59719,7 @@ function review(st, { store: store2, event, rejection_text }, lang2) {
         st.review[store2] = { ...R, status: "rejected", text: rejection_text };
         out = { ...out, status: "rejected", matched: false, information_needed: infoNeeded, message: msg(L, "unknownRejection") };
       } else {
-        st.review[store2] = { ...R, status: "fixing", text: rejection_text, rid: rj.id };
+        st.review[store2] = { ...R, status: "fixing", text: rejection_text, rid: rj.id, plan: { reason: t("rj." + rj.id + ".t"), fix_plan: [].concat(rj.plan[L] || rj.plan.en || []), reply: rj.reply(appName(st, "en")) } };
         const p = rj.id === "play-photo" ? Gen.patches(st.A, L)["patch-manifest-photo"] : null;
         out = {
           ...out,
@@ -59569,9 +59764,15 @@ function review(st, { store: store2, event, rejection_text }, lang2) {
   return out;
 }
 function stepOf(st, L) {
-  const open2 = Flow.decisions(st.A).filter((d) => st.dec[d.key] === void 0).length;
+  const open2 = Flow.decisions(st.A, st.dec).filter((d) => st.dec[d.key] === void 0).length;
   const stores = Object.entries(Flow.stores(st.A, st.dec)).filter(([, v]) => v).map(([k]) => k);
   if (st.done) return { step: "done", label: msg(L, "stepDone"), next: null };
+  const us = undecidedStages(st);
+  if (us.length) return { step: "stage", label: msg(L, "stepStage"), next: "aaplug2_decide", open_keys: us.map((k) => "stage:" + k), note: stageNext(st, L) };
+  const rj = stores.filter((k) => st.review[k] && st.review[k].status === "rejected" && !st.review[k].text);
+  if (rj.length) return { step: "rejected", label: msg(L, "stepRejected"), next: "aaplug2_report_review", stores: rj.map((k) => STORE_NAME[k]), note: stageNext(st, L) };
+  const ir = stores.filter((k) => st.review[k] && st.review[k].external && st.review[k].status === "in_review" && st.dec["binary:" + k] !== "new_build");
+  if (ir.length && ir.length === stores.length) return { step: "in_review", label: msg(L, "stepInReview"), next: "aaplug2_report_review", guide: "aaplug2_submission_guide", stores: ir.map((k) => STORE_NAME[k]), note: stageNext(st, L) };
   if (open2) return { step: "decide", label: msg(L, "stepDecide"), next: "aaplug2_get_decisions", open_decisions: open2 };
   if (!st.generated) return { step: "generate", label: msg(L, "stepGenerate"), next: "aaplug2_generate_store_materials" };
   const notApproved = stores.filter((k) => !st.approved[k]);
@@ -59608,10 +59809,11 @@ function forgetLesson(id, lang2) {
 }
 
 // lib/tools.mjs
-var VERSION = "0.1.4";
-var INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
+var VERSION = "0.1.5";
+var INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch. It works at every store stage: a first submit, an app already uploaded and waiting in review, a rejected app, and an update of an app that is already live.
 How to use it:
-1. When the user says their app is finished or asks for help publishing, call aaplug2_connect_app ONCE with a public GitHub URL, a local folder/ZIP path, or source=sample for a demo. Never ask the user for tokens, passwords or store metadata forms.
+1. When the user says their app is finished, is in review, was rejected or needs an update, call aaplug2_connect_app ONCE with a public GitHub URL, a local folder/ZIP path, or source=sample for a demo. Never ask the user for tokens, passwords or store metadata forms.
+1a. Store stage comes first and is required for each store: not_submitted (first submit), in_review (uploaded, waiting), rejected, or live (update). Pass store_stage on connect if the user already said it; otherwise ask, and record it with aaplug2_decide key stage:play / stage:apple. The report's store_stage shows hints (store links, fastlane metadata, version numbers) and a recommendation; hints are only hints, never assume a first launch. In review: nothing to submit, no new app record and no new build unless the user chooses binary:<store>=new_build (replacing a build can withdraw or delay the review); help them wait, prepare a reply draft for Information Needed and fix metadata. Rejected: the next step is pasting the store's message into aaplug2_report_review; then follow the fix plan and the resubmit guide. Live: an update, so no closed testing; keep the live listing (the "keep" option), and the guide covers the new version and "What's new".
 2. Show the analysis in plain words, then call aaplug2_get_decisions and present each decision's options to the user. The user only picks, approves or rejects. Show the recommended option first.
 3. Call aaplug2_decide ONLY with values the user actually chose in this conversation. Use accept_all_recommended=true only if the user explicitly says to accept all recommendations.
 4. Call aaplug2_generate_store_materials, then aaplug2_submission_guide for each store and walk the user through the console steps.
@@ -59642,11 +59844,12 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
   const W = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
   server.registerTool("aaplug2_connect_app", {
     title: "Connect an app (start launch help)",
-    description: 'Start here when the user has finished building an Android or iOS app and wants to publish it, or asks for Play Store / App Store launch help. Connects the app project once and analyzes it (manifest, Gradle, Info.plist, strings, README, icons, screenshots) for store-review problems and launch readiness. No tokens or forms. source: "github" (public repo URL), "path" (a project folder or .zip on the machine running this server), or "sample" (built-in demo app SnapLedger). Returns project_id used by every other AA Plug 2 tool.',
+    description: 'Start here when the user has finished building an Android or iOS app and wants to publish it, or asks for Play Store / App Store help with an app that is waiting in review, was rejected, or is live and needs an update. Connects the app project once and analyzes it (manifest, Gradle, Info.plist, strings, README, icons, screenshots) for store-review problems and launch readiness. No tokens or forms. source: "github" (public repo URL), "path" (a project folder or .zip on the machine running this server), or "sample" (built-in demo app SnapLedger). Returns project_id used by every other AA Plug 2 tool.',
     inputSchema: {
       source: external_exports.enum(["github", "path", "sample"]).describe("Where the app comes from"),
       github_url: external_exports.string().optional().describe("Public GitHub repo URL, e.g. https://github.com/owner/repo (optionally /tree/branch/subfolder). Required when source=github"),
       path: external_exports.string().optional().describe("Absolute path to the project folder or a .zip of it, on the computer running this MCP server. Required when source=path"),
+      store_stage: external_exports.union([external_exports.enum(["not_submitted", "in_review", "rejected", "live"]), external_exports.object({ play: external_exports.enum(["not_submitted", "in_review", "rejected", "live"]).optional(), apple: external_exports.enum(["not_submitted", "in_review", "rejected", "live"]).optional() })]).optional().describe("Where the app is now, only if the user said so: one stage for every store, or per store {play, apple}. not_submitted = first submit, in_review = uploaded and waiting, rejected = rejected, live = already published (this is an update). If omitted, ask the user (decision key stage:<store>)."),
       lang
     },
     annotations: { ...W, openWorldHint: true }
@@ -59665,7 +59868,7 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
   }));
   server.registerTool("aaplug2_get_decisions", {
     title: "List choices for the user",
-    description: "List what the user needs to decide, each with ready-made options and a recommended one: code fixes to apply or skip, which stores, store title, short description, tone, category, store languages, icon, feature graphic, screenshots, privacy policy, Data safety / App Privacy answers, content rating answers and release track. Present these to the user as simple choices; the user does not type metadata. Use only_open=true to see just the undecided ones.",
+    description: "List what the user needs to decide, each with ready-made options and a recommended one: the store stage per store (stage:play / stage:apple, required, asked first; binary:<store> when in review), code fixes to apply or skip, which stores, store title, short description, tone, category, store languages, icon, feature graphic, screenshots, privacy policy, Data safety / App Privacy answers, content rating answers and release track. Present these to the user as simple choices; the user does not type metadata. Use only_open=true to see just the undecided ones.",
     inputSchema: { project_id: pid, only_open: external_exports.boolean().optional().describe("Only undecided items (default true)"), lang },
     annotations: { ...RO, openWorldHint: true }
   }, wrap(async (a) => {
@@ -59674,7 +59877,7 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
   }));
   server.registerTool("aaplug2_decide", {
     title: "Record the user's choices",
-    description: "Record choices the user made. Pass each as {key, value} using the key and an option value from aaplug2_get_decisions. Only send what the user actually picked or approved. Set accept_all_recommended=true only when the user explicitly said to accept all recommendations; it fills every undecided item with the recommended option. Changing a decision clears earlier submission approvals and generated files.",
+    description: 'Record choices the user made. Pass each as {key, value} using the key and an option value from aaplug2_get_decisions. Only send what the user actually picked or approved. A stage with hints of an existing store listing is never filled by accept_all_recommended; ask the user. Value "keep" keeps a live listing value. Set accept_all_recommended=true only when the user explicitly said to accept all recommendations; it fills every undecided item with the recommended option. Changing a decision clears earlier submission approvals and generated files.',
     inputSchema: {
       project_id: pid,
       choices: external_exports.array(external_exports.object({ key: external_exports.string(), value: external_exports.union([external_exports.string(), external_exports.number(), external_exports.array(external_exports.string())]) })).optional().describe('e.g. [{"key":"title","value":1},{"key":"fix:targetSdk","value":"apply"},{"key":"langs","value":["en","ko"]}]'),
@@ -59705,7 +59908,7 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
   }));
   server.registerTool("aaplug2_submission_guide", {
     title: "Step-by-step console guide",
-    description: "Plain-language, step-by-step guide for Google Play Console (store=play) or App Store Connect (store=apple) with the exact value to paste into every field. The final submit step stays locked until the user approves with aaplug2_approve_submission.",
+    description: "Plain-language, step-by-step guide for Google Play Console (store=play) or App Store Connect (store=apple) with the exact value to paste into every field. The guide follows the store stage: first submit, waiting in review (wait, Information Needed reply draft, metadata-only fixes, no new build unless chosen), rejected (fix plan and resubmit) or live (new version, What's new, listing kept). The final submit step stays locked until the user approves with aaplug2_approve_submission.",
     inputSchema: { project_id: pid, store, lang },
     annotations: { ...RO, openWorldHint: true }
   }, wrap(async (a) => {
@@ -59738,7 +59941,7 @@ function createServer2({ allowPath = true, inlineZip = false } = {}) {
   }, wrap(async (a) => ok(forgetLesson(a.lesson_id, a.lang))));
   server.registerPrompt("launch_my_app", {
     title: "Launch my app with AA Plug 2",
-    description: "Start the AA Plug 2 launch flow for an app the user already built.",
+    description: "Start the AA Plug 2 flow for an app the user already built: first submit, waiting in review, rejected, or a live app update.",
     argsSchema: { app: external_exports.string().optional().describe("Public GitHub URL or local path of the app (leave empty for the demo)") }
   }, ({ app }) => ({ messages: [{ role: "user", content: { type: "text", text: `Use AA Plug 2 to get my app ready for Google Play / App Store launch${app ? `: ${app}` : " (use the built-in sample if I have nothing to connect yet)"}. I only want to pick and approve; do not submit anything without my approval.` } }] }));
   return server;

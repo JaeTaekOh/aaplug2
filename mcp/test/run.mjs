@@ -53,7 +53,7 @@ async function stdioFlow() {
 
   // 2. 결정
   r = await call(c, 'aaplug2_get_decisions', { project_id: id }); let D = data(r);
-  check(D.open_count === 25 && D.decisions.every(d => d.options.length >= 1), `get_decisions → ${D.open_count} open, each with options`);
+  check(D.open_count === 27 && D.decisions.every(d => d.options.length >= 1), `get_decisions → ${D.open_count} open, each with options`);
   const adsDec = D.decisions.find(d => d.key === 'fix:adsNpa');
   check(adsDec && adsDec.recommended === 'npa' && !D.decisions.some(d => d.options.some(o => o.value === 'att' || o.value === 'track')), 'sample with ads: non-personalized ads recommended, no ATT option offered', adsDec);
   check(!NON_EN.test(JSON.stringify(D)), 'decisions: every title, reason and option label in English');
@@ -75,7 +75,7 @@ async function stdioFlow() {
   r = await call(c, 'aaplug2_decide', { project_id: id, choices: [{ key: 'langs', value: ['en', 'xx'] }] });
   check(r.isError, 'decide rejects an unknown store-listing language');
   r = await call(c, 'aaplug2_decide', { project_id: id, choices: [{ key: 'title', value: 1 }, { key: 'fix:targetSdk', value: 'apply' }, { key: 'langs', value: ['en'] }, { key: 'icon', value: 1 }] });
-  D = data(r); check(!r.isError && D.applied.length === 4 && D.open_count === 21, 'decide 4 user picks → 21 left', D);
+  D = data(r); check(!r.isError && D.applied.length === 4 && D.open_count === 23, 'decide 4 user picks → 23 left (incl. 2 store stages)', D);
   r = await call(c, 'aaplug2_decide', { project_id: id, choices: [{ key: 'langs', value: ['en', 'zh', 'hi'] }], lang: 'zh' });
   check(!r.isError && SCRIPT.zh.test(JSON.stringify(data(r))), 'decide accepts zh + hi listing languages (reply in zh)', data(r));
   r = await call(c, 'aaplug2_decide', { project_id: id, choices: [{ key: 'langs', value: ['en'] }] });

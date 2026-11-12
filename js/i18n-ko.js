@@ -7,7 +7,7 @@ window.AAP_I18N.ko = {
   'foot.free': '모든 기능 무료', 'foot.tm': 'Google Play는 Google LLC의 상표이고, App Store는 Apple Inc.의 상표입니다.',
   'title.home': '앱 출시 도우미', 'title.analyze': '앱 분석', 'title.decide': '결정하기', 'title.assets': '출시 자료', 'title.submit': '제출 안내', 'title.review': '심사', 'title.done': '출시 완료',
   'home.kicker': '앱을 다 만들었다면, 여기서부터', 'home.h1': '스토어 출시까지,<br><em>결정만</em> 하세요.',
-  'home.lead': '어떤 AI로 만든 앱이든 연결만 하면 AA Plug 2가 검수, 스토어 설명, 개인정보처리방침, 그래픽, 등록 안내까지 준비해요. 직접 입력할 건 없어요.',
+  'home.lead': '어떤 AI로 만든 앱이든 연결만 하면 AA Plug 2가 검수, 스토어 설명, 개인정보처리방침, 그래픽, 등록 안내까지 준비해요. 직접 입력할 건 없어요. 첫 제출, 심사 대기 중, 반려됨, 이미 출시된 앱의 업데이트까지 어느 단계에서나 쓸 수 있어요.',
   'flow.connect': '연결', 'flow.connect.d': '저장소나 파일 한 번', 'flow.analyze': 'AI 분석', 'flow.analyze.d': '검수와 자료 준비', 'flow.decide': '결정', 'flow.decide.d': '고르고 승인만', 'flow.launch': '출시', 'flow.launch.d': '심사 통과까지',
   'home.resume': '이어서 하기', 'home.connect': '앱이 있는 곳을 연결하세요', 'home.connect.d': '처음이라면 샘플 앱으로 전체 과정을 먼저 둘러보세요.',
   'home.sample': '샘플 앱으로 시작', 'home.sample.d': '영수증 가계부 앱 “SnapLedger”로 출시 완료까지 체험해요.', or: '또는 내 앱 연결',

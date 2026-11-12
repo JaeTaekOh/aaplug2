@@ -1,10 +1,18 @@
 # AA Plug 2
 
-A free web tool that helps people who built an Android or iOS app with AI get it all the way to **launched on the stores**.
+A free web tool that helps people who built an Android or iOS app with AI get it all the way to **launched on the stores**: a first submit, an app waiting in review, a rejected app, or an update of a live app.
 You give one input. Connect the app (a public GitHub URL, a ZIP, or a folder) and from then on you only **pick, approve or reject**.
 Nothing is submitted to a store automatically. The final step unlocks only after you approve.
 
 The interface and the MCP tool texts come in five languages: English (`en`, the default), Korean (`ko`), Thai (`th`), Simplified Chinese (`zh`) and Hindi (`hi`). The web app always opens in English (it does not follow the browser or device language); pick another language from the globe button in the header on any screen, and that choice is remembered on this browser. The docs are in English.
+
+## Any store stage (since 0.1.5)
+
+AA Plug 2 is for apps at every stage, per store: **not submitted yet** (first submit), **in review** (uploaded, waiting), **rejected**, and **live** (an update). The stage is the first, required choice for each store; hints in the project (Play / App Store links, fastlane metadata, version numbers) only recommend one and never force a first launch.
+
+- In review: nothing to submit and no new app record. Replacing the build can withdraw or delay the review, so a new build is offered only if you choose it. You get help to wait, a reply draft for "Information Needed" (you send it) and metadata-only fixes.
+- Rejected: paste the store's message first (`aaplug2_report_review`); you get a fix plan, a reply draft and a resubmit guide, using the local and shared review lessons.
+- Live: an update. No closed test; the live listing (name, descriptions, category, languages, graphics, privacy URL) is kept, and the guide covers the new version and "What's new". Technical checks still run.
 
 ## Use it from your AI (MCP · Grok Bot · Claude · Cursor)
 
@@ -69,7 +77,6 @@ npm run shots    # needs the server running; updates preview-screenshots/
 
 - Free, static files only, never asks for API keys or tokens
 - App files are read only inside the browser and uploaded nowhere (progress is saved only in this browser's localStorage)
-- Shared review lessons (0.1.4): a real pasted store result sends only `{store, codes, advice_id, event}` to `https://aaplug.com/api/lessons` so everyone gets better checks; never the store message, app name, ids or free text. Always on, explained in `privacy.html`; the demo never sends
 - Shared review lessons (0.1.4): a real pasted store result sends only `{store, codes, advice_id, event}` to `https://aaplug.com/api/lessons` so everyone gets better checks; never the store message, app name, ids or free text. Always on, explained in `privacy.html`; the demo never sends
 - Nothing after launch
 

@@ -1,0 +1,17 @@
+{
+  "name": "aaplug2",
+  "displayName": "AA Plug 2",
+  "version": "0.1.0",
+  "description": "Get an app you already built with AI onto Google Play and the App Store: connect once, pick and approve, never auto-submitted. Free, no API keys. By MOTOR AA.",
+  "author": {
+    "name": "MOTOR AA",
+    "email": "motoraathailand@gmail.com"
+  },
+  "keywords": ["app-launch", "google-play", "app-store", "mcp"],
+  "mcpServers": {
+    "aaplug2": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/dist/aaplug2-mcp.mjs"]
+    }
+  }
+}

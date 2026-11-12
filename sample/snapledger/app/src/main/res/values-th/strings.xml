@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">SnapLedger</string>
+    <string name="tagline">ถ่ายใบเสร็จ จดรายจ่ายอัตโนมัติ</string>
+    <string name="home_title">เดือนนี้</string>
+    <string name="scan_title">สแกนใบเสร็จ</string>
+    <string name="report_title">รายงาน</string>
+    <string name="budget_label">งบประมาณรายเดือน</string>
+    <string name="budget_warning">คุณใช้งบไปแล้ว 80%</string>
+    <string name="sign_in_google">ดำเนินการต่อด้วย Google</string>
+    <string name="category_groceries">ของใช้ในบ้าน</string>
+    <string name="category_dining">ร้านอาหาร</string>
+    <string name="category_transport">การเดินทาง</string>
+    <string name="camera_rationale">ต้องใช้กล้องเพื่อสแกนใบเสร็จของคุณ</string>
+    <string name="notif_rationale">แจ้งเตือนก่อนที่คุณจะใช้เงินเกินงบ</string>
+</resources>

@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">스냅가계부</string>
+    <string name="tagline">영수증 찍으면 가계부 끝</string>
+    <string name="home_title">이번 달</string>
+    <string name="scan_title">영수증 스캔</string>
+    <string name="report_title">리포트</string>
+    <string name="budget_label">월 예산</string>
+    <string name="budget_warning">예산의 80%를 썼어요</string>
+    <string name="sign_in_google">Google로 계속하기</string>
+    <string name="category_groceries">장보기</string>
+    <string name="category_dining">외식</string>
+    <string name="category_transport">교통</string>
+    <string name="camera_rationale">영수증을 스캔하려면 카메라 권한이 필요해요.</string>
+    <string name="notif_rationale">예산을 넘기기 전에 알려드릴게요.</string>
+</resources>

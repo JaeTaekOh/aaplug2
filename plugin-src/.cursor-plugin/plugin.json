@@ -1,0 +1,14 @@
+{
+  "name": "aaplug2",
+  "displayName": "AA Plug 2",
+  "version": "0.1.0",
+  "description": "Get an app you already built with AI onto Google Play and the App Store. Connect the app once; AA Plug 2 finds review blockers, prepares fixes, store listings in Korean/English/Thai, privacy policy, Data safety and App Privacy answers, content rating, graphics and a step-by-step console guide. You only pick and approve, and nothing is ever submitted without your approval. Free, no API keys. By MOTOR AA.",
+  "author": {
+    "name": "MOTOR AA",
+    "email": "motoraathailand@gmail.com"
+  },
+  "keywords": ["app-launch", "google-play", "app-store", "play-console", "app-store-connect", "privacy-policy", "data-safety", "aso", "mcp"],
+  "category": "developer-tools",
+  "tags": ["mobile", "android", "ios", "launch", "mcp"],
+  "logo": "assets/logo.svg"
+}

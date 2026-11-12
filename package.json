@@ -1,0 +1,29 @@
+{
+  "name": "aa-plug-2",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AA Plug 2 — 앱 출시 완료까지 결정만 하면 되는 무료 웹 도구 (MOTOR AA)",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "sample": "python3 tools/build_sample.py",
+    "shots": "/workspace/venv-pw/bin/python tools/walkthrough.py",
+    "mcp": "node mcp/server.mjs",
+    "mcp:http": "node mcp/server.mjs --http",
+    "mcp:test": "node mcp/test/run.mjs",
+    "plugin:build": "bash tools/build_plugin.sh"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JaeTaekOh/aaplug2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JaeTaekOh/aaplug2/issues"
+  },
+  "homepage": "https://github.com/JaeTaekOh/aaplug2"
+}

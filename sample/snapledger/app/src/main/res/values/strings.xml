@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">SnapLedger</string>
+    <string name="tagline">Snap receipts, track spending</string>
+    <string name="home_title">This month</string>
+    <string name="scan_title">Scan receipt</string>
+    <string name="report_title">Reports</string>
+    <string name="budget_label">Monthly budget</string>
+    <string name="budget_warning">You have used 80% of your budget</string>
+    <string name="sign_in_google">Continue with Google</string>
+    <string name="category_groceries">Groceries</string>
+    <string name="category_dining">Dining</string>
+    <string name="category_transport">Transport</string>
+    <string name="camera_rationale">Camera access is needed to scan your receipts.</string>
+    <string name="notif_rationale">Get a reminder before you go over budget.</string>
+</resources>

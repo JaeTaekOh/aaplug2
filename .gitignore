@@ -1,0 +1,9 @@
+node_modules/
+mcp/node_modules/
+*.log
+.DS_Store
+.aaplug2/
+.env
+.env.*
+*.tgz
+npm-debug.log*

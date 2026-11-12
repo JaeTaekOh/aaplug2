@@ -1,0 +1,83 @@
+/* MCP 전용 안내 문구 (웹 앱 i18n 에 없는 것만). ko / en / th */
+export const M = {
+  ko: {
+    connected: '{name} 앱을 연결하고 분석했어요. 출시 준비도 {ready}%.',
+    counts: '꼭 고칠 것 {block}개 · 확인 권장 {warn}개 · 참고 {tip}개',
+    nextDecide: '다음: aaplug2_get_decisions 로 사용자에게 고를 것 {n}개를 보여 주세요. 사용자는 고르거나 승인·거절만 하면 돼요.',
+    openLeft: '아직 정하지 않은 항목이 {n}개 있어요.',
+    allDecided: '모든 항목을 정했어요. 다음: aaplug2_generate_store_materials',
+    needDecisions: '먼저 남은 결정 {n}개를 사용자에게 물어봐 주세요: {keys}',
+    generated: '스토어 자료 {n}개 파일을 만들었어요.',
+    guideLocked: '마지막 단계는 사용자가 제출을 승인한 뒤에만 열려요 (aaplug2_approve_submission).',
+    guideUnlocked: '사용자가 승인했어요. 마지막 단계의 제출 버튼은 사용자가 직접 눌러요. AA Plug 2는 자동으로 제출하지 않아요.',
+    approved: '{store} 제출 준비를 승인받았어요. 이제 사용자가 콘솔에서 직접 제출 버튼을 누르면 돼요.',
+    notChosenStore: '이 앱은 {store}에 출시하지 않기로 정했어요.',
+    needApproval: '먼저 사용자의 제출 승인이 필요해요 (aaplug2_approve_submission).',
+    inReview: '{store} 심사 중이에요. 결과가 나오면 알려 달라고 사용자에게 말해 주세요.',
+    pasteRejection: '스토어가 보낸 반려 메시지를 사용자에게 받아서 rejection_text 로 다시 불러 주세요.',
+    unknownRejection: '이 반려 사유는 아직 자동 분석 목록에 없어요. 메시지의 가이드라인 번호와 요구 사항을 사용자와 함께 하나씩 확인해 주세요.',
+    live: '{store} 출시 완료!',
+    allLive: '출시 완료! AA Plug 2의 역할은 여기까지예요. 의견은 {email} 로 보내 주세요.',
+    noProject: '프로젝트를 찾지 못했어요: {id}. aaplug2_status 로 목록을 확인하세요.',
+    pathDisabled: '이 서버에서는 로컬 경로 연결이 꺼져 있어요. 공개 GitHub 주소를 쓰거나, 서버를 자기 컴퓨터에서 stdio 로 실행하세요.',
+    noGraphics: '이 환경에는 그래픽 모듈(@napi-rs/canvas)이 없어 그림은 건너뛰었어요.',
+    badValue: '{key} 에 쓸 수 없는 값이에요: {val}',
+    unknownKey: '알 수 없는 결정 항목: {key}',
+    stepDecide: '결정', stepGenerate: '자료 만들기', stepSubmit: '제출 안내·승인', stepReview: '심사', stepDone: '출시 완료'
+  },
+  en: {
+    connected: 'Connected and analyzed {name}. Launch readiness {ready}%.',
+    counts: '{block} must-fix · {warn} worth checking · {tip} notes',
+    nextDecide: 'Next: call aaplug2_get_decisions and show the user the {n} choices. The user only picks, approves or rejects.',
+    openLeft: '{n} items are still undecided.',
+    allDecided: 'Everything is decided. Next: aaplug2_generate_store_materials',
+    needDecisions: 'Ask the user about the {n} remaining decisions first: {keys}',
+    generated: 'Created {n} store-material files.',
+    guideLocked: 'The final step unlocks only after the user approves submission (aaplug2_approve_submission).',
+    guideUnlocked: 'The user approved. The user presses the final submit button themselves. AA Plug 2 never submits automatically.',
+    approved: 'Submission to {store} approved by the user. The user now presses the submit button in the console themselves.',
+    notChosenStore: 'This app was set not to launch on {store}.',
+    needApproval: 'The user must approve submission first (aaplug2_approve_submission).',
+    inReview: '{store} review in progress. Ask the user to tell you when the result arrives.',
+    pasteRejection: 'Get the rejection message the store sent from the user and call again with rejection_text.',
+    unknownRejection: 'This rejection reason is not in the automatic list yet. Go through the guideline number and requirements in the message with the user.',
+    live: '{store} is live!',
+    allLive: 'Launched! This is where AA Plug 2’s job ends. Feedback: {email}',
+    noProject: 'Project not found: {id}. Use aaplug2_status to list projects.',
+    pathDisabled: 'Local path connection is disabled on this server. Use a public GitHub URL, or run the server on your own computer over stdio.',
+    noGraphics: 'Graphics module (@napi-rs/canvas) is not available here, so images were skipped.',
+    badValue: 'Value not allowed for {key}: {val}',
+    unknownKey: 'Unknown decision key: {key}',
+    stepDecide: 'Decide', stepGenerate: 'Make materials', stepSubmit: 'Submission guide & approval', stepReview: 'Review', stepDone: 'Launched'
+  },
+  th: {
+    connected: 'เชื่อมต่อและวิเคราะห์ {name} แล้ว ความพร้อมเปิดตัว {ready}%',
+    counts: 'ต้องแก้ {block} · ควรตรวจ {warn} · ข้อสังเกต {tip}',
+    nextDecide: 'ถัดไป: เรียก aaplug2_get_decisions แล้วให้ผู้ใช้เลือก {n} ข้อ ผู้ใช้แค่เลือก อนุมัติ หรือปฏิเสธ',
+    openLeft: 'ยังเหลือ {n} ข้อที่ยังไม่ได้ตัดสินใจ',
+    allDecided: 'ตัดสินใจครบแล้ว ถัดไป: aaplug2_generate_store_materials',
+    needDecisions: 'ถามผู้ใช้เรื่องที่เหลือ {n} ข้อก่อน: {keys}',
+    generated: 'สร้างไฟล์สำหรับสโตร์ {n} ไฟล์แล้ว',
+    guideLocked: 'ขั้นสุดท้ายจะเปิดหลังผู้ใช้อนุมัติการส่งเท่านั้น (aaplug2_approve_submission)',
+    guideUnlocked: 'ผู้ใช้อนุมัติแล้ว ผู้ใช้กดปุ่มส่งขั้นสุดท้ายเอง AA Plug 2 ไม่ส่งให้อัตโนมัติ',
+    approved: 'ผู้ใช้อนุมัติการส่งไปที่ {store} แล้ว ต่อไปผู้ใช้กดปุ่มส่งในคอนโซลเอง',
+    notChosenStore: 'แอปนี้เลือกไม่เปิดตัวบน {store}',
+    needApproval: 'ต้องให้ผู้ใช้อนุมัติการส่งก่อน (aaplug2_approve_submission)',
+    inReview: '{store} กำลังตรวจสอบ บอกผู้ใช้ให้แจ้งเมื่อได้ผล',
+    pasteRejection: 'ขอข้อความแจ้งปฏิเสธจากสโตร์จากผู้ใช้ แล้วเรียกอีกครั้งพร้อม rejection_text',
+    unknownRejection: 'เหตุผลนี้ยังไม่มีในรายการวิเคราะห์อัตโนมัติ ให้ไล่ดูหมายเลขแนวทางและข้อกำหนดในข้อความกับผู้ใช้ทีละข้อ',
+    live: '{store} เปิดตัวแล้ว!',
+    allLive: 'เปิดตัวสำเร็จ! หน้าที่ของ AA Plug 2 จบตรงนี้ ส่งความเห็นได้ที่ {email}',
+    noProject: 'ไม่พบโปรเจกต์: {id} ใช้ aaplug2_status เพื่อดูรายการ',
+    pathDisabled: 'เซิร์ฟเวอร์นี้ปิดการเชื่อมต่อด้วยพาธในเครื่อง ใช้ลิงก์ GitHub สาธารณะ หรือรันเซิร์ฟเวอร์บนเครื่องตัวเองผ่าน stdio',
+    noGraphics: 'ไม่มีโมดูลกราฟิก (@napi-rs/canvas) จึงข้ามรูปภาพ',
+    badValue: 'ใช้ค่านี้กับ {key} ไม่ได้: {val}',
+    unknownKey: 'ไม่รู้จักหัวข้อ: {key}',
+    stepDecide: 'ตัดสินใจ', stepGenerate: 'สร้างไฟล์', stepSubmit: 'คู่มือการส่งและอนุมัติ', stepReview: 'ตรวจสอบ', stepDone: 'เปิดตัวแล้ว'
+  }
+};
+export const msg = (lang, k, v) => {
+  let s = (M[lang] && M[lang][k]) || M.en[k] || k;
+  if (v) s = s.replace(/\{(\w+)\}/g, (m, x) => (v[x] != null ? v[x] : m));
+  return s;
+};

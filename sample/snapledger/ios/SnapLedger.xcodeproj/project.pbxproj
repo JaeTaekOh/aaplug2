@@ -1,0 +1,5 @@
+/* excerpt of project.pbxproj */
+PRODUCT_BUNDLE_IDENTIFIER = com.sample.snapledger;
+MARKETING_VERSION = 1.0.0;
+CURRENT_PROJECT_VERSION = 1;
+IPHONEOS_DEPLOYMENT_TARGET = 15.0;

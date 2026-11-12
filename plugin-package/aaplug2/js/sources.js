@@ -9,8 +9,15 @@
     /(^|\/)Info\.plist$/i, /project\.pbxproj$/i, /PrivacyInfo\.xcprivacy$/i, /\.entitlements$/i, /(^|\/)Podfile$/i, /(^|\/)Package\.swift$/i,
     /(^|\/)pubspec\.yaml$/i, /(^|\/)package\.json$/i, /(^|\/)app\.json$/i, /(^|\/)app\.config\.(js|ts)$/i, /(^|\/)capacitor\.config\.(json|ts|js)$/i,
     /(^|\/)eas\.json$/i, /(^|\/)README(\.[a-z]+)?$/i, /(^|\/)LICENSE(\.[a-z]+)?$/i, /(^|\/)privacy[^/]*\.(md|html)$/i,
-    /fastlane\/metadata\/.*\.txt$/i, /AppIcon\.appiconset\/Contents\.json$/i, /(^|\/)lib\/l10n\/.*\.arb$/i
+    /fastlane\/metadata\/.*\.txt$/i, /AppIcon\.appiconset\/Contents\.json$/i, /(^|\/)lib\/l10n\/.*\.arb$/i,
+    /(^|\/)(support|contact)[^/]*\.(md|html?)$/i, /(^|\/)(support|contact)\/index\.(md|html?)$/i
   ];
+  /* App source code: read a limited number of files so review checks can see runtime behavior
+     (ad request settings, ATT prompt, secret storage, login gate, user-supplied API keys). */
+  const CODE_RE = /\.(dart|kt|java|swift|m|mm|ts|tsx|js|jsx)$/i;
+  const CODE_SKIP_RE = /(^|\/)(test|tests|__tests__|__mocks__|androidTest|spec|e2e|integration_test|third_party|vendor|dist|web|public|scripts|\.expo|\.next)\/|\.(min|test|spec|d)\.[jt]sx?$|(^|\/)[\w.-]+\.config\.[jt]s$/i;
+  const CODE_HINT_RE = /main|app|ad|auth|login|sign|secure|storage|keychain|key|track|privacy|remote|config|setting|account|ai|gemini|llm|chat|location|car/i;
+  const MAX_CODE = 150, MAX_CODE_SIZE = 200 * 1024;
   const IMG_RE = [
     /ic_launcher(_round|_foreground)?\.(png|webp)$/i, /ic_launcher-playstore\.png$/i, /playstore[^/]*\.png$/i,
     /AppIcon\.appiconset\/.*\.png$/i, /(^|\/)(icon|app-icon|appicon|logo)\.png$/i,
@@ -23,6 +30,7 @@
     if (SKIP_RE.test(path)) return null;
     if (TEXT_RE.some(r => r.test(path))) return 'text';
     if (IMG_RE.some(r => r.test(path))) return 'img';
+    if (CODE_RE.test(path) && !CODE_SKIP_RE.test(path)) return 'code';
     return null;
   }
   function mime(path) { return /\.webp$/i.test(path) ? 'image/webp' : /\.jpe?g$/i.test(path) ? 'image/jpeg' : 'image/png'; }
@@ -46,13 +54,16 @@
     const launchers = picked.filter(e => /mipmap-[^/]+\/ic_launcher(_round)?\.(png|webp)$/i.test(e.rel)).sort((a, b) => rank(b.rel) - rank(a.rel));
     const keepLaunch = new Set(launchers.slice(0, 2).map(e => e.rel));
     picked = picked.filter(e => !/mipmap-[^/]+\/ic_launcher/i.test(e.rel) || keepLaunch.has(e.rel));
-    picked = picked.filter(e => (e.kind === 'text' ? e.size <= MAX_TEXT : e.size <= MAX_IMG)).slice(0, MAX_FILES);
+    const code = picked.filter(e => e.kind === 'code' && e.size <= MAX_CODE_SIZE)
+      .sort((a, b) => (CODE_HINT_RE.test(b.rel.split('/').pop()) - CODE_HINT_RE.test(a.rel.split('/').pop())) || (a.rel.split('/').length - b.rel.split('/').length) || a.rel.localeCompare(b.rel))
+      .slice(0, MAX_CODE);
+    picked = picked.filter(e => e.kind !== 'code').filter(e => (e.kind === 'text' ? e.size <= MAX_TEXT : e.size <= MAX_IMG)).slice(0, MAX_FILES).concat(code);
     const files = {};
     for (const e of picked) {
       onStep && onStep(e.rel);
       try {
         const u8 = await e.read();
-        files[e.rel] = e.kind === 'text' ? { text: new TextDecoder().decode(u8) } : { dataUrl: await u8ToDataUrl(u8, e.rel) };
+        files[e.rel] = e.kind === 'text' ? { text: new TextDecoder().decode(u8) } : e.kind === 'code' ? { text: new TextDecoder().decode(u8), code: true } : { dataUrl: await u8ToDataUrl(u8, e.rel) };
       } catch (err) { console.warn('skip', e.rel, err); }
     }
     return { name, source, files, fileCount: entries.length };

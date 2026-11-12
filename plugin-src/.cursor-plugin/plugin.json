@@ -1,7 +1,7 @@
 {
   "name": "aaplug2",
   "displayName": "AA Plug 2",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Get an app you already built with AI onto Google Play and the App Store. Connect the app once; AA Plug 2 finds review blockers, prepares fixes, store listings (English by default; Korean, Thai, Simplified Chinese or Hindi optional), privacy policy, Data safety and App Privacy answers, content rating, graphics and a step-by-step console guide. You only pick and approve, and nothing is ever submitted without your approval. Works in English (default), Korean, Thai, Chinese and Hindi. Free, no API keys.",
   "keywords": ["app-launch", "google-play", "app-store", "play-console", "app-store-connect", "privacy-policy", "data-safety", "aso", "mcp"],
   "category": "developer-tools",

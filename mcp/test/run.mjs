@@ -46,14 +46,16 @@ async function stdioFlow() {
   check(r.isError, 'lang "xx" rejected by the schema');
   r = await call(c, 'aaplug2_connect_app', { source: 'sample' }); const rep = data(r);
   const id = rep.project_id;
-  check(!r.isError && id && rep.readiness === 35 && rep.counts.block === 5, 'connect sample → readiness 35%, 5 must-fix', rep.counts);
+  check(!r.isError && id && rep.readiness === 26 && rep.counts.block === 6, 'connect sample → readiness 26%, 6 must-fix (Sign in with Apple now required)', rep.counts);
   check(rep.app.name === 'SnapLedger' && rep.app.targetSdk === 34 && rep.app.platforms.join() === 'android,ios', 'app facts: SnapLedger / targetSdk 34 / android+ios', rep.app);
   check(!NON_EN.test(JSON.stringify(rep)), 'connect (no lang) → analysis report fully in English (default en)');
   console.log('  summary:', rep.summary);
 
   // 2. 결정
   r = await call(c, 'aaplug2_get_decisions', { project_id: id }); let D = data(r);
-  check(D.open_count === 23 && D.decisions.every(d => d.options.length >= 1), `get_decisions → ${D.open_count} open, each with options`);
+  check(D.open_count === 25 && D.decisions.every(d => d.options.length >= 1), `get_decisions → ${D.open_count} open, each with options`);
+  const adsDec = D.decisions.find(d => d.key === 'fix:adsNpa');
+  check(adsDec && adsDec.recommended === 'npa' && !D.decisions.some(d => d.options.some(o => o.value === 'att' || o.value === 'track')), 'sample with ads: non-personalized ads recommended, no ATT option offered', adsDec);
   check(!NON_EN.test(JSON.stringify(D)), 'decisions: every title, reason and option label in English');
   const langsDec = D.decisions.find(d => d.key === 'langs');
   check(JSON.stringify(langsDec.recommended) === '["en"]' && langsDec.options[0].recommended && JSON.stringify(langsDec.options[0].value) === '["en"]' && langsDec.options[0].label === 'English (recommended)', 'store-listing languages: default/recommended = English', langsDec);
@@ -73,7 +75,7 @@ async function stdioFlow() {
   r = await call(c, 'aaplug2_decide', { project_id: id, choices: [{ key: 'langs', value: ['en', 'xx'] }] });
   check(r.isError, 'decide rejects an unknown store-listing language');
   r = await call(c, 'aaplug2_decide', { project_id: id, choices: [{ key: 'title', value: 1 }, { key: 'fix:targetSdk', value: 'apply' }, { key: 'langs', value: ['en'] }, { key: 'icon', value: 1 }] });
-  D = data(r); check(!r.isError && D.applied.length === 4 && D.open_count === 19, 'decide 4 user picks → 19 left', D);
+  D = data(r); check(!r.isError && D.applied.length === 4 && D.open_count === 21, 'decide 4 user picks → 21 left', D);
   r = await call(c, 'aaplug2_decide', { project_id: id, choices: [{ key: 'langs', value: ['en', 'zh', 'hi'] }], lang: 'zh' });
   check(!r.isError && SCRIPT.zh.test(JSON.stringify(data(r))), 'decide accepts zh + hi listing languages (reply in zh)', data(r));
   r = await call(c, 'aaplug2_decide', { project_id: id, choices: [{ key: 'langs', value: ['en'] }] });
@@ -136,7 +138,7 @@ async function stdioFlow() {
 
   // 7. 로컬 폴더 연결 (sample 원본 폴더)
   r = await call(c, 'aaplug2_connect_app', { source: 'path', path: process.env.AAPLUG2_TEST_SAMPLE_DIR || path.join(HERE, '..', '..', 'sample', 'snapledger'), lang: 'en' });
-  check(!r.isError && data(r).readiness === 35, 'connect local folder (sample/snapledger) → same analysis', r.isError ? r.content[0].text : undefined);
+  check(!r.isError && data(r).readiness === 26, 'connect local folder (sample/snapledger) → same analysis', r.isError ? r.content[0].text : undefined);
   r = await call(c, 'aaplug2_connect_app', { source: 'path', path: '/definitely/not/here' });
   check(r.isError, 'missing path → clear error');
   await c.close();

@@ -343,10 +343,12 @@
         body = `<div class="shots-row" id="shotsRow">${GEN && GEN.shots ? GEN.shots.map(s => `<img src="${s}" alt="">`).join('') : skel()}</div><div class="opts two">${optTile(d, 'ok', esc(t('opt.useThese')), '')}</div>`; break;
       case 'privacy': title = t('dec.privacy'); why = t('dec.privacy.d');
         body = `<div class="doc-prev">${policyBody(G.privacyPolicy(A, L, { photoRemoved: S.dec['fix:photoPerm'] === 'apply' }))}</div><div class="opts two">${optTile(d, 'ok', esc(t('opt.approve')), esc(t('dec.privacy.host')))}</div>`; break;
-      case 'safety': { title = t('dec.safety'); why = t('dec.safety.d'); const ds = G.dataSafety(A, L);
+      case 'safety': { title = t('dec.safety'); why = t('dec.safety.d'); const ds = G.dataSafety(A, L, F.privacyOpts(A, S.dec));
         body = safetyTable(ds) + `<div class="opts two">${optTile(d, 'ok', esc(t('opt.approve')), '')}</div>`; break; }
       case 'rating': { title = t('dec.rating'); why = t('dec.rating.d'); const r = G.rating(A, L);
         body = `<div class="rating-res"><span class="badge-big">3+</span><div><b>${esc(r.result.play)}</b><small>App Store: ${r.result.apple}</small></div></div><details class="qa"><summary>${ic('list')}${esc(t('dec.rating.qa'))}</summary><dl>${r.qa.map(([q, a]) => `<dt>${esc(q)}</dt><dd>${esc(a)}</dd>`).join('')}</dl></details><div class="opts two">${optTile(d, 'ok', esc(t('opt.approve')), '')}</div>`; break; }
+      case 'access': case 'location': title = t('dec.' + d.key); why = t('dec.' + d.key + '.d');
+        body = `<div class="opts two">${d.opts.map(o => optTile(d, o, esc(t(d.key + '.' + o)), esc(t(d.key + '.' + o + '.d')))).join('')}</div>`; break;
       case 'track': title = t('dec.track'); why = t('dec.track.d');
         body = `<div class="opts two">${d.opts.map(o => optTile(d, o, esc(t('track.' + o)), esc(t('track.' + o + '.d')))).join('')}</div>`; break;
     }
@@ -358,7 +360,7 @@
     if (done) {
       const L = S.lang, gl = GEN && GEN.listing[L];
       summary = d.key === 'title' && gl ? gl.titles[cur] : d.key === 'short' && gl ? gl.shorts[cur] : d.key === 'langs' ? cur.map(x => x.toUpperCase()).join(' · ') : d.key === 'category' ? G.CAT[S.A.categories[cur]][L][1]
-        : d.key === 'icon' ? t('icon.' + ['original', 'brand', 'light'][cur]) : d.key === 'feature' ? t('feat.' + ['split', 'shot', 'minimal'][cur]) : d.key === 'stores' ? t('store.' + cur) : d.key === 'tone' ? t('tone.' + cur) : d.key === 'track' ? t('track.' + cur)
+        : d.key === 'icon' ? t('icon.' + ['original', 'brand', 'light'][cur]) : d.key === 'feature' ? t('feat.' + ['split', 'shot', 'minimal'][cur]) : d.key === 'stores' ? t('store.' + cur) : d.key === 'tone' ? t('tone.' + cur) : d.key === 'track' ? t('track.' + cur) : d.key === 'access' || d.key === 'location' ? t(d.key + '.' + cur)
         : cur === 'ok' ? t('approved') : t('opt.' + cur);
     }
     return `<article class="dcard card ${done ? 'is-done' : ''} m-stagger" style="--i:${Math.min(i, 10)}" id="dc-${d.key.replace(/[:]/g, '-')}">
@@ -404,7 +406,7 @@
     const A = S.A, C = chosen(); const st = stores(); const L = assetTab && C.langs.includes(assetTab) ? assetTab : (C.langs.includes(S.lang) ? S.lang : C.langs[0]); assetTab = L;
     const field = (label, val, max, multi) => `<div class="field"><div class="field-h"><b>${esc(label)}</b>${max ? `<span class="cc ${val.length > max ? 'over' : ''}">${val.length}/${max}</span>` : ''}${copyBtn(val)}</div>${multi ? `<pre class="field-v">${esc(val)}</pre>` : `<p class="field-v">${esc(val)}</p>`}</div>`;
     const ios = C.ios(L);
-    const p = G.patches(A, S.lang); const fixes = Object.entries(p).filter(([k]) => Object.entries(S.dec).some(([dk, v]) => dk.startsWith('fix:') && v === 'apply' && A.issues.find(i => 'fix:' + i.id + (i.vars.key ? ':' + i.vars.key : '') === dk && i.fix === k)));
+    const fixes = F.appliedFixes(A, S.dec, S.lang);
     return `
     <section class="sec-head">
       <p class="kicker">${ic('check')}${esc(t('as.kicker'))}</p>
@@ -435,7 +437,8 @@
           ${A.sdk.auth ? `<li>${ic('file')}<span><b>${esc(t('doc.deletion'))}</b><small>account-deletion.html</small></span><button class="btn ghost sm" data-dl="deletion" data-press>${ic('download')}</button></li>` : ''}
           <li>${ic('list')}<span><b>${esc(t('doc.safety'))}</b><small>data-safety.csv</small></span><button class="btn ghost sm" data-dl="safety" data-press>${ic('download')}</button></li>
           <li>${ic('list')}<span><b>${esc(t('doc.rating'))}</b><small>content-rating.txt</small></span><button class="btn ghost sm" data-dl="rating" data-press>${ic('download')}</button></li>
-          ${st.apple && A.ios && !A.ios.privacyManifest ? `<li>${ic('code')}<span><b>PrivacyInfo.xcprivacy</b><small>${esc(t('doc.xcprivacy'))}</small></span><button class="btn ghost sm" data-dl="xcprivacy" data-press>${ic('download')}</button></li>` : ''}
+          <li>${ic('file')}<span><b>${esc(t('doc.support'))}</b><small>support-${C.langs.join('/')}.html</small></span><button class="btn ghost sm" data-dl="support" data-press>${ic('download')}</button></li>
+          ${st.apple && A.ios && (!A.ios.privacyManifest || S.dec['fix:trackingMismatch']) ? `<li>${ic('code')}<span><b>PrivacyInfo.xcprivacy</b><small>${esc(t('doc.xcprivacy'))}</small></span><button class="btn ghost sm" data-dl="xcprivacy" data-press>${ic('download')}</button></li>` : ''}
         </ul>
         <p class="small muted">${ic('info')} ${esc(t('as.host'))}</p>
       </div>
@@ -469,11 +472,12 @@
       if (k === 'icon') download('icon-512.png', GEN.icons[S.dec.icon || 0].dataUrl);
       else if (k === 'feature') download('feature-graphic-1024x500.png', GEN.features[S.dec.feature || 0]);
       else if (k.startsWith('shot')) download(`screenshot-${+k.slice(4) + 1}.png`, GEN.shots[+k.slice(4)]);
-      else if (k === 'privacy') download(`privacy-policy-${S.lang}.html`, G.privacyPolicy(A, S.lang, { photoRemoved: S.dec['fix:photoPerm'] === 'apply' }), 'text/html;charset=utf-8');
+      else if (k === 'privacy') download(`privacy-policy-${S.lang}.html`, G.privacyPolicy(A, S.lang, { photoRemoved: S.dec['fix:photoPerm'] === 'apply', nonPersonalized: !!A.sdk.ads && !F.trackingOn(A, S.dec) }), 'text/html;charset=utf-8');
+      else if (k === 'support') download(`support-${S.lang}.html`, G.supportPage(A, S.lang), 'text/html;charset=utf-8');
       else if (k === 'deletion') download(`account-deletion-${S.lang}.html`, G.deletionPage(A, S.lang), 'text/html;charset=utf-8');
-      else if (k === 'safety') download('data-safety.csv', G.dataSafetyCsv(A), 'text/csv;charset=utf-8');
+      else if (k === 'safety') download('data-safety.csv', G.dataSafetyCsv(A, F.privacyOpts(A, S.dec)), 'text/csv;charset=utf-8');
       else if (k === 'rating') download('content-rating.txt', ratingTxt());
-      else if (k === 'xcprivacy') download('PrivacyInfo.xcprivacy', G.xcprivacy(A), 'application/xml');
+      else if (k === 'xcprivacy') download('PrivacyInfo.xcprivacy', G.xcprivacy(A, F.privacyOpts(A, S.dec)), 'application/xml');
       else if (k === 'patch') download('aaplug2-fixes.diff', patchText());
     });
   };

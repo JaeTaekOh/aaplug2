@@ -131,9 +131,26 @@
       const io = { usage: {}, plistPath };
       if (plistPath) { note(plistPath); const pl = parsePlist(F[plistPath].text); io.plist = pl; io.displayName = pl.CFBundleDisplayName || pl.CFBundleName; for (const k in pl) if (/^NS\w+UsageDescription$/.test(k)) io.usage[k] = String(pl[k] || ''); io.gad = pl.GADApplicationIdentifier || null; }
       if (pbx) { note(pbx); const t = F[pbx].text; const g = k => (t.match(new RegExp(k + '\\s*=\\s*"?([^";]+)"?;')) || [])[1] || null; io.bundleId = g('PRODUCT_BUNDLE_IDENTIFIER'); io.version = g('MARKETING_VERSION'); io.build = g('CURRENT_PROJECT_VERSION'); io.deployment = g('IPHONEOS_DEPLOYMENT_TARGET'); }
-      if (expo && expo.ios) { io.bundleId = io.bundleId || expo.ios.bundleIdentifier; Object.assign(io.usage, expo.ios.infoPlist || {}); }
-      io.privacyManifest = !!find(F, /PrivacyInfo\.xcprivacy$/).length;
+      if (pbx) { const fam = (F[pbx].text.match(/TARGETED_DEVICE_FAMILY\s*=\s*"?([\d,]+)"?;/g) || []).join(' '); io.ipad = /[",=\s]2\b/.test(fam); }
+      if (io.plist) { if (io.plist['UISupportedInterfaceOrientations~ipad']) io.ipad = true; if (io.plist.ITSAppUsesNonExemptEncryption !== undefined) io.encryption = io.plist.ITSAppUsesNonExemptEncryption; }
+      if (expo && expo.ios) {
+        io.bundleId = io.bundleId || expo.ios.bundleIdentifier; const ip = expo.ios.infoPlist || {};
+        for (const k in ip) if (/^NS\w+UsageDescription$/.test(k)) io.usage[k] = String(ip[k] || '');
+        if (ip.ITSAppUsesNonExemptEncryption !== undefined) io.encryption = ip.ITSAppUsesNonExemptEncryption;
+        if (expo.ios.config && expo.ios.config.usesNonExemptEncryption !== undefined) io.encryption = expo.ios.config.usesNonExemptEncryption;
+        if (expo.ios.supportsTablet) io.ipad = true;
+      }
+      const xps = find(F, /PrivacyInfo\.xcprivacy$/);
+      io.privacyManifest = !!xps.length;
+      if (xps.length) {
+        const xpPath = xps.find(p => /(^|\/)ios\//.test(p)) || shortest(xps), xt = F[xpPath].text, xpl = parsePlist(xt);
+        io.xcprivacy = { path: xpPath, tracking: xpl.NSPrivacyTracking === true ? true : xpl.NSPrivacyTracking === false ? false : null,
+          domains: Array.isArray(xpl.NSPrivacyTrackingDomains) ? xpl.NSPrivacyTrackingDomains.map(x => String(x).trim()).filter(Boolean) : [],
+          types: [...new Set(xt.match(/NSPrivacyCollectedDataType(?!Linked|Tracking|Purpose|s\b)[A-Za-z]+/g) || [])] };
+      }
       io.appleSignIn = find(F, /\.entitlements$/).some(p => /applesignin/.test(F[p].text));
+      io.carplayEntitlement = find(F, /\.entitlements$/).some(p => /com\.apple\.developer\.carplay/.test(F[p].text));
+      io.deploymentNum = io.deployment ? parseFloat(io.deployment) : null;
       A.ios = io;
     }
 
@@ -164,7 +181,7 @@
     // ---------- 연락처 ----------
     const lic = txt(F, shortest(find(F, /(^|\/)LICENSE/i)));
     const holder = (lic.match(/Copyright\s*(?:\(c\)|©)?\s*\d{4}(?:-\d{4})?\s+(.+)/i) || [])[1];
-    const allText = Object.values(F).filter(v => v.text).map(v => v.text).join('\n').slice(0, 600000);
+    const allText = Object.values(F).filter(v => v.text && !v.code).map(v => v.text).join('\n').slice(0, 600000);
     const email = (allText.match(/[\w.+-]+@[\w-]+\.[\w.]+/g) || []).find(e => !/noreply|example\.com|users\.noreply|android\.com|apple\.com|googlegroups/.test(e));
     A.developer = { name: (holder || (project.meta && project.meta.owner) || '').trim() || null, email: email || null, policyFound: !!find(F, /privacy[^/]*\.(md|html)$/i).length };
 
@@ -187,7 +204,9 @@
       contacts: has(hay, /READ_CONTACTS|NSContacts/i),
       mic: has(hay, /RECORD_AUDIO|NSMicrophone/i)
     };
-    A.sdk.appleSignIn = !!(A.ios && A.ios.appleSignIn) || has(hay, /sign_in_with_apple|apple-authentication/i);
+    A.sdk.appleSignIn = !!(A.ios && A.ios.appleSignIn) || has(hay, /sign_in_with_apple|apple-authentication|AuthenticationServices|ASAuthorizationAppleIDProvider|appleAuth|AppleAuthProvider/i);
+    A.sdk.thirdPartyLogin = A.sdk.googleSignIn || has(hay, /flutter_facebook_auth|facebook-login|FBSDKLoginKit|react-native-fbsdk|kakao[\w.-]*(login|user|auth)|kakao_flutter_sdk|naveridlogin|flutter_naver_login|line-sdk|LineSDK|flutter_line_sdk|twitter_login|react-native-app-auth/i);
+    A.review = reviewSignals(A, F, hay);
 
     // ---------- 카테고리 ----------
     const corpus = [rm.title, rm.summary, rm.features.join(' '), ...Object.values(def), ...Object.values(A.tagline), A.pkg || ''].join(' ');
@@ -213,6 +232,54 @@
     return A;
   }
 
+  /* ---------- App review signals from code and metadata (general App Store review lessons) ---------- */
+  function reviewSignals(A, F, hay) {
+    const codeP = Object.keys(F).filter(p => F[p].code);
+    const code = codeP.map(p => F[p].text).join('\n').slice(0, 4000000);
+    const any = code + '\n' + hay;
+    const io = A.ios, R = {};
+    // Ads: non-personalized requests (npa=1) and remote on/off flags
+    R.npa = /["']npa["']\s*[:,=\]]\s*["']?1|\bnpa\s*=\s*["']?1|nonPersonalizedAds\s*:\s*true|requestNonPersonalizedAdsOnly\s*:\s*true|setRequestNonPersonalizedAdsOnly|NonPersonalized(Ads)?\s*=\s*true/i.test(code);
+    R.remoteAds = !!A.sdk.ads && (/firebase[-_]?remote[-_]?config|remoteConfig|RemoteConfig/.test(any) && /(ads?_?enabled|show_?ads|enable_?ads|ad_?flag|ads_?on)/i.test(code));
+    // Tracking: ATT usage string, ATT request in code, PrivacyInfo, App Store Connect usesIdfa
+    R.attString = !!(io && io.usage.NSUserTrackingUsageDescription && String(io.usage.NSUserTrackingUsageDescription).trim());
+    R.attCode = /requestTrackingAuthorization|ATTrackingManager|AppTrackingTransparency\.|app_tracking_transparency|expo-tracking-transparency|react-native-tracking-transparency|requestTrackingPermissionsAsync|requestTrackingAuthorizationWithCompletionHandler/.test(any);
+    const allMeta = Object.keys(F).filter(p => F[p].text != null && !F[p].code).map(p => F[p].text).join('\n');
+    R.usesIdfa = /usesIdfa["']?\s*[:=]\s*true/i.test(allMeta + code) ? true : /usesIdfa["']?\s*[:=]\s*false/i.test(allMeta + code) ? false : null;
+    const xp = io && io.xcprivacy;
+    R.manifestTracking = !!(xp && xp.tracking === true);
+    R.trackingDomains = xp ? xp.domains.length : 0;
+    // Secret storage: Keychain (or a cross-platform plugin that uses it on iOS) vs Android-only storage
+    R.iosKeychain = /Keychain|kSecClass|SecItemAdd|SecItemCopyMatching|flutter_secure_storage|expo-secure-store|react-native-keychain|react-native-encrypted-storage|KeychainAccess|SAMKeychain|capacitor-secure-storage|@aparajita\/capacitor-secure-storage|secure_storage|KeychainSwift/i.test(any);
+    R.androidOnlySecrets = /encrypted_shared_preferences|EncryptedSharedPreferences|androidx\.security[:.]security-crypto|MasterKey(s)?\.Builder|AndroidKeyStore/.test(any);
+    // User-supplied AI API keys (bring your own key)
+    const ai = /generativelanguage\.googleapis|google_generative_ai|@google\/generative-ai|@google\/genai|aistudio\.google|GenerativeModel\(|api\.openai\.com|\bopenai\b|api\.anthropic\.com|anthropic|dart_openai|langchain/i.test(any);
+    const keyEntry = /(enter|paste|your|user'?s?|own)\s+(\w+\s+)?api[\s_-]?key|api[\s_-]?key\s*(field|input|setting|controller|textfield)|apiKey(Controller|Field|Input|TextField|Setting)|setApiKey|saveApiKey|byok|bring your own key|API ?키|คีย์ API|API 密钥|API कुंजी/i.test(any + '\n' + JSON.stringify(A.strings || {}));
+    R.byok = ai && keyEntry;
+    // Login gate: the first screen is a sign-in screen (core features may need login, Guideline 5.1.1(v))
+    R.loginGate = /initialRoute\s*:\s*['"]\/?(login|signin|sign-in|auth|welcome-login)['"]|startDestination\s*=\s*["'](login|signin|sign_in|auth)["']|home\s*:\s*(const\s+)?(Login|SignIn|Auth)\w*(Screen|Page|View)\b|initialRouteName\s*=\s*["'](Login|SignIn|Auth)\w*["']|rootViewController\s*=\s*(Login|SignIn)\w*|WindowGroup\s*\{\s*(Login|SignIn)\w*View/.test(code) || /(requires?|must)\s+(a\s+)?(log ?in|sign[ -]?in)|login (is )?required|sign[- ]in (is )?required/i.test((A.readme && A.readme.summary) || '');
+    // Location: does code send coordinates to a server?
+    R.locationSent = codeP.some(p => { const t = F[p].text; return /latitude|longitude|GeoPoint|CLLocation|LatLng/.test(t) && /firestore|collection\(|\.setData\(|\bfetch\(|axios|http\.post|\bdio\b|Retrofit|URLSession|HttpClient/.test(t); });
+    // CarPlay
+    R.carplay = /CPTemplateApplicationScene|CPInterfaceController|import\s+CarPlay|flutter_carplay|react-native-carplay|CPTemplateApplicationSceneSessionRoleApplication/.test(any);
+    // Store metadata in the repo (fastlane): iOS = fastlane/metadata/<locale>/, Android = fastlane/metadata/android/
+    const meta = Object.keys(F).filter(p => /fastlane\/metadata\//i.test(p) && F[p].text != null);
+    const iosMeta = meta.filter(p => !/fastlane\/metadata\/android\//i.test(p));
+    const field = (list, re) => list.filter(p => re.test(p)).map(p => ({ path: p, text: F[p].text }));
+    const FREE = /\bfree\b|무료|ฟรี|免费|免費|मुफ़्त|मुफ्त|फ्री/i, BRANDS = /\b(google|android|iphone|ipad|apple|app store|play store|facebook|instagram|whatsapp|tiktok|youtube|chatgpt|gemini)\b/i;
+    R.freeInMeta = field(iosMeta, /(subtitle|keywords)\.txt$/i).filter(x => FREE.test(x.text) || BRANDS.test(x.text)).map(x => x.path);
+    R.androidInIosMeta = field(iosMeta, /(description|subtitle|keywords|promotional_text|release_notes|name)\.txt$/i).filter(x => /android|android auto|google play/i.test(x.text)).map(x => x.path);
+    R.adsInCopy = field(meta, /(description|subtitle|keywords|promotional_text|release_notes|title|short_description|full_description|changelogs\/[^/]+)\.txt$/i)
+      .filter(x => /\b(ads?|advert\w*|admob|banner ads?)\b|광고|โฆษณา|广告|विज्ञापन/i.test(x.text)).map(x => x.path);
+    const supUrl = field(iosMeta, /support_url\.txt$/i).map(x => x.text.trim()).find(Boolean);
+    R.supportUrl = supUrl || null;
+    R.supportUrlHome = !!supUrl && /^https?:\/\/[^/]+\/?(index\.html?)?$/i.test(supUrl);
+    const sup = Object.keys(F).filter(p => /(^|\/)(support|contact)([^/]*\.(md|html?)|\/index\.(md|html?))$/i.test(p) && F[p].text != null && !F[p].code);
+    R.supportPage = sup[0] || null;
+    R.supportNoContact = sup.length > 0 && !sup.some(p => /mailto:|[\w.+-]+@[\w-]+\.[\w.]+|<form\b|tel:|wa\.me|line\.me|m\.me\//i.test(F[p].text));
+    return R;
+  }
+
   /* ---------- 검수 규칙: id·심각도·플랫폼·수정안 종류 (문구는 i18n 'iss.<id>.*') ---------- */
   function checks(A) {
     const out = []; const add = (id, sev, plat, fix, vars) => out.push({ id, sev, plat, fix: fix || null, vars: vars || {} });
@@ -229,15 +296,41 @@
       if (s.ads || an.adId) add('adsDeclare', 'warn', 'android', 'declare');
       add('closedTest', 'tip', 'android', 'info', { testers: 12, days: 14 });
     }
+    const R = A.review || {};
     if (s.auth) add('accountDeletion', 'block', 'both', 'gen-deletion');
     if (!A.developer.policyFound) add('privacyPolicy', 'block', 'both', 'gen-privacy');
+    // Support URL: a page where an official contact method is visible right away (Guideline 1.5)
+    if (R.supportNoContact) add('supportNoContact', 'block', 'both', 'info', { file: R.supportPage });
+    if (R.supportUrlHome) add('supportUrlHome', 'warn', io ? 'ios' : 'both', 'info', { url: R.supportUrl });
+    if (!A.developer.email) add('supportContact', 'warn', 'both', 'info');
+    if (R.adsInCopy && R.adsInCopy.length) add('adsInCopy', 'warn', 'both', 'info', { files: R.adsInCopy.join(', ') });
     if (io) {
       for (const [k, v] of Object.entries(io.usage)) if (!String(v).trim()) add('emptyUsage', 'block', 'ios', 'patch-plist', { key: k });
       if (s.camera && !io.usage.NSCameraUsageDescription) add('missingUsage', 'block', 'ios', 'patch-plist', { key: 'NSCameraUsageDescription' });
       if (!io.privacyManifest) add('privacyManifest', 'block', 'ios', 'gen-xcprivacy');
-      if ((s.ads || io.gad) && !io.usage.NSUserTrackingUsageDescription) add('att', 'warn', 'ios', 'choose-att');
-      if (s.googleSignIn && !s.appleSignIn) add('loginOption', 'warn', 'ios', 'choose-login');
-      if (s.auth) add('demoAccount', 'tip', 'both', 'info');
+      /* Tracking: ATT usage string, ATT prompt in code, PrivacyInfo (NSPrivacyTracking + domains), the App Privacy form and
+         runtime ad requests must tell one story from the first submit. Default and recommended: no tracking + npa=1.
+         Never recommend "has ads → add ATT". */
+      const tr = tracking(A);
+      if (tr.state === 'mixed') {
+        add('trackingMismatch', 'block', 'ios', 'choose-tracking', { found: tr.found.join(', '), missing: tr.missing.join(', ') });
+        if (R.manifestTracking && !R.trackingDomains) add('itms91064', 'block', 'ios', 'info');
+        if (R.attString && !R.attCode) add('attNoPrompt', 'block', 'ios', 'info');
+      } else if (tr.state === 'tracking') add('trackingAligned', 'warn', 'ios', 'info');
+      else if ((s.ads || io.gad) && !R.npa) add('adsNpa', 'warn', 'ios', 'choose-tracking');
+      else if (s.ads || io.gad) add('adsNpaOk', 'tip', 'ios', 'info');
+      if (R.remoteAds) add('remoteAds', 'warn', 'both', 'info');
+      if (s.thirdPartyLogin && !s.appleSignIn) add('loginOption', 'block', 'ios', 'choose-login');
+      if (s.auth && R.loginGate) add('loginGate', 'warn', 'ios', 'info');
+      if (s.auth) add('demoAccount', 'tip', 'ios', 'info');
+      if (R.androidOnlySecrets && !R.iosKeychain) add('iosSecretStorage', 'block', 'ios', 'info');
+      if (R.byok) add('byok', 'warn', 'ios', 'info');
+      if (io.encryption === undefined && io.plistPath) add('encryption', 'warn', 'ios', 'patch-plist-encryption');
+      if (io.ipad) add('ipadShots', 'warn', 'ios', 'info');
+      if (R.carplay && !io.carplayEntitlement) add('carplay', 'warn', 'ios', 'info');
+      if (R.freeInMeta && R.freeInMeta.length) add('freeInMeta', 'warn', 'ios', 'info', { files: R.freeInMeta.join(', ') });
+      if (R.androidInIosMeta && R.androidInIosMeta.length) add('androidInIosCopy', 'warn', 'ios', 'info', { files: R.androidInIosMeta.join(', ') });
+      if (io.deploymentNum && io.deploymentNum < 15) add('iosDeployment', 'tip', 'ios', 'info', { cur: io.deployment });
       add('iosSdk', 'tip', 'ios', 'info', { sdk: IOS_SDK_NOTE });
     }
     if (!A.icon) add('noIcon', 'warn', 'both', 'gen-icon');
@@ -247,5 +340,16 @@
     return out.sort((a, b) => order[a.sev] - order[b.sev]);
   }
 
-  window.AAPAnalyzer = { analyze, PLAY_TARGET };
+  /* Tracking state of the iOS app: 'none' (no tracking anywhere), 'tracking' (ATT string + ATT prompt + PrivacyInfo tracking + domains
+     all present) or 'mixed' (some but not all — the state that causes ITMS-91064 or a Guideline 2.1 rejection). */
+  function tracking(A) {
+    const R = A.review || {};
+    const parts = [['NSUserTrackingUsageDescription', !!R.attString], ['ATT prompt in code', !!R.attCode], ['NSPrivacyTracking=true', !!R.manifestTracking], ['NSPrivacyTrackingDomains', R.trackingDomains > 0]];
+    if (R.usesIdfa === true || R.usesIdfa === false) parts.push(['usesIdfa=true', R.usesIdfa === true]);
+    const found = parts.filter(p => p[1]).map(p => p[0]), missing = parts.filter(p => !p[1]).map(p => p[0]);
+    const state = !found.length ? 'none' : !missing.length ? 'tracking' : 'mixed';
+    return { state, found, missing };
+  }
+
+  window.AAPAnalyzer = { analyze, tracking, PLAY_TARGET };
 })();

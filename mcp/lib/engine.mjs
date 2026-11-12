@@ -115,7 +115,9 @@ function optionList(st, d, L) {
     case 'feature': return STYLE.feature.map((s, k) => ({ value: k, label: t('feat.' + s), detail: '1024×500 · aaplug2_preview_graphics kind=feature' }));
     case 'shots': return [{ value: 'ok', label: t('opt.useThese'), detail: A.screenshots.length ? t('dec.shots.d', { n: A.screenshots.length }) : t('dec.shots.none') }];
     case 'privacy': return [{ value: 'ok', label: t('opt.approve'), detail: t('dec.privacy.d') + ' (' + C.langs.map(l => `privacy-policy-${l}.html`).join(', ') + ')' }];
-    case 'safety': return [{ value: 'ok', label: t('opt.approve'), detail: Gen.dataSafety(A, L).rows.map(r => `${r.label}: ${r.purposes}${r.shared ? ' · shared' : ''}`).join(' / ') }];
+    case 'safety': { const ds = Gen.dataSafety(A, L, Flow.privacyOpts(A, st.dec));
+      return [{ value: 'ok', label: t('opt.approve'), detail: ds.rows.map(r => `${r.label}: ${r.purposes}${r.shared ? ' · shared' : ''}${r.tracking ? ' · tracking' : ''}`).concat(ds.notCollected.map(r => `${r.label}: ${r.note}`)).join(' / ') }]; }
+    case 'access': case 'location': return d.opts.map(o => ({ value: o, label: t(d.key + '.' + o), detail: t(d.key + '.' + o + '.d') }));
     case 'rating': { const r = Gen.rating(A, L); return [{ value: 'ok', label: t('opt.approve'), detail: `Play: ${r.result.play} · App Store: ${r.result.apple}` }]; }
     case 'track': return d.opts.map(o => ({ value: o, label: t('track.' + o), detail: t('track.' + o + '.d') }));
   }
@@ -222,9 +224,11 @@ export async function generate(st, { output_dir, lang }, { allowPath }) {
   return {
     project_id: st.id, summary: msg(L, 'generated', { n: files.length }) + (g ? '' : ' ' + msg(L, 'noGraphics')),
     folder, zip: zipPath, zip_bytes: zipBuf.length, files: files.map(f => f.path), stores: Object.keys(stores).filter(k => stores[k]).map(k => STORE_NAME[k]),
-    listing, data_safety: Gen.dataSafety(A, L).rows.map(x => ({ play: x.playType, apple: x.appleType, collected: x.collected, shared: x.shared, optional: x.optional, linked: x.linked, tracking: x.tracking, purposes: x.purposes })),
+    listing, data_safety: Gen.dataSafety(A, L, Flow.privacyOpts(A, st.dec)).rows.map(x => ({ play: x.playType, apple: x.appleType, collected: x.collected, shared: x.shared, optional: x.optional, linked: x.linked, tracking: x.tracking, purposes: x.purposes })),
     content_rating: { play: r.result.play, apple: r.result.apple, answers: r.qa.map(([q, a]) => ({ q, a })) },
     applied_code_fixes: Flow.appliedFixes(A, st.dec, L).map(([, v]) => v.file),
+    app_review_notes: stores.apple && A.ios ? Flow.reviewNotes(A, st.dec, C.langs[0]) : undefined,
+    app_privacy_tracking: stores.apple && A.ios ? (Flow.trackingOn(A, st.dec) ? 'Yes, we track (ATT prompt + tracking domains must match)' : 'No, we do not track') : undefined,
     note_privacy_hosting: t('as.host'),
     next: 'aaplug2_submission_guide',
     _zipBase64: zipBuf.toString('base64')
@@ -265,16 +269,17 @@ export function review(st, { store, event, rejection_text }, lang) {
     out = { ...out, status: 'in_review', round: st.review[store].round, message: msg(L, 'inReview', { store: S }) };
   } else if (event === 'rejected') {
     if (!rejection_text) {
-      const sample = st.sample ? (Gen.REJECTIONS.find(r => r.store === store) || {}).sample : undefined;
+      const sample = st.sample ? (Gen.REJECTIONS.find(r => r.store === store && r.demo) || Gen.REJECTIONS.find(r => r.store === store) || {}).sample : undefined;
       st.review[store] = { ...R, status: 'rejected' };
       out = { ...out, status: 'rejected', message: msg(L, 'pasteRejection'), sample_message_for_demo: sample };
     } else {
       const rj = Gen.matchRejection(rejection_text, store);
-      if (!rj) { st.review[store] = { ...R, status: 'rejected', text: rejection_text }; out = { ...out, status: 'rejected', matched: false, message: msg(L, 'unknownRejection') }; }
+      const infoNeeded = store === 'apple' && /information needed/i.test(rejection_text) ? msg(L, 'infoNeeded') : undefined;
+      if (!rj) { st.review[store] = { ...R, status: 'rejected', text: rejection_text }; out = { ...out, status: 'rejected', matched: false, information_needed: infoNeeded, message: msg(L, 'unknownRejection') }; }
       else {
         st.review[store] = { ...R, status: 'fixing', text: rejection_text, rid: rj.id };
         const p = rj.id === 'play-photo' ? Gen.patches(st.A, L)['patch-manifest-photo'] : null;
-        out = { ...out, status: 'fixing', matched: true, reason: t('rj.' + rj.id + '.t'), why: t('rj.' + rj.id + '.w'), fix_plan: rj.plan[L] || rj.plan.en,
+        out = { ...out, status: 'fixing', matched: true, information_needed: infoNeeded, reason: t('rj.' + rj.id + '.t'), why: t('rj.' + rj.id + '.w'), fix_plan: rj.plan[L] || rj.plan.en, auto_reply: false,
           reply_to_reviewer: rj.reply(appName(st, 'en')), code_fix: p ? { file: p.file, diff: p.diff } : undefined,
           next: t('rv.approveFix.d') + ' → aaplug2_report_review event=resubmitted' };
       }

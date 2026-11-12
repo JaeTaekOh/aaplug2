@@ -4,7 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as E from './engine.mjs';
 import { CFG } from './runtime.mjs';
 
-export const VERSION = '0.1.1';
+export const VERSION = '0.1.2';
 
 export const INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
 How to use it:
@@ -13,7 +13,10 @@ How to use it:
 3. Call aaplug2_decide ONLY with values the user actually chose in this conversation. Use accept_all_recommended=true only if the user explicitly says to accept all recommendations.
 4. Call aaplug2_generate_store_materials, then aaplug2_submission_guide for each store and walk the user through the console steps.
 5. The final submit step stays locked until the user explicitly approves; then call aaplug2_approve_submission. AA Plug 2 never submits to any store itself: the user presses the submit button in Play Console / App Store Connect.
-6. When the user reports the review result, call aaplug2_report_review (submitted / rejected with the store's message / resubmitted / approved). When every chosen store is live, the job is done.
+6. When the user reports the review result, call aaplug2_report_review (submitted / rejected with the store's message / resubmitted / approved). When every chosen store is live, the job is done. In App Store Connect an "Information Needed" request also shows as Rejected; it asks for a reply, not always a new build. Never reply to Apple or Google yourself: draft the reply and let the user send it.
+App Store review rules the analysis follows (explain them in plain words when they come up):
+- Tracking, ATT, PrivacyInfo.xcprivacy, the App Privacy form and real behavior must match from the first submit. Default for apps with ads: no ATT prompt or NSUserTrackingUsageDescription, NSPrivacyTracking=false with no tracking domains, every ad request non-personalized (npa=1), App Privacy "No, we do not track". Never suggest adding ATT just because the app shows ads. Keep an already fully aligned tracking setup, but never leave a mixed one.
+- Core features should work without login (5.1.1(v)); third-party login on iOS needs Sign in with Apple; accounts need in-app and web deletion; the Support URL must show a contact method; ads are mentioned only in the privacy policy; no "free" or other brands' names in subtitle/keywords; review notes for user-supplied API keys say there is no IAP and the developer does not sell keys, with a review-only key the user attaches (never put real keys anywhere).
 Reply to the user in their language. Tool texts come in five languages via the lang argument: en (English, the default), ko (Korean), th (Thai), zh (Simplified Chinese) and hi (Hindi). Pass the user's language as lang; when lang is omitted, texts are in English. Store listings for the user's app default to English (the recommended choice); Korean, Thai, Chinese and Hindi listings can be added if the user picks them. Free to use; feedback: ${CFG.feedbackUrl}.`;
 
 const lang = z.enum(['en', 'ko', 'th', 'zh', 'hi']).optional().describe('Language for texts in the result: en (default), ko, th, zh (Simplified Chinese), hi (Hindi). Pass the user\'s language.');

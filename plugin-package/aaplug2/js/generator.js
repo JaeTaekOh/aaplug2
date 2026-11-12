@@ -93,18 +93,23 @@
     const full = [H.intro, '', H.feat, ...feats.map(f => `${B} ${f}`), '', H.who, ...c.who[lang].map(w => `${B} ${w}`), '', H.priv, H.privTxt, ...(email ? ['', `${H.contact}: ${email}`] : [])].join('\n');
     const kwBase = c.kw[lang].split(',');
     let kw = []; for (const k of kwBase.filter(k => !name.toLowerCase().includes(k.toLowerCase()))) { if ((kw.concat(k).join(',')).length <= 100 && !kw.includes(k)) kw.push(k); }
-    return { titles, shorts, full: clip(full, 4000), ios: { subtitle: clip(tag, 30), keywords: kw.join(','), promo: clip(shorts[0], 170) } };
+    return { titles, shorts, full: clip(full, 4000), ios: { subtitle: clip(asoClean(tag), 30), keywords: kw.map(asoClean).filter(Boolean).join(','), promo: clip(shorts[0], 170) } };
   }
+  /* App Store subtitle and keywords must not carry "free" (in any language) or other brands' names (Guideline 2.3.7). */
+  const ASO_FREE = /\b(free|for free)\b|무료|ฟรี|免费|免費|मुफ़्त|मुफ्त|फ्री/gi;
+  const ASO_BRANDS = /\b(google play|google|android( auto)?|iphone|ipad|apple|app store|play store|facebook|instagram|whatsapp|tiktok|youtube|chatgpt|gemini)\b/gi;
+  function asoClean(x) { return String(x || '').replace(ASO_FREE, '').replace(ASO_BRANDS, '').replace(/\s*[-–:|·,]\s*$/, '').replace(/^\s*[-–:|·,]\s*/, '').replace(/\s{2,}/g, ' ').trim(); }
+  function asoIssues(text) { const t = String(text || ''); return { free: new RegExp(ASO_FREE.source, 'i').test(t), brand: new RegExp(ASO_BRANDS.source, 'i').test(t), android: /android|google play/i.test(t), ads: /\b(ads?|advert\w*|admob)\b|광고|โฆษณา|广告|विज्ञापन/i.test(t) }; }
 
   /* ---------- 수집 데이터 (Play 데이터 보안 / Apple 앱 개인정보) ---------- */
-  function dataItems(A) {
-    const s = A.sdk, fin = A.categories[0] === 'finance', D = [];
+  function dataItems(A, opts) {
+    const o = opts || {}, s = A.sdk, fin = A.categories[0] === 'finance', D = [];
     if (s.auth) D.push({ id: 'name', play: ['Personal info', 'Name'], apple: ['Contact Info', 'Name'], purposes: ['account', 'func'], optional: true, linked: true },
                        { id: 'email', play: ['Personal info', 'Email address'], apple: ['Contact Info', 'Email Address'], purposes: ['account', 'func'], optional: true, linked: true },
                        { id: 'uid', play: ['Personal info', 'User IDs'], apple: ['Identifiers', 'User ID'], purposes: ['account', 'func'], optional: true, linked: true });
     if (s.cloudDb) D.push(fin ? { id: 'fin', play: ['Financial info', 'Other financial info'], apple: ['Financial Info', 'Other Financial Info'], purposes: ['func'], optional: true, linked: true }
                               : { id: 'ugc', play: ['App activity', 'Other user-generated content'], apple: ['User Content', 'Other User Content'], purposes: ['func'], optional: true, linked: true });
-    if (s.location) D.push({ id: 'loc', play: ['Location', 'Approximate location'], apple: ['Location', 'Coarse Location'], purposes: ['func'], optional: true, linked: false });
+    if (s.location && o.location !== 'device') D.push({ id: 'loc', play: ['Location', 'Approximate location'], apple: ['Location', 'Coarse Location'], purposes: ['func'], optional: true, linked: false });
     if (s.analytics) D.push({ id: 'usage', play: ['App activity', 'App interactions'], apple: ['Usage Data', 'Product Interaction'], purposes: ['analytics'], optional: false, linked: false });
     if (s.crash) D.push({ id: 'crash', play: ['App info and performance', 'Crash logs'], apple: ['Diagnostics', 'Crash Data'], purposes: ['analytics'], optional: false, linked: false },
                         { id: 'diag', play: ['App info and performance', 'Diagnostics'], apple: ['Diagnostics', 'Performance Data'], purposes: ['analytics'], optional: false, linked: false });
@@ -121,16 +126,20 @@
     loc: { ko: '대략적인 위치', en: 'Approximate location', th: 'ตำแหน่งโดยประมาณ', zh: '大致位置', hi: 'अनुमानित लोकेशन' }, usage: { ko: '앱 사용 기록', en: 'App interactions', th: 'การโต้ตอบกับแอป', zh: '应用互动', hi: 'ऐप इंटरैक्शन' },
     crash: { ko: '비정상 종료 기록', en: 'Crash logs', th: 'บันทึกข้อขัดข้อง', zh: '崩溃日志', hi: 'क्रैश लॉग' }, diag: { ko: '진단 정보', en: 'Diagnostics', th: 'ข้อมูลการวินิจฉัย', zh: '诊断信息', hi: 'डायग्नोस्टिक्स' }, adid: { ko: '기기 ID (광고 ID)', en: 'Device or other IDs (advertising ID)', th: 'รหัสอุปกรณ์ (รหัสโฆษณา)', zh: '设备 ID（广告 ID）', hi: 'डिवाइस ID (विज्ञापन ID)' }
   };
-  function dataSafety(A, lang) {
-    const D = dataItems(A);
+  /* opts.tracking: true only on a fully aligned tracking path (visible ATT prompt + tracking domains + App Privacy "Yes, we track").
+     Default false: non-personalized ads (npa=1) are not tracking. opts.location: 'device' (never leaves the device → not collected) | 'server'.
+     Each data type is its own row with its own purposes; sign-in data (name, email, user ID) is never grouped with location. */
+  function dataSafety(A, lang, opts) {
+    const o = opts || {}, D = dataItems(A, o);
     return {
-      rows: D.map(d => ({ id: d.id, label: DATA_LABEL[d.id][lang], playType: d.play.join(' › '), appleType: d.apple.join(' › '), collected: true, shared: !!d.shared, optional: d.optional, linked: d.linked, tracking: d.id === 'adid', purposes: d.purposes.map(p => PURPOSE[p][lang]).join(', ') })),
+      rows: D.map(d => ({ id: d.id, label: DATA_LABEL[d.id][lang], playType: d.play.join(' › '), appleType: d.apple.join(' › '), collected: true, shared: !!d.shared, optional: d.optional, linked: d.linked, tracking: d.id === 'adid' && !!o.tracking, purposes: d.purposes.map(p => PURPOSE[p][lang]).join(', ') })),
+      notCollected: A.sdk.location && o.location === 'device' ? [{ id: 'loc', label: DATA_LABEL.loc[lang], appleType: 'Location', note: { ko: '기기 안에서만 사용, 서버로 보내지 않음 → 수집 안 함', en: 'Used on the device only, never sent to a server → Data Not Collected', th: 'ใช้ในเครื่องเท่านั้น ไม่ส่งไปยังเซิร์ฟเวอร์ → ไม่เก็บรวบรวม', zh: '仅在设备上使用，从不发送到服务器 → 未收集', hi: 'सिर्फ़ डिवाइस पर इस्तेमाल, कभी सर्वर पर नहीं भेजा जाता → एकत्र नहीं' }[lang] }] : [],
       encrypted: !(A.android && A.android.cleartext) || true, deletable: !!A.sdk.auth,
       onDevice: A.sdk.ocr ? { ko: '영수증 사진: 기기 안에서만 처리 → "수집" 아님', en: 'Receipt photos: processed on device only → not "collected"', th: 'รูปใบเสร็จ: ประมวลผลในเครื่องเท่านั้น → ไม่ถือว่า "เก็บรวบรวม"', zh: '收据照片：仅在设备上处理 → 不属于“收集”', hi: 'रसीद की फ़ोटो: सिर्फ़ डिवाइस पर प्रोसेस → “संग्रह” नहीं' }[lang] : null
     };
   }
-  function dataSafetyCsv(A) {
-    const r = dataSafety(A, 'en').rows;
+  function dataSafetyCsv(A, opts) {
+    const r = dataSafety(A, 'en', opts).rows;
     return ['Data type (Play),Data type (Apple),Collected,Shared,Optional,Linked to user,Used for tracking,Purposes', ...r.map(x => [x.playType, x.appleType, 'Yes', x.shared ? 'Yes' : 'No', x.optional ? 'Yes' : 'No', x.linked ? 'Yes' : 'No', x.tracking ? 'Yes' : 'No', x.purposes].map(v => `"${v}"`).join(','))].join('\n')
       + '\n\n"Is all user data encrypted in transit?","Yes"\n"Do you provide a way for users to request data deletion?","' + (A.sdk.auth ? 'Yes' : 'No') + '"\n';
   }
@@ -154,6 +163,7 @@
     return { qa, result: { play: L('전체이용가 (IARC 3+ / ESRB Everyone / PEGI 3)', 'Everyone (IARC 3+ / ESRB Everyone / PEGI 3)', 'ทุกวัย (IARC 3+ / ESRB Everyone / PEGI 3)', '适合所有人 (IARC 3+ / ESRB Everyone / PEGI 3)', 'सभी के लिए (IARC 3+ / ESRB Everyone / PEGI 3)'), apple: '4+' }, needCheck: game };
   }
 
+  const NPA_LINE = { ko: '광고는 비맞춤 광고로만 요청하며, 다른 회사의 앱·웹사이트에 걸쳐 사용자를 추적하지 않습니다.', en: 'Ads are requested as non-personalized ads only, and we do not track you across other companies’ apps or websites.', th: 'โฆษณาที่แสดงเป็นแบบไม่ปรับตามบุคคลเท่านั้น และเราไม่ติดตามคุณข้ามแอปหรือเว็บไซต์ของบริษัทอื่น', zh: '广告仅以非个性化广告方式请求，我们不会跨其他公司的应用或网站跟踪你。', hi: 'विज्ञापन सिर्फ़ गैर-व्यक्तिगत विज्ञापन के रूप में मांगे जाते हैं, और हम दूसरी कंपनियों के ऐप या वेबसाइटों पर आपको ट्रैक नहीं करते।' };
   /* ---------- 개인정보처리방침 HTML ---------- */
   function privacyPolicy(A, lang, opts) {
     const o = opts || {}; const name = o.appName || nameOf(A, lang); const dev = A.developer.name || name; const email = A.developer.email || '';
@@ -202,7 +212,7 @@
     }[lang];
     const items = [];
     if (s.auth) items.push(T.it.account); if (s.cloudDb && s.auth) items.push(T.it.cloud); if (s.camera) items.push(T.it.camera);
-    if (s.photos && !(o.photoRemoved)) items.push(T.it.photos); if (s.location) items.push(T.it.location); if (s.analytics) items.push(T.it.analytics); if (s.crash) items.push(T.it.crash); if (s.ads) items.push(T.it.ads); if (s.notifications) items.push(T.it.notif);
+    if (s.photos && !(o.photoRemoved)) items.push(T.it.photos); if (s.location) items.push(T.it.location); if (s.analytics) items.push(T.it.analytics); if (s.crash) items.push(T.it.crash); if (s.ads) items.push(T.it.ads + (o.nonPersonalized ? ' ' + NPA_LINE[lang] : '')); if (s.notifications) items.push(T.it.notif);
     const third = [];
     if (s.auth || s.cloudDb || s.analytics || s.crash) third.push(['Google Firebase', 'https://firebase.google.com/support/privacy']);
     if (s.ads) third.push(['Google AdMob', 'https://policies.google.com/technologies/ads']);
@@ -243,6 +253,31 @@ ${third.length ? `<h2>${T.third}</h2><p>${T.thirdTxt}</p><ul>${third.map(t => `<
 `;
   }
 
+  /* Support page for the store "Support URL": the official contact method is the first thing on the page (Guideline 1.5). */
+  function supportPage(A, lang) {
+    const name = nameOf(A, lang), email = A.developer.email || '[contact email]';
+    const T = {
+      ko: [`${name} 고객 지원`, '문의하기', '아래 이메일로 보내 주시면 보통 2영업일 안에 답장해 드려요.', '자주 묻는 질문', [['계정을 삭제하려면?', '앱 설정 > 계정 삭제, 또는 계정 삭제 안내 페이지를 이용하세요.'], ['개인정보는 어떻게 쓰이나요?', '개인정보처리방침에서 확인할 수 있어요.']], '개인정보처리방침'],
+      en: [`${name} Support`, 'Contact us', 'Email us at the address below. We usually reply within 2 business days.', 'Frequently asked questions', [['How do I delete my account?', 'In the app, go to Settings > Delete account, or use the account deletion page.'], ['How is my data used?', 'See our privacy policy.']], 'Privacy policy'],
+      th: [`ฝ่ายช่วยเหลือ ${name}`, 'ติดต่อเรา', 'ส่งอีเมลมาที่ที่อยู่ด้านล่าง ปกติเราจะตอบภายใน 2 วันทำการ', 'คำถามที่พบบ่อย', [['ลบบัญชีได้อย่างไร', 'ในแอปไปที่ ตั้งค่า > ลบบัญชี หรือใช้หน้าการลบบัญชี'], ['ข้อมูลของฉันถูกใช้อย่างไร', 'ดูได้ในนโยบายความเป็นส่วนตัว']], 'นโยบายความเป็นส่วนตัว'],
+      zh: [`${name} 支持`, '联系我们', '请发送邮件至下面的地址，我们通常会在 2 个工作日内回复。', '常见问题', [['如何删除我的账号？', '在应用中进入“设置 > 删除账号”，或使用账号删除页面。'], ['我的数据如何使用？', '请查看我们的隐私政策。']], '隐私政策'],
+      hi: [`${name} सहायता`, 'हमसे संपर्क करें', 'नीचे दिए पते पर ईमेल करें। हम आमतौर पर 2 कार्यदिवसों में जवाब देते हैं।', 'अक्सर पूछे जाने वाले सवाल', [['अपना अकाउंट कैसे डिलीट करूँ?', 'ऐप में सेटिंग > अकाउंट डिलीट करें पर जाएँ, या अकाउंट डिलीट पेज इस्तेमाल करें।'], ['मेरा डेटा कैसे इस्तेमाल होता है?', 'हमारी गोपनीयता नीति देखें।']], 'गोपनीयता नीति']
+    };
+    const L2 = T[lang] || T.en;
+    const faq = A.sdk.auth ? L2[4] : L2[4].slice(1);
+    return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(L2[0])}</title>
+<style>body{font:16px/1.7 system-ui,sans-serif;max-width:720px;margin:0 auto;padding:32px 20px;color:#1b1d21}h1{font-size:24px}h2{font-size:18px;margin-top:24px}.contact{font-size:20px;font-weight:600}a{color:#0b5c4f}</style></head><body>
+<h1>${esc(L2[0])}</h1>
+<h2>${esc(L2[1])}</h2>
+<p class="contact">${A.developer.email ? `<a href="mailto:${esc(email)}">${esc(email)}</a>` : esc(email)}</p>
+<p>${esc(L2[2])}</p>
+<h2>${esc(L2[3])}</h2>
+${faq.map(([q, a]) => `<p><b>${esc(q)}</b><br>${esc(a)}</p>`).join('\n')}
+<p><a href="privacy-policy-${lang}.html">${esc(L2[5])}</a></p>
+</body></html>
+`;
+  }
+
   /* ---------- 코드 수정안 ---------- */
   function patches(A, lang) {
     const out = {}; const an = A.android, io = A.ios;
@@ -261,23 +296,39 @@ ${third.length ? `<h2>${T.third}</h2><p>${T.thirdTxt}</p><ul>${third.map(t => `<
       const tx = { NSPhotoLibraryUsageDescription: 'Choose a receipt photo from your library to add an expense.', NSCameraUsageDescription: 'Camera access is needed to scan your receipts.', NSLocationWhenInUseUsageDescription: 'Your location is used to show nearby results.', NSMicrophoneUsageDescription: 'The microphone is used for voice input.' };
       if (A.categories[0] !== 'finance') tx.NSPhotoLibraryUsageDescription = 'Choose a photo from your library to use in the app.';
       if (empty.length) out['patch-plist'] = { file: io.plistPath, diff: `--- a/${io.plistPath}\n+++ b/${io.plistPath}\n` + empty.map(k => `     <key>${k}</key>\n-    <string></string>\n+    <string>${tx[k] || 'This permission is used for a feature you choose to use.'}</string>`).join('\n') + '\n' };
+      if (io.encryption === undefined) out['patch-plist-encryption'] = { file: io.plistPath, diff: `--- a/${io.plistPath}\n+++ b/${io.plistPath}\n@@ <dict>\n+    <!-- The app only uses standard HTTPS (exempt encryption). If it uses other encryption, set true and answer export compliance. -->\n+    <key>ITSAppUsesNonExemptEncryption</key>\n+    <false/>\n` };
+    }
+    if (io) {
+      const R = A.review || {}, fw = A.framework, xp = (io.xcprivacy && io.xcprivacy.path) || 'ios/PrivacyInfo.xcprivacy', pl = io.plistPath || 'ios/Info.plist';
+      const npaCode = fw === 'flutter' ? `// Flutter (google_mobile_ads)\nfinal request = AdRequest(nonPersonalizedAds: true); // sends npa=1`
+        : fw === 'react-native' || fw === 'expo' ? `// React Native (react-native-google-mobile-ads)\nconst requestOptions = { requestNonPersonalizedAdsOnly: true }; // sends npa=1`
+        : `// iOS (Google Mobile Ads SDK)\nlet extras = Extras(); extras.additionalParameters = ["npa": "1"]\nlet request = Request(); request.register(extras)\n// Android: val extras = Bundle().apply { putString("npa", "1") }; AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter::class.java, extras)`;
+      out['tracking-npa'] = { file: xp, diff: `# No-tracking path: ATT, PrivacyInfo, App Privacy form and runtime tell the same story from the first submit.\n`
+        + (R.attString ? `--- a/${pl}\n+++ b/${pl}\n-    <key>NSUserTrackingUsageDescription</key>\n-    <string>…</string>\n` : '')
+        + (R.manifestTracking || R.trackingDomains ? `--- a/${xp}\n+++ b/${xp}\n-\t<key>NSPrivacyTracking</key><true/>\n+\t<key>NSPrivacyTracking</key><false/>\n-\t<key>NSPrivacyTrackingDomains</key><array>…</array>\n+\t<key>NSPrivacyTrackingDomains</key><array/>\n` : `# ${xp}: keep NSPrivacyTracking=false and an empty NSPrivacyTrackingDomains list. Do not add NSUserTrackingUsageDescription.\n`)
+        + (R.attCode ? `\n# Remove the ATT request call (requestTrackingAuthorization / app_tracking_transparency / expo-tracking-transparency).\n` : '')
+        + `\n# Every ad request is non-personalized:\n${npaCode}\n\n# App Store Connect > App Privacy: "Do you or your third-party partners use data for tracking?" → No. usesIdfa: false.\n` };
+      out['tracking-track'] = { file: xp, diff: `# Tracking path, fully aligned (all four must match from the first submit):\n`
+        + `# 1. Info.plist: NSUserTrackingUsageDescription with a clear reason.\n# 2. Code: call ATTrackingManager.requestTrackingAuthorization before any tracking, on a screen the reviewer reaches right after launch (no login needed).\n`
+        + `--- a/${xp}\n+++ b/${xp}\n+\t<key>NSPrivacyTracking</key><true/>\n+\t<key>NSPrivacyTrackingDomains</key>\n+\t<array>\n+\t\t<string><!-- every tracking domain your ad / analytics SDKs contact --></string>\n+\t</array>\n`
+        + `# 3. NSPrivacyTrackingDomains must not be empty when NSPrivacyTracking is true (ITMS-91064).\n# 4. App Store Connect > App Privacy: mark the tracked data types "Used for tracking" → Yes. Personalized ads only after the user allows tracking.\n` };
     }
     return out;
   }
-  function xcprivacy(A) {
-    const types = [];
+  function xcprivacy(A, opts) {
+    const o = opts || {}, track = !!o.tracking, types = [];
     const t = (type, linked, track, purpose) => `\t\t<dict>\n\t\t\t<key>NSPrivacyCollectedDataType</key><string>${type}</string>\n\t\t\t<key>NSPrivacyCollectedDataTypeLinked</key><${linked}/>\n\t\t\t<key>NSPrivacyCollectedDataTypeTracking</key><${track}/>\n\t\t\t<key>NSPrivacyCollectedDataTypePurposes</key><array><string>${purpose}</string></array>\n\t\t</dict>`;
     if (A.sdk.auth) types.push(t('NSPrivacyCollectedDataTypeEmailAddress', 'true', 'false', 'NSPrivacyCollectedDataTypePurposeAppFunctionality'), t('NSPrivacyCollectedDataTypeName', 'true', 'false', 'NSPrivacyCollectedDataTypePurposeAppFunctionality'), t('NSPrivacyCollectedDataTypeUserID', 'true', 'false', 'NSPrivacyCollectedDataTypePurposeAppFunctionality'));
     if (A.sdk.cloudDb && A.categories[0] === 'finance') types.push(t('NSPrivacyCollectedDataTypeOtherFinancialInfo', 'true', 'false', 'NSPrivacyCollectedDataTypePurposeAppFunctionality'));
     if (A.sdk.analytics) types.push(t('NSPrivacyCollectedDataTypeProductInteraction', 'false', 'false', 'NSPrivacyCollectedDataTypePurposeAnalytics'));
     if (A.sdk.crash) types.push(t('NSPrivacyCollectedDataTypeCrashData', 'false', 'false', 'NSPrivacyCollectedDataTypePurposeAppFunctionality'));
-    if (A.sdk.ads) types.push(t('NSPrivacyCollectedDataTypeDeviceID', 'false', 'false', 'NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising'));
+    if (A.sdk.location && o.location === 'server') types.push(t('NSPrivacyCollectedDataTypeCoarseLocation', 'false', 'false', 'NSPrivacyCollectedDataTypePurposeAppFunctionality'));
+    if (A.sdk.ads) types.push(t('NSPrivacyCollectedDataTypeDeviceID', 'false', track ? 'true' : 'false', 'NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising'));
     return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-\t<key>NSPrivacyTracking</key><false/>
-\t<key>NSPrivacyTrackingDomains</key><array/>
+${track ? '\t<key>NSPrivacyTracking</key><true/>\n\t<!-- List every tracking domain. NSPrivacyTracking=true with an empty list is rejected (ITMS-91064). -->\n\t<key>NSPrivacyTrackingDomains</key>\n\t<array>\n\t\t<string>REPLACE-WITH-TRACKING-DOMAIN</string>\n\t</array>' : '\t<key>NSPrivacyTracking</key><false/>\n\t<key>NSPrivacyTrackingDomains</key><array/>'}
 \t<key>NSPrivacyCollectedDataTypes</key>
 \t<array>
 ${types.join('\n')}
@@ -296,7 +347,31 @@ ${types.join('\n')}
 
   /* ---------- 심사 거절 대응 ---------- */
   const REJECTIONS = [
-    { id: 'apple-21-demo', store: 'apple', match: /2\.1|information needed|demo account|sign[- ]in credentials|log ?in/i,
+    { id: 'apple-91064', store: 'apple', match: /ITMS-91064|NSPrivacyTrackingDomains|tracking domains?/i,
+      sample: 'ITMS-91064: Invalid tracking information - The PrivacyInfo.xcprivacy file sets NSPrivacyTracking to true, but NSPrivacyTrackingDomains is empty.',
+      plan: { ko: ['추적 신고를 한 가지로 맞춥니다. 비맞춤 광고(npa=1)만 쓰면 NSPrivacyTracking=false, 추적 도메인 없음, ATT 문구·팝업 없음으로 맞춥니다 (권장).', '추적을 정말 한다면 NSPrivacyTrackingDomains에 실제 추적 도메인을 모두 넣고, ATT 팝업과 App Privacy 양식도 같이 맞춥니다.', '빌드 번호를 올려 새 빌드를 올리고, 제출 직전에 App Privacy 양식을 다시 확인합니다.'], en: ['Make the tracking declaration consistent. With non-personalized ads (npa=1) only: NSPrivacyTracking=false, no tracking domains, no ATT string or prompt (recommended).', 'If the app really tracks: list every tracking domain in NSPrivacyTrackingDomains and align the ATT prompt and the App Privacy form too.', 'Raise the build number, upload a new build, and re-check the App Privacy form right before submitting.'], th: ['ทำให้การประกาศการติดตามตรงกันทั้งหมด หากใช้โฆษณาแบบไม่ปรับตามบุคคล (npa=1) เท่านั้น: NSPrivacyTracking=false ไม่มีโดเมนติดตาม ไม่มีข้อความหรือป๊อปอัป ATT (แนะนำ)', 'หากแอปติดตามจริง: ใส่โดเมนติดตามทั้งหมดใน NSPrivacyTrackingDomains และปรับป๊อปอัป ATT กับแบบฟอร์ม App Privacy ให้ตรงกัน', 'เพิ่มหมายเลขบิลด์ อัปโหลดบิลด์ใหม่ และตรวจแบบฟอร์ม App Privacy อีกครั้งก่อนส่ง'], zh: ['让跟踪声明保持一致。仅使用非个性化广告（npa=1）时：NSPrivacyTracking=false，不填跟踪域名，不加 ATT 说明和弹窗（推荐）。', '如果应用确实跟踪：在 NSPrivacyTrackingDomains 中列出所有跟踪域名，并同步 ATT 弹窗和 App Privacy 表单。', '提高构建号，上传新构建，提交前再次核对 App Privacy 表单。'], hi: ['ट्रैकिंग की घोषणा एक जैसी करें। सिर्फ़ गैर-व्यक्तिगत विज्ञापन (npa=1) हों तो: NSPrivacyTracking=false, कोई ट्रैकिंग डोमेन नहीं, कोई ATT टेक्स्ट या प्रॉम्प्ट नहीं (सुझाया गया)।', 'अगर ऐप सच में ट्रैक करता है: NSPrivacyTrackingDomains में हर ट्रैकिंग डोमेन डालें और ATT प्रॉम्प्ट व App Privacy फ़ॉर्म भी मिलाएँ।', 'बिल्ड नंबर बढ़ाएँ, नया बिल्ड अपलोड करें और सबमिट से ठीक पहले App Privacy फ़ॉर्म फिर से जाँचें।'] },
+      reply: n => `Hello App Review team,\n\nThank you for the note on ${n}. We corrected the privacy manifest so the tracking declaration is consistent: the app does not track users, NSPrivacyTracking is false and no tracking domains are listed. Ads are non-personalized only, and the App Privacy answers say the app does not track. A new build has been uploaded.\n\nBest regards` },
+    { id: 'apple-21-att', store: 'apple', match: /App Tracking Transparency|AppTrackingTransparency|\bATT\b|tracking (permission|prompt)|track(ing)? .{0,40}without .{0,20}permission/i,
+      sample: 'Guideline 2.1 - Information Needed\n\nYour app declares that it collects data to track the user, but we were unable to locate the App Tracking Transparency permission request when reviewing your app.',
+      plan: { ko: ['ATT·PrivacyInfo·App Privacy 양식·실제 동작을 한 방향으로 맞춥니다. 비맞춤 광고(npa=1)만 쓰면 ATT 문구를 지우고 App Privacy를 "추적 안 함"으로 바꿉니다 (권장).', '추적을 유지한다면 로그인 없이 실행 직후 ATT 팝업이 뜨게 하고, 심사 메모에 팝업 위치를 적습니다.', '새 빌드를 올리고, 제출 직전 App Privacy 양식을 확인한 뒤 답장을 보냅니다.'], en: ['Align ATT, PrivacyInfo, the App Privacy form and real behavior to one path. With non-personalized ads (npa=1) only: remove the ATT string and set App Privacy to "No, we do not track" (recommended).', 'If you keep tracking: show the ATT prompt right after launch without login, before any tracking, and say where it appears in the review notes.', 'Upload a new build, check the App Privacy form right before submitting, then send the reply.'], th: ['ปรับ ATT, PrivacyInfo, แบบฟอร์ม App Privacy และการทำงานจริงให้เป็นแนวทางเดียว หากใช้โฆษณาแบบไม่ปรับตามบุคคล (npa=1) เท่านั้น: ลบข้อความ ATT และตั้ง App Privacy เป็น "ไม่ติดตาม" (แนะนำ)', 'หากยังติดตาม: แสดงป๊อปอัป ATT ทันทีหลังเปิดแอปโดยไม่ต้องล็อกอิน ก่อนการติดตามใด ๆ และระบุตำแหน่งในบันทึกถึงผู้ตรวจ', 'อัปโหลดบิลด์ใหม่ ตรวจแบบฟอร์ม App Privacy ก่อนส่ง แล้วส่งข้อความตอบกลับ'], zh: ['让 ATT、PrivacyInfo、App Privacy 表单和实际行为保持同一路径。仅使用非个性化广告（npa=1）时：删除 ATT 说明，把 App Privacy 设为“不跟踪”（推荐）。', '如果保留跟踪：在启动后无需登录即显示 ATT 弹窗，且在任何跟踪之前，并在审核备注中说明弹窗位置。', '上传新构建，提交前核对 App Privacy 表单，然后发送回复。'], hi: ['ATT, PrivacyInfo, App Privacy फ़ॉर्म और असली व्यवहार को एक ही रास्ते पर लाएँ। सिर्फ़ गैर-व्यक्तिगत विज्ञापन (npa=1) हों तो: ATT टेक्स्ट हटाएँ और App Privacy को “हम ट्रैक नहीं करते” पर रखें (सुझाया गया)।', 'अगर ट्रैकिंग रखनी है: लॉन्च के तुरंत बाद बिना लॉगिन के, किसी भी ट्रैकिंग से पहले ATT प्रॉम्प्ट दिखाएँ और समीक्षा नोट्स में उसकी जगह बताएँ।', 'नया बिल्ड अपलोड करें, सबमिट से ठीक पहले App Privacy फ़ॉर्म जाँचें, फिर जवाब भेजें।'] },
+      reply: n => `Hello App Review team,\n\nThank you for reviewing ${n}. The app does not track users. We removed the tracking declaration so that the App Privacy answers, the privacy manifest (NSPrivacyTracking = false) and the app's behavior match: ads are non-personalized only and no App Tracking Transparency prompt is needed. A new build has been uploaded.\n\nBest regards` },
+    { id: 'apple-21a-launch', store: 'apple', match: /2\.1\s*\(a\)|crash(ed|es)? (on|at|upon) launch|(failed|unable) to launch|did not launch|app crashed|performance - app completeness/i,
+      sample: 'Guideline 2.1(a) - Performance - App Completeness\n\nThe app crashed on launch on iPhone running iOS 26.',
+      plan: { ko: ['실행 직후 동작을 점검합니다. iOS에서는 기기 비밀값을 Keychain(또는 같은 역할의 iOS 구현)에 저장하고, Android 전용 저장소를 쓰지 않습니다.', '저장·읽기에 실패해도 앱이 멈추거나 실행이 막히지 않게 예외를 처리합니다.', '실제 iPhone에서 새로 설치해 실행을 확인한 뒤 새 빌드를 올리고 답장합니다.'], en: ['Check what runs at launch. On iOS, store device secrets in the Keychain (or an equivalent iOS implementation), never in Android-only storage.', 'Handle storage failures so the app never crashes or blocks launch.', 'Fresh-install on a real iPhone, confirm launch, upload a new build and reply.'], th: ['ตรวจสิ่งที่ทำงานตอนเปิดแอป บน iOS ให้เก็บความลับของอุปกรณ์ใน Keychain (หรือการทำงานเทียบเท่าบน iOS) ห้ามใช้ที่เก็บเฉพาะ Android', 'จัดการกรณีบันทึกหรืออ่านล้มเหลว ไม่ให้แอปค้างหรือเปิดไม่ได้', 'ติดตั้งใหม่บน iPhone จริง ยืนยันว่าเปิดได้ อัปโหลดบิลด์ใหม่และตอบกลับ'], zh: ['检查启动时运行的内容。在 iOS 上把设备密钥保存在钥匙串（Keychain，或等效的 iOS 实现）中，不要使用仅限 Android 的存储。', '处理存储失败的情况，确保应用不会崩溃或无法启动。', '在真机 iPhone 上全新安装并确认能启动，然后上传新构建并回复。'], hi: ['लॉन्च पर क्या चलता है जाँचें। iOS पर डिवाइस सीक्रेट Keychain (या उसके बराबर iOS तरीके) में रखें, Android-केवल स्टोरेज में कभी नहीं।', 'स्टोरेज फ़ेल हो तो भी ऐप क्रैश न हो और लॉन्च न रुके, ऐसा हैंडल करें।', 'असली iPhone पर नया इंस्टॉल करके लॉन्च जाँचें, नया बिल्ड अपलोड करें और जवाब दें।'] },
+      reply: n => `Hello App Review team,\n\nThank you for reviewing ${n}. We found and fixed the launch issue: on iOS the app now stores its device secret in the Keychain, and a storage failure no longer stops the app from launching. We verified a fresh install on a physical iPhone. A new build has been uploaded.\n\nBest regards` },
+    { id: 'apple-15-support', store: 'apple', match: /Guideline 1\.5|1\.5 - Safety|support url|developer information|contact information/i,
+      sample: 'Guideline 1.5 - Safety - Developer Information\n\nThe support URL provided in App Store Connect does not direct to a website with information users can use to ask questions and request support.',
+      plan: { ko: ['연락처(이메일 등)가 바로 보이는 지원 페이지(/support/)를 올립니다 (페이지 준비됨).', 'App Store Connect의 지원 URL을 홍보용 홈페이지가 아니라 이 지원 페이지로 바꿉니다. 개인정보처리방침 URL도 열리는지 확인합니다.', '새 빌드 없이 메타데이터만 고친 뒤 답장하고 다시 제출합니다.'], en: ['Publish a support page (/support/) where an official contact method (e.g. email) is visible right away (page ready).', 'Change the Support URL in App Store Connect to that page, not a marketing homepage. Check that the privacy policy URL opens too.', 'Fix the metadata only (no new build needed), reply and resubmit.'], th: ['เผยแพร่หน้าช่วยเหลือ (/support/) ที่เห็นช่องทางติดต่ออย่างเป็นทางการ (เช่น อีเมล) ได้ทันที (มีหน้าเตรียมไว้แล้ว)', 'เปลี่ยน Support URL ใน App Store Connect เป็นหน้านั้น ไม่ใช่หน้าแรกเพื่อการตลาด และตรวจว่า URL นโยบายความเป็นส่วนตัวเปิดได้', 'แก้เฉพาะเมทาดาทา (ไม่ต้องมีบิลด์ใหม่) ตอบกลับและส่งอีกครั้ง'], zh: ['发布一个能立即看到官方联系方式（如邮箱）的支持页面（/support/）（页面已准备好）。', '把 App Store Connect 中的支持网址改为该页面，而不是营销首页，并确认隐私政策网址可以打开。', '只改元数据（无需新构建），回复后重新提交。'], hi: ['एक सपोर्ट पेज (/support/) प्रकाशित करें जिस पर आधिकारिक संपर्क (जैसे ईमेल) तुरंत दिखे (पेज तैयार है)।', 'App Store Connect में Support URL को उसी पेज पर बदलें, मार्केटिंग होमपेज पर नहीं। प्राइवेसी पॉलिसी URL भी खुलता है जाँचें।', 'सिर्फ़ मेटाडेटा ठीक करें (नया बिल्ड ज़रूरी नहीं), जवाब दें और दोबारा सबमिट करें।'] },
+      reply: n => `Hello App Review team,\n\nThank you for reviewing ${n}. We updated the Support URL to a dedicated support page where users can contact us directly by email. The privacy policy URL is also available.\n\nBest regards` },
+    { id: 'apple-237', store: 'apple', match: /2\.3\.7|keywords|subtitle|accurate metadata/i,
+      sample: 'Guideline 2.3.7 - Performance - Accurate Metadata\n\nYour app subtitle or keywords include pricing terms or other apps\' names, which are not appropriate.',
+      plan: { ko: ['부제와 키워드에서 "무료/Free/ฟรี/免费" 같은 가격 표현과 다른 브랜드 이름을 뺍니다 (정리된 문구 준비됨).', '설명·새로운 기능·스크린샷에 Android나 광고 언급이 없는지도 확인합니다.', '메타데이터만 고친 뒤 답장하고 다시 제출합니다.'], en: ['Remove price words ("Free", "무료", "ฟรี", "免费"…) and other brands\' names from the subtitle and keywords (clean copy ready).', 'Also check the description, What\'s New and screenshots for Android or ad mentions.', 'Fix the metadata only, reply and resubmit.'], th: ['ลบคำเกี่ยวกับราคา ("ฟรี", "Free", "무료", "免费"…) และชื่อแบรนด์อื่นออกจากคำบรรยายย่อยและคีย์เวิร์ด (มีข้อความที่แก้แล้ว)', 'ตรวจคำอธิบาย มีอะไรใหม่ และภาพหน้าจอ ว่าไม่มีการพูดถึง Android หรือโฆษณา', 'แก้เฉพาะเมทาดาทา ตอบกลับและส่งอีกครั้ง'], zh: ['从副标题和关键词中删除“免费 / Free / ฟรี / 무료”等价格词以及其他品牌名称（已准备好修改后的文案）。', '同时检查描述、新功能说明和截图中没有提到 Android 或广告。', '只改元数据，回复后重新提交。'], hi: ['सबटाइटल और कीवर्ड से कीमत वाले शब्द (“Free”, “मुफ़्त”, “ฟรี”, “免费”…) और दूसरे ब्रांड के नाम हटाएँ (साफ़ कॉपी तैयार है)।', 'विवरण, What’s New और स्क्रीनशॉट में Android या विज्ञापन का ज़िक्र न हो, यह भी जाँचें।', 'सिर्फ़ मेटाडेटा ठीक करें, जवाब दें और दोबारा सबमिट करें।'] },
+      reply: n => `Hello App Review team,\n\nThank you for reviewing ${n}. We removed pricing terms and third-party brand names from the subtitle and keywords so the metadata accurately describes the app.\n\nBest regards` },
+    { id: 'apple-info-byok', store: 'apple', match: /api[ -]?keys?\b|own key|user[- ]provided key/i,
+      sample: 'Guideline 2.1 - Information Needed\n\nPlease explain how users obtain the API key required by your app, whether it is sold in the app, and provide a working key so we can review the AI features.',
+      plan: { ko: ['새 빌드는 보통 필요 없어요. 심사 센터에 답장합니다: 인앱 결제·구독 없음, 사용자가 제3자(예: Google AI Studio)에서 직접 키를 받음, 개발자는 키를 팔지 않음.', '심사 전용 키를 새로 만들어 답장에 첨부합니다. 실제 키는 저장소·메모 파일에 절대 넣지 않습니다.', '다음 제출부터는 처음부터 심사 메모에 같은 설명과 심사용 키를 넣습니다.'], en: ['Usually no new build is needed. Reply in App Review: no in-app purchase or subscription, users get their own key from a third party (e.g. Google AI Studio), and the developer does not sell keys.', 'Create a review-only key and attach it to the reply. Never put a real key in the repo or in saved notes.', 'From the next submit, put the same explanation and a review key in the review notes from the start.'], th: ['ปกติไม่ต้องมีบิลด์ใหม่ ตอบกลับใน App Review: ไม่มีการซื้อในแอปหรือการสมัครสมาชิก ผู้ใช้รับคีย์เองจากบุคคลที่สาม (เช่น Google AI Studio) และผู้พัฒนาไม่ได้ขายคีย์', 'สร้างคีย์สำหรับการตรวจเท่านั้นแล้วแนบไปกับข้อความตอบกลับ ห้ามใส่คีย์จริงในรีโปหรือบันทึก', 'ตั้งแต่การส่งครั้งถัดไป ให้ใส่คำอธิบายเดียวกันและคีย์สำหรับตรวจในบันทึกถึงผู้ตรวจตั้งแต่แรก'], zh: ['通常不需要新构建。在 App 审核中回复：没有 App 内购买或订阅，用户自行从第三方（如 Google AI Studio）获取密钥，开发者不出售密钥。', '创建一个仅供审核使用的密钥并附在回复中。切勿把真实密钥放进代码库或保存的备注里。', '从下次提交起，一开始就在审核备注中写上同样的说明并提供审核用密钥。'], hi: ['आमतौर पर नया बिल्ड ज़रूरी नहीं। App Review में जवाब दें: कोई इन-ऐप खरीदारी या सब्सक्रिप्शन नहीं, यूज़र अपनी कुंजी किसी तीसरे पक्ष (जैसे Google AI Studio) से लेते हैं, और डेवलपर कुंजियाँ नहीं बेचता।', 'सिर्फ़ समीक्षा के लिए एक कुंजी बनाएँ और जवाब के साथ लगाएँ। असली कुंजी कभी रिपॉज़िटरी या सेव किए नोट्स में न रखें।', 'अगली बार से समीक्षा नोट्स में शुरू से यही जानकारी और समीक्षा कुंजी दें।'] },
+      reply: n => `Hello App Review team,\n\nThank you for reviewing ${n}. The app has no in-app purchases or subscriptions. AI features use the user's own API key, which users obtain directly from a third-party provider (for example, Google AI Studio). We do not sell or provide API keys.\n\nFor your review, a working sample key is attached: [attach a review-only key here].\n\nBest regards` },
+    { id: 'apple-21-demo', store: 'apple', demo: true, match: /2\.1|information needed|demo account|sign[- ]in credentials|log ?in/i,
       sample: 'Guideline 2.1 - Information Needed\n\nWe were unable to review your app because it requires users to sign in, but no demo account was provided in App Review Information. Please provide a demo account and password, or explain how to access all features without signing in.',
       plan: { ko: ['로그인 없이도 모든 핵심 기능(스캔·예산·리포트)을 쓸 수 있다는 점을 설명합니다.', '백업 기능 확인용 Google 테스트 계정 정보를 App Store Connect > 앱 심사 정보에 넣습니다.', '아래 답장을 심사 센터(Resolution Center)에 보내고 다시 제출합니다.'], en: ['Explain that every core feature (scan, budget, reports) works without signing in.', 'Add a Google test account for the backup feature in App Store Connect > App Review Information.', 'Send the reply below in the Resolution Center and resubmit.'], th: ['อธิบายว่าฟีเจอร์หลักทั้งหมด (สแกน งบประมาณ รายงาน) ใช้ได้โดยไม่ต้องลงชื่อเข้าใช้', 'ใส่บัญชี Google สำหรับทดสอบฟีเจอร์สำรองข้อมูลใน App Store Connect > App Review Information', 'ส่งข้อความตอบกลับด้านล่างใน Resolution Center แล้วส่งตรวจอีกครั้ง'], zh: ['说明所有核心功能（扫描、预算、报表）无需登录即可使用。', '在 App Store Connect > App 审核信息中添加用于测试备份功能的 Google 测试账号。', '在解决方案中心（Resolution Center）发送下面的回复，然后重新提交。'], hi: ['बताएँ कि हर मुख्य सुविधा (स्कैन, बजट, रिपोर्ट) बिना साइन इन के चलती है।', 'बैकअप सुविधा के लिए App Store Connect > App Review Information में एक Google टेस्ट अकाउंट जोड़ें।', 'Resolution Center में नीचे दिया जवाब भेजें और दोबारा सबमिट करें।'] },
       reply: n => `Hello App Review team,\n\nThank you for reviewing ${n}. Signing in is optional: all core features — receipt scanning, budgets and reports — are available without an account on the first screen ("Skip").\n\nSign-in is only used for the optional cloud backup. To test it, please use the demo account we have added to App Review Information:\n• Email: (see App Review Information)\n• Password: (see App Review Information)\n\nPlease let us know if you need anything else.\n\nBest regards` },
@@ -318,5 +393,5 @@ ${types.join('\n')}
     return REJECTIONS.find(r => (!store || r.store === store) && r.match.test(t)) || REJECTIONS.find(r => r.match.test(t)) || null;
   }
 
-  window.AAPGen = { LANGS, CAT, listing, features, dataSafety, dataSafetyCsv, rating, privacyPolicy, deletionPage, patches, xcprivacy, REJECTIONS, matchRejection, nameOf, tagOf, clip, esc };
+  window.AAPGen = { LANGS, CAT, listing, features, dataSafety, dataSafetyCsv, rating, privacyPolicy, deletionPage, supportPage, patches, xcprivacy, REJECTIONS, matchRejection, asoClean, asoIssues, nameOf, tagOf, clip, esc };
 })();

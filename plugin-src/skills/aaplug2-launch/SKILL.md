@@ -25,3 +25,11 @@ AA Plug 2 takes an app the user already built and gets it to "launched" on Googl
 8. `aaplug2_report_review` with `submitted`, `rejected` (with the store's message, which returns a fix plan and a reply), `resubmitted`, or `approved`. When every chosen store is live, congratulate the user. The job is done.
 
 Use `aaplug2_status` to resume in a new conversation.
+
+## App Store review rules to explain (the tools already check them)
+- Tracking must tell one story from the first submit: ATT, `PrivacyInfo.xcprivacy`, the App Privacy form, and what the app really does. For apps with ads the default is no ATT prompt and no `NSUserTrackingUsageDescription`, `NSPrivacyTracking` false with no tracking domains, non-personalized ad requests (`npa=1`), and App Privacy "No, we do not track". Never tell the user to add ATT just because the app shows ads. A mixed setup leads to ITMS-91064 or a Guideline 2.1 rejection. If the app already has a fully aligned tracking setup, keep it aligned.
+- The App Privacy form is separate from the build. Remind the user to check it right before submitting.
+- Core features should work without signing in (Guideline 5.1.1(v)). A third-party login on iOS also needs Sign in with Apple. Apps with accounts need deletion both in the app and on a web page.
+- The Support URL must open a page that shows a contact method. Mention ads only in the privacy policy. Keep "free" and other brands' names out of the subtitle and keywords, and keep Android out of App Store text.
+- If users bring their own AI API key, the review notes must say there is no in-app purchase or subscription, that users get the key from a third party, and that the developer does not sell keys. Ask the user to attach a review-only key. Never write a real key anywhere.
+- In App Store Connect, "Information Needed" also shows as Rejected. It asks for a reply, often without a new build. Draft the reply; the user sends it. Never reply to a store yourself.

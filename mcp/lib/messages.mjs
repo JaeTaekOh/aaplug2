@@ -1,6 +1,7 @@
 /* MCP 전용 안내 문구 (웹 앱 i18n 에 없는 것만). en (기본) / ko / th / zh / hi */
 export const M = {
   ko: {
+    infoNeeded: 'App Store Connect에서는 "정보 필요(Information Needed)"도 "거부됨"으로 보여요. 대부분 새 빌드 반려가 아니라 답장(때로는 심사용 키나 설명)을 달라는 요청이에요. 답장은 사용자가 직접 보내요. AA Plug 2는 Apple에 자동으로 답하지 않아요.',
     connected: '{name} 앱을 연결하고 분석했어요. 출시 준비도 {ready}%.',
     counts: '꼭 고칠 것 {block}개 · 확인 권장 {warn}개 · 참고 {tip}개',
     nextDecide: '다음: aaplug2_get_decisions 로 사용자에게 고를 것 {n}개를 보여 주세요. 사용자는 고르거나 승인·거절만 하면 돼요.',
@@ -26,6 +27,7 @@ export const M = {
     stepDecide: '결정', stepGenerate: '자료 만들기', stepSubmit: '제출 안내·승인', stepReview: '심사', stepDone: '출시 완료'
   },
   en: {
+    infoNeeded: 'In App Store Connect an "Information Needed" request also shows as Rejected. It usually asks for a reply (sometimes a sample key or a clarification), not a new binary. The user sends the reply; AA Plug 2 never replies to Apple automatically.',
     connected: 'Connected and analyzed {name}. Launch readiness {ready}%.',
     counts: '{block} must-fix · {warn} worth checking · {tip} notes',
     nextDecide: 'Next: call aaplug2_get_decisions and show the user the {n} choices. The user only picks, approves or rejects.',
@@ -51,6 +53,7 @@ export const M = {
     stepDecide: 'Decide', stepGenerate: 'Make materials', stepSubmit: 'Submission guide & approval', stepReview: 'Review', stepDone: 'Launched'
   },
   th: {
+    infoNeeded: 'ใน App Store Connect คำขอ "Information Needed" จะแสดงเป็น "ถูกปฏิเสธ" ด้วย ส่วนใหญ่เป็นการขอให้ตอบกลับ (บางครั้งขอคีย์ตัวอย่างหรือคำอธิบาย) ไม่ใช่การปฏิเสธบิลด์ ผู้ใช้เป็นคนส่งคำตอบเอง AA Plug 2 ไม่ตอบ Apple อัตโนมัติ',
     connected: 'เชื่อมต่อและวิเคราะห์ {name} แล้ว ความพร้อมเปิดตัว {ready}%',
     counts: 'ต้องแก้ {block} · ควรตรวจ {warn} · ข้อสังเกต {tip}',
     nextDecide: 'ถัดไป: เรียก aaplug2_get_decisions แล้วให้ผู้ใช้เลือก {n} ข้อ ผู้ใช้แค่เลือก อนุมัติ หรือปฏิเสธ',
@@ -76,6 +79,7 @@ export const M = {
     stepDecide: 'ตัดสินใจ', stepGenerate: 'สร้างไฟล์', stepSubmit: 'คู่มือการส่งและอนุมัติ', stepReview: 'ตรวจสอบ', stepDone: 'เปิดตัวแล้ว'
   },
   zh: {
+    infoNeeded: '在 App Store Connect 中，“需要更多信息（Information Needed）”也会显示为“被拒绝”。它通常是请你回复（有时需要示例密钥或说明），而不是要求新构建。回复由用户本人发送，AA Plug 2 不会自动回复 Apple。',
     connected: '已连接并分析 {name}。上架准备度 {ready}%。',
     counts: '必须修改 {block} 项 · 建议检查 {warn} 项 · 值得了解 {tip} 项',
     nextDecide: '下一步：调用 aaplug2_get_decisions，向用户展示 {n} 个选项。用户只需选择、批准或拒绝。',
@@ -101,6 +105,7 @@ export const M = {
     stepDecide: '决定', stepGenerate: '生成素材', stepSubmit: '提交指南与批准', stepReview: '审核', stepDone: '已上架'
   },
   hi: {
+    infoNeeded: 'App Store Connect में “Information Needed” अनुरोध भी Rejected दिखता है। आमतौर पर यह जवाब (कभी-कभी सैंपल कुंजी या स्पष्टीकरण) माँगता है, नया बिल्ड नहीं। जवाब यूज़र खुद भेजता है; AA Plug 2 कभी Apple को अपने-आप जवाब नहीं देता।',
     connected: '{name} कनेक्ट और विश्लेषण हो गया। लॉन्च की तैयारी {ready}%।',
     counts: '{block} ठीक करना ज़रूरी · {warn} जाँचना बेहतर · {tip} जानने लायक',
     nextDecide: 'आगे: aaplug2_get_decisions कॉल करें और उपयोगकर्ता को {n} विकल्प दिखाएँ। उपयोगकर्ता को बस चुनना, मंज़ूर या अस्वीकार करना है।',

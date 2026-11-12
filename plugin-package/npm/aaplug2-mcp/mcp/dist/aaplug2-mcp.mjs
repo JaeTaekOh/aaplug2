@@ -58721,6 +58721,7 @@ var tr = (lang2, k, v) => g.AAPi18n.t(lang2, k, v);
 // lib/messages.mjs
 var M = {
   ko: {
+    infoNeeded: 'App Store Connect\uC5D0\uC11C\uB294 "\uC815\uBCF4 \uD544\uC694(Information Needed)"\uB3C4 "\uAC70\uBD80\uB428"\uC73C\uB85C \uBCF4\uC5EC\uC694. \uB300\uBD80\uBD84 \uC0C8 \uBE4C\uB4DC \uBC18\uB824\uAC00 \uC544\uB2C8\uB77C \uB2F5\uC7A5(\uB54C\uB85C\uB294 \uC2EC\uC0AC\uC6A9 \uD0A4\uB098 \uC124\uBA85)\uC744 \uB2EC\uB77C\uB294 \uC694\uCCAD\uC774\uC5D0\uC694. \uB2F5\uC7A5\uC740 \uC0AC\uC6A9\uC790\uAC00 \uC9C1\uC811 \uBCF4\uB0B4\uC694. AA Plug 2\uB294 Apple\uC5D0 \uC790\uB3D9\uC73C\uB85C \uB2F5\uD558\uC9C0 \uC54A\uC544\uC694.',
     connected: "{name} \uC571\uC744 \uC5F0\uACB0\uD558\uACE0 \uBD84\uC11D\uD588\uC5B4\uC694. \uCD9C\uC2DC \uC900\uBE44\uB3C4 {ready}%.",
     counts: "\uAF2D \uACE0\uCE60 \uAC83 {block}\uAC1C \xB7 \uD655\uC778 \uAD8C\uC7A5 {warn}\uAC1C \xB7 \uCC38\uACE0 {tip}\uAC1C",
     nextDecide: "\uB2E4\uC74C: aaplug2_get_decisions \uB85C \uC0AC\uC6A9\uC790\uC5D0\uAC8C \uACE0\uB97C \uAC83 {n}\uAC1C\uB97C \uBCF4\uC5EC \uC8FC\uC138\uC694. \uC0AC\uC6A9\uC790\uB294 \uACE0\uB974\uAC70\uB098 \uC2B9\uC778\xB7\uAC70\uC808\uB9CC \uD558\uBA74 \uB3FC\uC694.",
@@ -58750,6 +58751,7 @@ var M = {
     stepDone: "\uCD9C\uC2DC \uC644\uB8CC"
   },
   en: {
+    infoNeeded: 'In App Store Connect an "Information Needed" request also shows as Rejected. It usually asks for a reply (sometimes a sample key or a clarification), not a new binary. The user sends the reply; AA Plug 2 never replies to Apple automatically.',
     connected: "Connected and analyzed {name}. Launch readiness {ready}%.",
     counts: "{block} must-fix \xB7 {warn} worth checking \xB7 {tip} notes",
     nextDecide: "Next: call aaplug2_get_decisions and show the user the {n} choices. The user only picks, approves or rejects.",
@@ -58779,6 +58781,7 @@ var M = {
     stepDone: "Launched"
   },
   th: {
+    infoNeeded: '\u0E43\u0E19 App Store Connect \u0E04\u0E33\u0E02\u0E2D "Information Needed" \u0E08\u0E30\u0E41\u0E2A\u0E14\u0E07\u0E40\u0E1B\u0E47\u0E19 "\u0E16\u0E39\u0E01\u0E1B\u0E0F\u0E34\u0E40\u0E2A\u0E18" \u0E14\u0E49\u0E27\u0E22 \u0E2A\u0E48\u0E27\u0E19\u0E43\u0E2B\u0E0D\u0E48\u0E40\u0E1B\u0E47\u0E19\u0E01\u0E32\u0E23\u0E02\u0E2D\u0E43\u0E2B\u0E49\u0E15\u0E2D\u0E1A\u0E01\u0E25\u0E31\u0E1A (\u0E1A\u0E32\u0E07\u0E04\u0E23\u0E31\u0E49\u0E07\u0E02\u0E2D\u0E04\u0E35\u0E22\u0E4C\u0E15\u0E31\u0E27\u0E2D\u0E22\u0E48\u0E32\u0E07\u0E2B\u0E23\u0E37\u0E2D\u0E04\u0E33\u0E2D\u0E18\u0E34\u0E1A\u0E32\u0E22) \u0E44\u0E21\u0E48\u0E43\u0E0A\u0E48\u0E01\u0E32\u0E23\u0E1B\u0E0F\u0E34\u0E40\u0E2A\u0E18\u0E1A\u0E34\u0E25\u0E14\u0E4C \u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49\u0E40\u0E1B\u0E47\u0E19\u0E04\u0E19\u0E2A\u0E48\u0E07\u0E04\u0E33\u0E15\u0E2D\u0E1A\u0E40\u0E2D\u0E07 AA Plug 2 \u0E44\u0E21\u0E48\u0E15\u0E2D\u0E1A Apple \u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34',
     connected: "\u0E40\u0E0A\u0E37\u0E48\u0E2D\u0E21\u0E15\u0E48\u0E2D\u0E41\u0E25\u0E30\u0E27\u0E34\u0E40\u0E04\u0E23\u0E32\u0E30\u0E2B\u0E4C {name} \u0E41\u0E25\u0E49\u0E27 \u0E04\u0E27\u0E32\u0E21\u0E1E\u0E23\u0E49\u0E2D\u0E21\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27 {ready}%",
     counts: "\u0E15\u0E49\u0E2D\u0E07\u0E41\u0E01\u0E49 {block} \xB7 \u0E04\u0E27\u0E23\u0E15\u0E23\u0E27\u0E08 {warn} \xB7 \u0E02\u0E49\u0E2D\u0E2A\u0E31\u0E07\u0E40\u0E01\u0E15 {tip}",
     nextDecide: "\u0E16\u0E31\u0E14\u0E44\u0E1B: \u0E40\u0E23\u0E35\u0E22\u0E01 aaplug2_get_decisions \u0E41\u0E25\u0E49\u0E27\u0E43\u0E2B\u0E49\u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49\u0E40\u0E25\u0E37\u0E2D\u0E01 {n} \u0E02\u0E49\u0E2D \u0E1C\u0E39\u0E49\u0E43\u0E0A\u0E49\u0E41\u0E04\u0E48\u0E40\u0E25\u0E37\u0E2D\u0E01 \u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34 \u0E2B\u0E23\u0E37\u0E2D\u0E1B\u0E0F\u0E34\u0E40\u0E2A\u0E18",
@@ -58808,6 +58811,7 @@ var M = {
     stepDone: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E41\u0E25\u0E49\u0E27"
   },
   zh: {
+    infoNeeded: "\u5728 App Store Connect \u4E2D\uFF0C\u201C\u9700\u8981\u66F4\u591A\u4FE1\u606F\uFF08Information Needed\uFF09\u201D\u4E5F\u4F1A\u663E\u793A\u4E3A\u201C\u88AB\u62D2\u7EDD\u201D\u3002\u5B83\u901A\u5E38\u662F\u8BF7\u4F60\u56DE\u590D\uFF08\u6709\u65F6\u9700\u8981\u793A\u4F8B\u5BC6\u94A5\u6216\u8BF4\u660E\uFF09\uFF0C\u800C\u4E0D\u662F\u8981\u6C42\u65B0\u6784\u5EFA\u3002\u56DE\u590D\u7531\u7528\u6237\u672C\u4EBA\u53D1\u9001\uFF0CAA Plug 2 \u4E0D\u4F1A\u81EA\u52A8\u56DE\u590D Apple\u3002",
     connected: "\u5DF2\u8FDE\u63A5\u5E76\u5206\u6790 {name}\u3002\u4E0A\u67B6\u51C6\u5907\u5EA6 {ready}%\u3002",
     counts: "\u5FC5\u987B\u4FEE\u6539 {block} \u9879 \xB7 \u5EFA\u8BAE\u68C0\u67E5 {warn} \u9879 \xB7 \u503C\u5F97\u4E86\u89E3 {tip} \u9879",
     nextDecide: "\u4E0B\u4E00\u6B65\uFF1A\u8C03\u7528 aaplug2_get_decisions\uFF0C\u5411\u7528\u6237\u5C55\u793A {n} \u4E2A\u9009\u9879\u3002\u7528\u6237\u53EA\u9700\u9009\u62E9\u3001\u6279\u51C6\u6216\u62D2\u7EDD\u3002",
@@ -58837,6 +58841,7 @@ var M = {
     stepDone: "\u5DF2\u4E0A\u67B6"
   },
   hi: {
+    infoNeeded: "App Store Connect \u092E\u0947\u0902 \u201CInformation Needed\u201D \u0905\u0928\u0941\u0930\u094B\u0927 \u092D\u0940 Rejected \u0926\u093F\u0916\u0924\u093E \u0939\u0948\u0964 \u0906\u092E\u0924\u094C\u0930 \u092A\u0930 \u092F\u0939 \u091C\u0935\u093E\u092C (\u0915\u092D\u0940-\u0915\u092D\u0940 \u0938\u0948\u0902\u092A\u0932 \u0915\u0941\u0902\u091C\u0940 \u092F\u093E \u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923) \u092E\u093E\u0901\u0917\u0924\u093E \u0939\u0948, \u0928\u092F\u093E \u092C\u093F\u0932\u094D\u0921 \u0928\u0939\u0940\u0902\u0964 \u091C\u0935\u093E\u092C \u092F\u0942\u091C\u093C\u0930 \u0916\u0941\u0926 \u092D\u0947\u091C\u0924\u093E \u0939\u0948; AA Plug 2 \u0915\u092D\u0940 Apple \u0915\u094B \u0905\u092A\u0928\u0947-\u0906\u092A \u091C\u0935\u093E\u092C \u0928\u0939\u0940\u0902 \u0926\u0947\u0924\u093E\u0964",
     connected: "{name} \u0915\u0928\u0947\u0915\u094D\u091F \u0914\u0930 \u0935\u093F\u0936\u094D\u0932\u0947\u0937\u0923 \u0939\u094B \u0917\u092F\u093E\u0964 \u0932\u0949\u0928\u094D\u091A \u0915\u0940 \u0924\u0948\u092F\u093E\u0930\u0940 {ready}%\u0964",
     counts: "{block} \u0920\u0940\u0915 \u0915\u0930\u0928\u093E \u091C\u093C\u0930\u0942\u0930\u0940 \xB7 {warn} \u091C\u093E\u0901\u091A\u0928\u093E \u092C\u0947\u0939\u0924\u0930 \xB7 {tip} \u091C\u093E\u0928\u0928\u0947 \u0932\u093E\u092F\u0915",
     nextDecide: "\u0906\u0917\u0947: aaplug2_get_decisions \u0915\u0949\u0932 \u0915\u0930\u0947\u0902 \u0914\u0930 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0915\u094B {n} \u0935\u093F\u0915\u0932\u094D\u092A \u0926\u093F\u0916\u093E\u090F\u0901\u0964 \u0909\u092A\u092F\u094B\u0917\u0915\u0930\u094D\u0924\u093E \u0915\u094B \u092C\u0938 \u091A\u0941\u0928\u0928\u093E, \u092E\u0902\u091C\u093C\u0942\u0930 \u092F\u093E \u0905\u0938\u094D\u0935\u0940\u0915\u093E\u0930 \u0915\u0930\u0928\u093E \u0939\u0948\u0964",
@@ -59030,8 +59035,13 @@ function optionList(st, d, L) {
       return [{ value: "ok", label: t("opt.useThese"), detail: A.screenshots.length ? t("dec.shots.d", { n: A.screenshots.length }) : t("dec.shots.none") }];
     case "privacy":
       return [{ value: "ok", label: t("opt.approve"), detail: t("dec.privacy.d") + " (" + C.langs.map((l) => `privacy-policy-${l}.html`).join(", ") + ")" }];
-    case "safety":
-      return [{ value: "ok", label: t("opt.approve"), detail: Gen.dataSafety(A, L).rows.map((r) => `${r.label}: ${r.purposes}${r.shared ? " \xB7 shared" : ""}`).join(" / ") }];
+    case "safety": {
+      const ds = Gen.dataSafety(A, L, Flow.privacyOpts(A, st.dec));
+      return [{ value: "ok", label: t("opt.approve"), detail: ds.rows.map((r) => `${r.label}: ${r.purposes}${r.shared ? " \xB7 shared" : ""}${r.tracking ? " \xB7 tracking" : ""}`).concat(ds.notCollected.map((r) => `${r.label}: ${r.note}`)).join(" / ") }];
+    }
+    case "access":
+    case "location":
+      return d.opts.map((o) => ({ value: o, label: t(d.key + "." + o), detail: t(d.key + "." + o + ".d") }));
     case "rating": {
       const r = Gen.rating(A, L);
       return [{ value: "ok", label: t("opt.approve"), detail: `Play: ${r.result.play} \xB7 App Store: ${r.result.apple}` }];
@@ -59203,9 +59213,11 @@ Feedback: ${CFG.feedbackUrl}
     files: files.map((f) => f.path),
     stores: Object.keys(stores).filter((k) => stores[k]).map((k) => STORE_NAME[k]),
     listing,
-    data_safety: Gen.dataSafety(A, L).rows.map((x) => ({ play: x.playType, apple: x.appleType, collected: x.collected, shared: x.shared, optional: x.optional, linked: x.linked, tracking: x.tracking, purposes: x.purposes })),
+    data_safety: Gen.dataSafety(A, L, Flow.privacyOpts(A, st.dec)).rows.map((x) => ({ play: x.playType, apple: x.appleType, collected: x.collected, shared: x.shared, optional: x.optional, linked: x.linked, tracking: x.tracking, purposes: x.purposes })),
     content_rating: { play: r.result.play, apple: r.result.apple, answers: r.qa.map(([q, a]) => ({ q, a })) },
     applied_code_fixes: Flow.appliedFixes(A, st.dec, L).map(([, v]) => v.file),
+    app_review_notes: stores.apple && A.ios ? Flow.reviewNotes(A, st.dec, C.langs[0]) : void 0,
+    app_privacy_tracking: stores.apple && A.ios ? Flow.trackingOn(A, st.dec) ? "Yes, we track (ATT prompt + tracking domains must match)" : "No, we do not track" : void 0,
     note_privacy_hosting: t("as.host"),
     next: "aaplug2_submission_guide",
     _zipBase64: zipBuf.toString("base64")
@@ -59263,14 +59275,15 @@ function review(st, { store: store2, event, rejection_text }, lang2) {
     out = { ...out, status: "in_review", round: st.review[store2].round, message: msg(L, "inReview", { store: S }) };
   } else if (event === "rejected") {
     if (!rejection_text) {
-      const sample = st.sample ? (Gen.REJECTIONS.find((r) => r.store === store2) || {}).sample : void 0;
+      const sample = st.sample ? (Gen.REJECTIONS.find((r) => r.store === store2 && r.demo) || Gen.REJECTIONS.find((r) => r.store === store2) || {}).sample : void 0;
       st.review[store2] = { ...R, status: "rejected" };
       out = { ...out, status: "rejected", message: msg(L, "pasteRejection"), sample_message_for_demo: sample };
     } else {
       const rj = Gen.matchRejection(rejection_text, store2);
+      const infoNeeded = store2 === "apple" && /information needed/i.test(rejection_text) ? msg(L, "infoNeeded") : void 0;
       if (!rj) {
         st.review[store2] = { ...R, status: "rejected", text: rejection_text };
-        out = { ...out, status: "rejected", matched: false, message: msg(L, "unknownRejection") };
+        out = { ...out, status: "rejected", matched: false, information_needed: infoNeeded, message: msg(L, "unknownRejection") };
       } else {
         st.review[store2] = { ...R, status: "fixing", text: rejection_text, rid: rj.id };
         const p = rj.id === "play-photo" ? Gen.patches(st.A, L)["patch-manifest-photo"] : null;
@@ -59278,9 +59291,11 @@ function review(st, { store: store2, event, rejection_text }, lang2) {
           ...out,
           status: "fixing",
           matched: true,
+          information_needed: infoNeeded,
           reason: t("rj." + rj.id + ".t"),
           why: t("rj." + rj.id + ".w"),
           fix_plan: rj.plan[L] || rj.plan.en,
+          auto_reply: false,
           reply_to_reviewer: rj.reply(appName(st, "en")),
           code_fix: p ? { file: p.file, diff: p.diff } : void 0,
           next: t("rv.approveFix.d") + " \u2192 aaplug2_report_review event=resubmitted"
@@ -59337,7 +59352,7 @@ function status(id, lang2) {
 }
 
 // lib/tools.mjs
-var VERSION = "0.1.1";
+var VERSION = "0.1.2";
 var INSTRUCTIONS = `AA Plug 2 helps people who already built an Android and/or iOS app with AI get it published on Google Play and the App Store, and stops at launch.
 How to use it:
 1. When the user says their app is finished or asks for help publishing, call aaplug2_connect_app ONCE with a public GitHub URL, a local folder/ZIP path, or source=sample for a demo. Never ask the user for tokens, passwords or store metadata forms.
@@ -59345,7 +59360,10 @@ How to use it:
 3. Call aaplug2_decide ONLY with values the user actually chose in this conversation. Use accept_all_recommended=true only if the user explicitly says to accept all recommendations.
 4. Call aaplug2_generate_store_materials, then aaplug2_submission_guide for each store and walk the user through the console steps.
 5. The final submit step stays locked until the user explicitly approves; then call aaplug2_approve_submission. AA Plug 2 never submits to any store itself: the user presses the submit button in Play Console / App Store Connect.
-6. When the user reports the review result, call aaplug2_report_review (submitted / rejected with the store's message / resubmitted / approved). When every chosen store is live, the job is done.
+6. When the user reports the review result, call aaplug2_report_review (submitted / rejected with the store's message / resubmitted / approved). When every chosen store is live, the job is done. In App Store Connect an "Information Needed" request also shows as Rejected; it asks for a reply, not always a new build. Never reply to Apple or Google yourself: draft the reply and let the user send it.
+App Store review rules the analysis follows (explain them in plain words when they come up):
+- Tracking, ATT, PrivacyInfo.xcprivacy, the App Privacy form and real behavior must match from the first submit. Default for apps with ads: no ATT prompt or NSUserTrackingUsageDescription, NSPrivacyTracking=false with no tracking domains, every ad request non-personalized (npa=1), App Privacy "No, we do not track". Never suggest adding ATT just because the app shows ads. Keep an already fully aligned tracking setup, but never leave a mixed one.
+- Core features should work without login (5.1.1(v)); third-party login on iOS needs Sign in with Apple; accounts need in-app and web deletion; the Support URL must show a contact method; ads are mentioned only in the privacy policy; no "free" or other brands' names in subtitle/keywords; review notes for user-supplied API keys say there is no IAP and the developer does not sell keys, with a review-only key the user attaches (never put real keys anywhere).
 Reply to the user in their language. Tool texts come in five languages via the lang argument: en (English, the default), ko (Korean), th (Thai), zh (Simplified Chinese) and hi (Hindi). Pass the user's language as lang; when lang is omitted, texts are in English. Store listings for the user's app default to English (the recommended choice); Korean, Thai, Chinese and Hindi listings can be added if the user picks them. Free to use; feedback: ${CFG.feedbackUrl}.`;
 var lang = external_exports.enum(["en", "ko", "th", "zh", "hi"]).optional().describe("Language for texts in the result: en (default), ko, th, zh (Simplified Chinese), hi (Hindi). Pass the user's language.");
 var pid = external_exports.string().describe("project_id returned by aaplug2_connect_app");
